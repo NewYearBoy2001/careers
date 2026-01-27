@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
+import 'package:careers/data/models/college_model.dart';
 import 'package:go_router/go_router.dart';
 
 class CollegeCard extends StatelessWidget {
-  final Map<String, dynamic> college;
+  final CollegeModel college;
 
   const CollegeCard({
     super.key,
@@ -30,7 +31,7 @@ class CollegeCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.push('/college-details', extra: college);
+            context.push('/college-details', extra: college.id);
           },
           borderRadius: BorderRadius.circular(Responsive.w(3.5)),
           child: Padding(
@@ -42,7 +43,7 @@ class CollegeCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        college['name'],
+                        college.name,
                         style: TextStyle(
                           fontSize: Responsive.sp(15),
                           fontWeight: FontWeight.w600,
@@ -70,7 +71,7 @@ class CollegeCard extends StatelessWidget {
                           ),
                           SizedBox(width: Responsive.w(1)),
                           Text(
-                            college['rating'],
+                            college.rating,
                             style: TextStyle(
                               fontSize: Responsive.sp(12),
                               fontWeight: FontWeight.w600,
@@ -91,18 +92,22 @@ class CollegeCard extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                     SizedBox(width: Responsive.w(1)),
-                    Text(
-                      college['location'],
-                      style: TextStyle(
-                        fontSize: Responsive.sp(12),
-                        color: AppColors.textSecondary,
+                    Expanded(
+                      child: Text(
+                        college.location,
+                        style: TextStyle(
+                          fontSize: Responsive.sp(12),
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: Responsive.h(0.7)),
                 Text(
-                  college['courses'],
+                  college.courses,
                   style: TextStyle(
                     fontSize: Responsive.sp(12),
                     color: AppColors.textSecondary,

@@ -164,15 +164,15 @@ class AppRouter {
         },
       ),
 
-      // College Details Screen
+      // College Details Screen - UPDATED TO USE COLLEGE ID
       GoRoute(
         path: '/college-details',
         name: 'college-details',
         pageBuilder: (context, state) {
-          final college = state.extra as Map<String, dynamic>;
+          final collegeId = state.extra as String; // Changed from Map to String
           return CustomTransitionPage(
             key: state.pageKey,
-            child: CollegeDetailsPage(college: college),
+            child: CollegeDetailsPage(collegeId: collegeId), // Pass ID instead of college object
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: animation,

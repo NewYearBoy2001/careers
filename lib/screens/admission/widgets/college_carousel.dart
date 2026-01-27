@@ -1,50 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
+import 'package:careers/bloc/admission_banner/admission_banner_bloc.dart';
+import 'package:careers/bloc/admission_banner/admission_banner_state.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class CollegeCarousel extends StatefulWidget {
+class CollegeCarousel extends StatelessWidget {
   const CollegeCarousel({super.key});
 
   @override
-  State<CollegeCarousel> createState() => _CollegeCarouselState();
+  Widget build(BuildContext context) {
+    Responsive.init(context);
+
+    return BlocBuilder<AdmissionBloc, AdmissionState>(
+      builder: (context, state) {
+        if (state is AdmissionLoading) {
+          return SizedBox(
+            height: Responsive.h(22),
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+            ),
+          );
+        }
+
+        if (state is AdmissionError) {
+          return SizedBox(
+            height: Responsive.h(22),
+            child: Center(
+              child: Text(
+                state.message,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: Responsive.sp(14),
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (state is AdmissionBannersLoaded && state.banners.isNotEmpty) {
+          return _BannerCarousel(banners: state.banners);
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
 }
 
-class _CollegeCarouselState extends State<CollegeCarousel> {
-  int _currentIndex = 0;
+class _BannerCarousel extends StatefulWidget {
+  final List banners;
 
-  final List<Map<String, dynamic>> _featuredColleges = [
-    {
-      'name': 'IIT Bombay',
-      'tagline': 'Premier Engineering Institute',
-      'image': 'assets/images/college_banner1.jpg',
-      'gradientColors': [AppColors.teal1, AppColors.teal2],
-    },
-    {
-      'name': 'AIIMS Delhi',
-      'tagline': 'Excellence in Medical Education',
-      'image': 'assets/images/college_banner2.jpg',
-      'gradientColors': [AppColors.headerGradientStart, AppColors.headerGradientMiddle],
-    },
-    {
-      'name': 'IIM Ahmedabad',
-      'tagline': 'Top Business School',
-      'image': 'assets/images/college_banner3.jpg',
-      'gradientColors': [AppColors.tealGreen, AppColors.teal3],
-    },
-  ];
+  const _BannerCarousel({required this.banners});
+
+  @override
+  State<_BannerCarousel> createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<_BannerCarousel> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    Responsive.init(context); // Initialize Responsive
-
     return Column(
       children: [
         CarouselSlider.builder(
-          itemCount: _featuredColleges.length,
-          itemBuilder: (context, index, realIndex) => _buildCard(_featuredColleges[index]),
+          itemCount: widget.banners.length,
+          itemBuilder: (context, index, realIndex) =>
+              _buildCard(widget.banners[index]),
           options: CarouselOptions(
-            height: Responsive.h(22), // Responsive height
+            height: Responsive.h(22),
             autoPlay: true,
             autoPlayInterval: const Duration(seconds: 4),
             enlargeCenterPage: true,
@@ -53,27 +82,30 @@ class _CollegeCarouselState extends State<CollegeCarousel> {
             onPageChanged: (index, _) => setState(() => _currentIndex = index),
           ),
         ),
-        SizedBox(height: Responsive.h(1.5)), // Responsive spacing
+        SizedBox(height: Responsive.h(1.5)),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(_featuredColleges.length, (i) =>
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: EdgeInsets.symmetric(horizontal: Responsive.w(1)),
-                height: Responsive.h(0.75),
-                width: _currentIndex == i ? Responsive.w(6) : Responsive.w(1.5),
-                decoration: BoxDecoration(
-                  color: _currentIndex == i ? AppColors.primary : AppColors.textSecondary.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(Responsive.w(0.75)),
-                ),
+          children: List.generate(
+            widget.banners.length,
+                (i) => AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: EdgeInsets.symmetric(horizontal: Responsive.w(1)),
+              height: Responsive.h(0.75),
+              width: _currentIndex == i ? Responsive.w(6) : Responsive.w(1.5),
+              decoration: BoxDecoration(
+                color: _currentIndex == i
+                    ? AppColors.primary
+                    : AppColors.textSecondary.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(Responsive.w(0.75)),
               ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCard(Map<String, dynamic> college) {
+  Widget _buildCard(banner) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: Responsive.w(1)),
       decoration: BoxDecoration(
@@ -91,15 +123,30 @@ class _CollegeCarouselState extends State<CollegeCarousel> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              college['image'],
+            CachedNetworkImage(
+              imageUrl: banner.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                decoration: BoxDecoration(
+              placeholder: (context, url) => Container(
+                color: AppColors.primary.withOpacity(0.1),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: college['gradientColors'], // Fixed: was 'colors'
+                    colors: [AppColors.teal1, AppColors.teal2],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.school_rounded,
+                    size: Responsive.w(15),
+                    color: AppColors.white.withOpacity(0.5),
                   ),
                 ),
               ),
@@ -107,7 +154,10 @@ class _CollegeCarouselState extends State<CollegeCarousel> {
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.transparent, AppColors.black.withOpacity(0.7)],
+                  colors: [
+                    Colors.transparent,
+                    AppColors.black.withOpacity(0.7)
+                  ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -120,7 +170,7 @@ class _CollegeCarouselState extends State<CollegeCarousel> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    college['name'],
+                    banner.title,
                     style: TextStyle(
                       fontSize: Responsive.sp(22),
                       fontWeight: FontWeight.w700,
@@ -131,22 +181,6 @@ class _CollegeCarouselState extends State<CollegeCarousel> {
                           color: AppColors.overlayLight,
                           offset: Offset(0, Responsive.h(0.25)),
                           blurRadius: Responsive.w(1),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: Responsive.h(0.5)),
-                  Text(
-                    college['tagline'],
-                    style: TextStyle(
-                      fontSize: Responsive.sp(14),
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.white.withOpacity(0.9),
-                      shadows: [
-                        Shadow(
-                          color: AppColors.overlayLight,
-                          offset: Offset(0, Responsive.h(0.125)),
-                          blurRadius: Responsive.w(0.5),
                         )
                       ],
                     ),

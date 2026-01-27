@@ -1,19 +1,35 @@
-import 'package:careers/data/models/admission_banner.dart';
+import 'package:equatable/equatable.dart';
+import '../../data/models/admission_banner.dart';
 
-abstract class AdmissionState {}
+abstract class AdmissionState extends Equatable {
+  const AdmissionState();
 
-class AdmissionInitial extends AdmissionState {}
+  @override
+  List<Object?> get props => [];
+}
 
-class AdmissionLoading extends AdmissionState {}
+class AdmissionInitial extends AdmissionState {
+  const AdmissionInitial();
+}
 
-class AdmissionLoaded extends AdmissionState {
+class AdmissionLoading extends AdmissionState {
+  const AdmissionLoading();
+}
+
+class AdmissionBannersLoaded extends AdmissionState {
   final List<AdmissionBanner> banners;
 
-  AdmissionLoaded(this.banners);
+  const AdmissionBannersLoaded(this.banners);
+
+  @override
+  List<Object?> get props => [banners];
 }
 
 class AdmissionError extends AdmissionState {
   final String message;
 
-  AdmissionError(this.message);
+  const AdmissionError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

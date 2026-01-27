@@ -1,12 +1,13 @@
-import 'package:careers/data/models/admission_banner.dart';
-import 'package:careers/data/api/admission_banner_api.dart';
+import '../api/admission_banner_api.dart';
+import '../../data/models/api_response.dart';
+import '../models/admission_banner.dart';
 
 class AdmissionRepository {
-  final AdmissionApi api;
+  final AdmissionApiService _apiService;
 
-  AdmissionRepository(this.api);
+  AdmissionRepository(this._apiService);
 
-  Future<List<AdmissionBanner>> getBanners() {
-    return api.fetchBanners();
+  Future<ApiResponse<List<AdmissionBanner>>> fetchBanners() async {
+    return await _apiService.getBanners();
   }
 }

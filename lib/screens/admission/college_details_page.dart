@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:careers/utils/responsive/responsive.dart';
+import 'package:careers/bloc/college/college_bloc.dart';
+import 'package:careers/bloc/college/college_event.dart';
+import 'package:careers/bloc/college/college_state.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
-  final Map<String, dynamic> college;
+  final String collegeId;
 
   const CollegeDetailsPage({
     super.key,
-    required this.college,
+    required this.collegeId,
   });
 
   @override
@@ -19,6 +24,13 @@ class CollegeDetailsPage extends StatefulWidget {
 class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   int _currentImageIndex = 0;
   final PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch college details when page loads
+    context.read<CollegeBloc>().add(FetchCollegeDetails(widget.collegeId));
+  }
 
   @override
   void dispose() {
@@ -33,42 +45,110 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     }
   }
 
+  Future<void> _launchEmail(String email) async {
+    final Uri url = Uri(scheme: 'mailto', path: email);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
+  }
+
+  Future<void> _launchWebsite(String website) async {
+    final Uri url = Uri.parse(website);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(context),
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImageGallery(),
-                _buildCollegeInfo(),
-                _buildContactSection(),
-                _buildAgentSection(),
-                SizedBox(height: Responsive.h(2.5)),
+      body: BlocBuilder<CollegeBloc, CollegeState>(
+        builder: (context, state) {
+          if (state is CollegeDetailsLoading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+            );
+          }
+
+          if (state is CollegeError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: Responsive.w(15),
+                    color: AppColors.textSecondary,
+                  ),
+                  SizedBox(height: Responsive.h(2)),
+                  Text(
+                    state.message,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: Responsive.sp(14),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: Responsive.h(2)),
+                  ElevatedButton(
+                    onPressed: () => context.pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Go Back'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state is CollegeDetailsLoaded) {
+            final college = state.college;
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context, college.name),
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (college.images != null && college.images!.isNotEmpty)
+                        _buildImageGallery(college.images!),
+                      _buildCollegeInfo(college),
+                      _buildContactSection(college),
+                      if (college.facilities != null && college.facilities!.isNotEmpty)
+                        _buildFacilitiesSection(college.facilities!),
+                      if (college.phone != null)
+                        _buildAgentSection(college.phone!),
+                      SizedBox(height: Responsive.h(2.5)),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ),
-        ],
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, String collegeName) {
     return SliverAppBar(
-      expandedHeight: Responsive.h(8), // Reduced from 15 to 8
+      expandedHeight: Responsive.h(8),
       pinned: true,
       backgroundColor: AppColors.headerGradientStart,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          widget.college['name'],
+          collegeName,
           style: TextStyle(
-            fontSize: Responsive.sp(16), // Reduced from 18 to 16
+            fontSize: Responsive.sp(16),
             fontWeight: FontWeight.w700,
             color: Colors.white,
             shadows: [
@@ -101,9 +181,9 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     );
   }
 
-  Widget _buildImageGallery() {
+  Widget _buildImageGallery(List<String> images) {
     return Container(
-      height: Responsive.h(22), // Reduced from 31.25 to 22
+      height: Responsive.h(22),
       margin: EdgeInsets.all(Responsive.w(4)),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(Responsive.w(4)),
@@ -119,134 +199,109 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(Responsive.w(4)),
-            child: PageView(
+            child: PageView.builder(
               controller: _pageController,
+              itemCount: images.length,
               onPageChanged: (index) {
                 setState(() {
                   _currentImageIndex = index;
                 });
               },
-              children: [
-                Image.asset(
-                  'assets/images/college_campus.jpg',
+              itemBuilder: (context, index) {
+                return CachedNetworkImage(
+                  imageUrl: images[index],
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: AppColors.primary.withOpacity(0.1),
-                      child: Center(
-                        child: Icon(
-                          Icons.school_rounded,
-                          size: Responsive.w(15), // Reduced from 20 to 15
-                          color: AppColors.primary,
-                        ),
+                  placeholder: (context, url) => Container(
+                    color: AppColors.primary.withOpacity(0.1),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
                       ),
-                    );
-                  },
-                ),
-                Image.asset(
-                  'assets/images/college_library.jpg',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: AppColors.primary.withOpacity(0.1),
-                      child: Center(
-                        child: Icon(
-                          Icons.local_library_rounded,
-                          size: Responsive.w(15), // Reduced from 20 to 15
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                Image.asset(
-                  'assets/images/college_building.jpg',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: AppColors.primary.withOpacity(0.1),
-                      child: Center(
-                        child: Icon(
-                          Icons.domain_rounded,
-                          size: Responsive.w(15), // Reduced from 20 to 15
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Page indicators (dots)
-          Positioned(
-            bottom: Responsive.h(1.5),
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (index) {
-                return Container(
-                  margin: EdgeInsets.symmetric(horizontal: Responsive.w(1)),
-                  width: _currentImageIndex == index ? Responsive.w(6) : Responsive.w(2),
-                  height: Responsive.h(1),
-                  decoration: BoxDecoration(
-                    color: _currentImageIndex == index
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(Responsive.w(1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: Responsive.w(1),
-                        offset: Offset(0, Responsive.h(0.25)),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ),
-          ),
-          // Image counter badge
-          Positioned(
-            top: Responsive.h(1.5),
-            right: Responsive.w(3),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: Responsive.w(2.5),
-                vertical: Responsive.h(0.75),
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(Responsive.w(5)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.image_rounded,
-                    color: Colors.white,
-                    size: Responsive.w(3.5),
-                  ),
-                  SizedBox(width: Responsive.w(1)),
-                  Text(
-                    '${_currentImageIndex + 1}/3',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: Responsive.sp(12),
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
-              ),
+                  errorWidget: (context, url, error) => Container(
+                    color: AppColors.primary.withOpacity(0.1),
+                    child: Center(
+                      child: Icon(
+                        Icons.school_rounded,
+                        size: Responsive.w(15),
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
+          if (images.length > 1)
+            Positioned(
+              bottom: Responsive.h(1.5),
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(images.length, (index) {
+                  return Container(
+                    margin: EdgeInsets.symmetric(horizontal: Responsive.w(1)),
+                    width: _currentImageIndex == index ? Responsive.w(6) : Responsive.w(2),
+                    height: Responsive.h(1),
+                    decoration: BoxDecoration(
+                      color: _currentImageIndex == index
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(Responsive.w(1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: Responsive.w(1),
+                          offset: Offset(0, Responsive.h(0.25)),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+          if (images.length > 1)
+            Positioned(
+              top: Responsive.h(1.5),
+              right: Responsive.w(3),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(2.5),
+                  vertical: Responsive.h(0.75),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(Responsive.w(5)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.image_rounded,
+                      color: Colors.white,
+                      size: Responsive.w(3.5),
+                    ),
+                    SizedBox(width: Responsive.w(1)),
+                    Text(
+                      '${_currentImageIndex + 1}/${images.length}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: Responsive.sp(12),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildCollegeInfo() {
+  Widget _buildCollegeInfo(college) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
       padding: EdgeInsets.all(Responsive.w(5)),
@@ -274,9 +329,9 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
               SizedBox(width: Responsive.w(2)),
               Expanded(
                 child: Text(
-                  widget.college['location'],
+                  college.location,
                   style: TextStyle(
-                    fontSize: Responsive.sp(16),
+                    fontSize: Responsive.sp(14),
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -301,7 +356,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                     ),
                     SizedBox(width: Responsive.w(1)),
                     Text(
-                      widget.college['rating'],
+                      college.rating,
                       style: TextStyle(
                         fontSize: Responsive.sp(16),
                         fontWeight: FontWeight.w600,
@@ -324,37 +379,39 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
           ),
           SizedBox(height: Responsive.h(1)),
           Text(
-            widget.college['courses'],
+            college.courses,
             style: TextStyle(
               fontSize: Responsive.sp(15),
               color: AppColors.textSecondary,
               height: 1.5,
             ),
           ),
-          SizedBox(height: Responsive.h(2.5)),
-          Text(
-            'About',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          if (college.about != null) ...[
+            SizedBox(height: Responsive.h(2.5)),
+            Text(
+              'About',
+              style: TextStyle(
+                fontSize: Responsive.sp(16),
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          SizedBox(height: Responsive.h(1)),
-          Text(
-            'One of the premier institutions in India, offering world-class education and research facilities. With state-of-the-art infrastructure and experienced faculty, we nurture future leaders and innovators.',
-            style: TextStyle(
-              fontSize: Responsive.sp(15),
-              color: AppColors.textSecondary,
-              height: 1.5,
+            SizedBox(height: Responsive.h(1)),
+            Text(
+              college.about!,
+              style: TextStyle(
+                fontSize: Responsive.sp(15),
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildContactSection() {
+  Widget _buildContactSection(college) {
     return Container(
       margin: EdgeInsets.all(Responsive.w(4)),
       padding: EdgeInsets.all(Responsive.w(5)),
@@ -381,19 +438,22 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
             ),
           ),
           SizedBox(height: Responsive.h(2)),
-          _buildContactItem(
-            icon: Icons.email_rounded,
-            title: 'Email',
-            value: 'admissions@college.edu',
-            onTap: () {},
-          ),
-          SizedBox(height: Responsive.h(1.5)),
-          _buildContactItem(
-            icon: Icons.language_rounded,
-            title: 'Website',
-            value: 'www.college.edu',
-            onTap: () {},
-          ),
+          if (college.email != null)
+            _buildContactItem(
+              icon: Icons.email_rounded,
+              title: 'Email',
+              value: college.email!,
+              onTap: () => _launchEmail(college.email!),
+            ),
+          if (college.email != null && college.website != null)
+            SizedBox(height: Responsive.h(1.5)),
+          if (college.website != null)
+            _buildContactItem(
+              icon: Icons.language_rounded,
+              title: 'Website',
+              value: college.website!,
+              onTap: () => _launchWebsite(college.website!),
+            ),
         ],
       ),
     );
@@ -458,7 +518,63 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     );
   }
 
-  Widget _buildAgentSection() {
+  Widget _buildFacilitiesSection(List<String> facilities) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
+      padding: EdgeInsets.all(Responsive.w(5)),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(Responsive.w(4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: Responsive.w(2),
+            offset: Offset(0, Responsive.h(0.25)),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Facilities',
+            style: TextStyle(
+              fontSize: Responsive.sp(16),
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: Responsive.h(1.5)),
+          ...facilities.map((facility) => Padding(
+            padding: EdgeInsets.only(bottom: Responsive.h(1)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.primary,
+                  size: Responsive.w(4.5),
+                ),
+                SizedBox(width: Responsive.w(2)),
+                Expanded(
+                  child: Text(
+                    facility,
+                    style: TextStyle(
+                      fontSize: Responsive.sp(14),
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgentSection(String phone) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
       padding: EdgeInsets.all(Responsive.w(5)),
@@ -529,7 +645,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                     ),
                     SizedBox(width: Responsive.w(2)),
                     Text(
-                      '+91 98765 43210',
+                      phone,
                       style: TextStyle(
                         fontSize: Responsive.sp(16),
                         fontWeight: FontWeight.w600,
@@ -540,7 +656,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                 ),
                 SizedBox(height: Responsive.h(1.5)),
                 ElevatedButton.icon(
-                  onPressed: () => _makePhoneCall('+919876543210'),
+                  onPressed: () => _makePhoneCall(phone),
                   icon: Icon(Icons.call_rounded, size: Responsive.w(4.5)),
                   label: Text(
                     'Call Now',

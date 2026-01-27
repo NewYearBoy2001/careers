@@ -6,12 +6,14 @@ class SearchBarWidget extends StatefulWidget {
   final String hint;
   final IconData icon;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   const SearchBarWidget({
     super.key,
     required this.hint,
     required this.icon,
     this.controller,
+    this.onChanged,
   });
 
   @override
@@ -40,10 +42,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Responsive.init(context); // Initialize Responsive
+    Responsive.init(context);
 
     return Container(
-      height: Responsive.h(6), // Responsive height (~48px on most phones)
+      height: Responsive.h(6),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -54,61 +56,65 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-        borderRadius: BorderRadius.circular(Responsive.w(6)), // Responsive border radius
+        borderRadius: BorderRadius.circular(Responsive.w(6)),
         boxShadow: [
           BoxShadow(
             color: AppColors.headerGradientStart.withOpacity(0.3),
-            blurRadius: Responsive.w(3), // Responsive blur
-            offset: Offset(0, Responsive.h(0.5)), // Responsive offset
+            blurRadius: Responsive.w(3),
+            offset: Offset(0, Responsive.h(0.5)),
           ),
         ],
       ),
-      padding: EdgeInsets.all(Responsive.w(0.5)), // Responsive padding
+      padding: EdgeInsets.all(Responsive.w(0.5)),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(Responsive.w(5.5)), // Slightly less than outer radius
+          borderRadius: BorderRadius.circular(Responsive.w(5.5)),
         ),
         child: TextField(
           focusNode: _focusNode,
           controller: _controller,
           style: TextStyle(
-            fontSize: Responsive.sp(14), // Responsive font with accessibility support
+            fontSize: Responsive.sp(14),
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w500,
           ),
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: TextStyle(
-              fontSize: Responsive.sp(14), // Responsive font
+              fontSize: Responsive.sp(14),
               color: AppColors.textSecondary.withOpacity(0.5),
               fontWeight: FontWeight.w400,
             ),
             prefixIcon: Icon(
               widget.icon,
               color: AppColors.headerGradientMiddle,
-              size: Responsive.w(5), // Responsive icon size (~20px)
+              size: Responsive.w(5),
             ),
             suffixIcon: _controller.text.isNotEmpty
                 ? IconButton(
               icon: Icon(
                 Icons.close_rounded,
                 color: AppColors.textSecondary.withOpacity(0.6),
-                size: Responsive.w(4.5), // Responsive icon size (~18px)
+                size: Responsive.w(4.5),
               ),
               onPressed: () {
                 setState(() => _controller.clear());
+                widget.onChanged?.call('');
               },
-              splashRadius: Responsive.w(4), // Responsive splash radius
+              splashRadius: Responsive.w(4),
             )
                 : null,
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-              horizontal: Responsive.w(3), // Responsive horizontal padding
-              vertical: Responsive.h(1.5), // Responsive vertical padding
+              horizontal: Responsive.w(3),
+              vertical: Responsive.h(1.5),
             ),
           ),
-          onChanged: (_) => setState(() {}),
+          onChanged: (value) {
+            setState(() {});
+            widget.onChanged?.call(value);
+          },
         ),
       ),
     );

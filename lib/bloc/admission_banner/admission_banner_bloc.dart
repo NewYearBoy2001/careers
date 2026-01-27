@@ -1,26 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'admission_banner_event.dart';
+import '../../data/repositories/admission_banner_repository.dart';
 import 'admission_banner_state.dart';
-import 'package:careers/data/repositories/admission_banner_repository.dart';
+import 'admission_banner_event.dart';
 
 class AdmissionBloc extends Bloc<AdmissionEvent, AdmissionState> {
-  final AdmissionRepository repository;
+  final AdmissionRepository _repository;
 
-  AdmissionBloc(this.repository) : super(AdmissionInitial()) {
-    on<LoadAdmissionBanners>(_onLoadBanners);
+  AdmissionBloc(this._repository) : super(const AdmissionInitial()) {
+    on<FetchAdmissionBanners>(_onFetchBanners);
   }
 
-  Future<void> _onLoadBanners(
-      LoadAdmissionBanners event,
+  Future<void> _onFetchBanners(
+      FetchAdmissionBanners event,
       Emitter<AdmissionState> emit,
       ) async {
-    emit(AdmissionLoading());
+    emit(const AdmissionLoading());
 
-    try {
-      final banners = await repository.getBanners();
-      emit(AdmissionLoaded(banners));
-    } catch (e) {
-      emit(AdmissionError(e.toString()));
+    final response = await _repository.fetchBanners();
+
+    if (response.success && response.data != null) {
+      emit(AdmissionBannersLoaded(response.data!));
+    } else {
+      emit(AdmissionError(response.message));
     }
   }
 }

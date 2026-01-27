@@ -1,22 +1,46 @@
 import 'package:dio/dio.dart';
-import 'package:careers/utils/network/base_dio_client.dart';
-import 'package:careers/utils/network/api_error_handler.dart';
-import 'package:careers/data/models/admission_banner.dart';
+import '../../constants/api_constants.dart';
+import '../../utils/network/api_error_handler.dart';
+import '../../data/models/api_response.dart';
+import '../../utils/network/base_dio_client.dart';
+import '../models/admission_banner.dart';
 
-class AdmissionApi {
-  final Dio _dio = BaseDioClient().dio;
+class AdmissionApiService {
+  final BaseDioClient _dioClient = BaseDioClient();
 
-  Future<List<AdmissionBanner>> fetchBanners() async {
+  Future<ApiResponse<List<AdmissionBanner>>> getBanners() async {
     try {
-      final response = await _dio.get('/admision-banners');
+      final response = await _dioClient.dio.get(ApiConstants.admissionBanners);
 
-      final bannersJson = response.data['data']['banners'] as List;
+      if (response.statusCode == 200) {
+        final data = response.data;
 
-      return bannersJson
-          .map((e) => AdmissionBanner.fromJson(e))
-          .toList();
+        if (data['status'] == '1') {
+          final bannersJson = data['data']['banners'] as List;
+          final banners = bannersJson
+              .map((json) => AdmissionBanner.fromJson(json))
+              .toList();
+
+          return ApiResponse(
+            success: true,
+            statusCode: 200,
+            message: data['message'] ?? 'Banners fetched successfully',
+            data: banners,
+          );
+        }
+      }
+
+      return ApiResponse(
+        success: false,
+        statusCode: response.statusCode ?? 500,
+        message: 'Failed to fetch banners',
+      );
     } on DioException catch (e) {
-      throw ApiErrorHandler.handleDioError(e);
+      return ApiResponse(
+        success: false,
+        statusCode: e.response?.statusCode ?? 500,
+        message: ApiErrorHandler.handleDioError(e),
+      );
     }
   }
 }
