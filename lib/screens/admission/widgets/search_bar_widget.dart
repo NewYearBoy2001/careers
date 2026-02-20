@@ -7,6 +7,7 @@ class SearchBarWidget extends StatefulWidget {
   final IconData icon;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
 
   const SearchBarWidget({
     super.key,
@@ -14,6 +15,7 @@ class SearchBarWidget extends StatefulWidget {
     required this.icon,
     this.controller,
     this.onChanged,
+    this.focusNode,
   });
 
   @override
@@ -28,7 +30,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-    _focusNode = FocusNode();
+    // ✅ CHANGE: Use provided focusNode or create new one
+    _focusNode = widget.focusNode ?? FocusNode();
   }
 
   @override
@@ -36,7 +39,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     if (widget.controller == null) {
       _controller.dispose();
     }
-    _focusNode.dispose();
+    // ✅ CHANGE: Only dispose if we created the focus node
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 

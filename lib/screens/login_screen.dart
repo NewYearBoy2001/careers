@@ -21,36 +21,20 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
-  late Animation<Offset> _slideAnim;
-  bool _showPassword= false;
 
+  bool _showPassword = false;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
-    _animController.forward();
   }
 
   @override
   void dispose() {
-    _animController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -85,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           TextButton(
             onPressed: () => context.pop(),
             child: Text(
-              '0K',
+              'OK',
               style: TextStyle(fontSize: Responsive.sp(14)),
             ),
           ),
@@ -106,179 +90,174 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         ),
       ),
       child: Scaffold(
-    backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
-          child: FadeTransition(
-            opacity: _fadeAnim,
-            child: SlideTransition(
-              position: _slideAnim,
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: Responsive.h(11)),
-                    Center(
-                      child: Hero(
-                        tag: 'app_logo',
-                        child: Container(
-                          width: Responsive.w(20),
-                          height: Responsive.w(20),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [AppColors.primary, AppColors.primaryLight],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(Responsive.w(5)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.3),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.school_rounded,
-                            size: Responsive.w(10),
-                            color: AppColors.white,
-                          ),
+        backgroundColor: AppColors.backgroundTealGray,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(8)),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: Responsive.h(12)),
+                      // Logo
+                      Center(
+                        child: Image.asset(        // ← Remove Hero(), keep Image.asset directly
+                          'assets/images/coloured_logo_for_login.png',
+                          width: Responsive.w(55),
+                          height: Responsive.h(12),
+                          fit: BoxFit.contain,
                         ),
                       ),
-                    ),
-                    SizedBox(height: Responsive.h(4)),
-                    Center(
-                      child: Text(
-                        'Welcome Back',
-                        style: TextStyle(
-                          fontSize: Responsive.sp(28),
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: Responsive.h(1)),
-                    Center(
-                      child: Text(
-                        'Login to continue your career journey',
-                        style: TextStyle(
-                          fontSize: Responsive.sp(14),
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: Responsive.h(5)),
-                    CustomTextField(
-                      label: 'Email',
-                      hint: 'Enter your email address',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icon(
-                        Icons.person_outline,
-                        color: AppColors.iconPrimary,
-                        size: Responsive.w(6),
-                      ),
-                      validator: FormValidators.email,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    SizedBox(height: Responsive.h(1.5)),
-                    CustomTextField(
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      isPassword: !_showPassword,
-                      controller: _passwordController,
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: AppColors.iconPrimary,
-                        size: Responsive.w(6),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _showPassword ? Icons.visibility : Icons.visibility_off,
-                          color: AppColors.iconPrimary,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _showPassword = !_showPassword;
-                          });
-                        },
-                      ),
-                      validator: FormValidators.password,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    SizedBox(height: Responsive.h(0.8)),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: _handleForgotPassword,
+                      SizedBox(height: Responsive.h(1)),
+                      // Welcome Back
+                      Center(
                         child: Text(
-                          'Forgot Password?',
+                          'Explore what’s next',
                           style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: Responsive.sp(14),
-                            fontWeight: FontWeight.w500,
+                            fontSize: Responsive.sp(28),
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: Responsive.h(2)),
-                    BlocConsumer<LoginBloc, LoginState>(
-                      listener: (context, state) {
-                        if (state is LoginSuccess) {
-                          context.go('/dashboard');
-                        } else if (state is LoginFailure) {
-                          AppNotifier.show(context, state.message);
-                        }
-                      },
-                      builder: (context, state) {
-                        return CustomButton(
-                          text: 'Login',
-                          isLoading: state is LoginLoading,
-                          onPressed: () {
-                            if (state is! LoginLoading) {
-                              _handleLogin(context);
-                            }
-                          },
-                        );
-                      },
-                    ),
-                    SizedBox(height: Responsive.h(3)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
+                      SizedBox(height: Responsive.h(0.8)),
+                      // Subtitle
+                      Center(
+                        child: Text(
+                          'Login to your account',
                           style: TextStyle(
+                            fontSize: Responsive.sp(15),
                             color: AppColors.textSecondary,
-                            fontSize: Responsive.sp(14),
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            context.push('/signup');
+                      ),
+                      SizedBox(height: Responsive.h(5)),
+                      // Email Field
+                      CustomTextField(
+                        label: 'Email',
+                        hint: 'Enter your email address',
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        prefixIcon: Icon(
+                          Icons.person_outline,
+                          color: AppColors.primary,
+                          size: Responsive.w(6),
+                        ),
+                        validator: FormValidators.email,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                      SizedBox(height: Responsive.h(2.5)),
+                      // Password Field
+                      CustomTextField(
+                        label: 'Password',
+                        hint: 'Enter your password',
+                        isPassword: !_showPassword,
+                        controller: _passwordController,
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
+                          color: AppColors.primary,
+                          size: Responsive.w(6),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                            color: AppColors.primary,
+                            size: Responsive.w(6),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            });
                           },
+                        ),
+                        validator: FormValidators.password,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                      SizedBox(height: Responsive.h(1)),
+                      // Forgot Password
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _handleForgotPassword,
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           child: Text(
-                            'Sign Up',
+                            'Forgot Password?',
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: Responsive.sp(14),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    SizedBox(height: Responsive.h(5)),
-                  ],
-                ),
-              ),
+                      ),
+                      SizedBox(height: Responsive.h(3)),
+                      // Login Button
+                      BlocConsumer<LoginBloc, LoginState>(
+                        listener: (context, state) {
+                          if (state is LoginSuccess) {
+                            context.go('/dashboard');
+                          } else if (state is LoginFailure) {
+                            AppNotifier.show(context, state.message);
+                          }
+                        },
+                        builder: (context, state) {
+                          return CustomButton(
+                            text: 'Login',
+                            isLoading: state is LoginLoading,
+                            onPressed: () {
+                              if (state is! LoginLoading) {
+                                _handleLogin(context);
+                              }
+                            },
+                          );
+                        },
+                      ),
+                      SizedBox(height: Responsive.h(3)),
+                      // Sign Up Link
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account? ",
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: Responsive.sp(14),
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                context.push('/signup');
+                              },
+                              child: Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  color: AppColors.accent,
+                                  fontSize: Responsive.sp(14),
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.accent,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: Responsive.h(5)),
+                    ],
+                  ),
             ),
           ),
         ),
-      ),),
+      ),
     );
   }
 }

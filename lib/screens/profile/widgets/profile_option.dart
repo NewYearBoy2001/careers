@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
+import 'package:go_router/go_router.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class ProfileOption extends StatefulWidget {
   final IconData icon;
   final String title;
   final bool isLogout;
+  final String? route;
+  final dynamic profileData;
+  final VoidCallback? onReturn;
 
   const ProfileOption({
     super.key,
     required this.icon,
     required this.title,
     this.isLogout = false,
+    this.route,
+    this.profileData,
+    this.onReturn,
   });
 
   @override
@@ -39,6 +47,46 @@ class _ProfileOptionState extends State<ProfileOption> with SingleTickerProvider
     super.dispose();
   }
 
+  void _handleTap() async {
+    if (widget.isLogout) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true && context.mounted) {
+        await AuthLocalStorage().clearUser();
+        context.go('/login');
+      }
+      return;
+    }
+
+    // existing route handling below unchanged
+    if (widget.route != null) {
+      final result = await (
+          widget.route == '/edit-profile' && widget.profileData != null
+              ? context.push(widget.route!, extra: widget.profileData)
+              : context.push(widget.route!)
+      );
+      if (result == true && widget.onReturn != null) {
+        widget.onReturn!();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -62,7 +110,7 @@ class _ProfileOptionState extends State<ProfileOption> with SingleTickerProvider
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: _handleTap,
                 onTapDown: (_) => _controller.forward(),
                 onTapUp: (_) => _controller.reverse(),
                 onTapCancel: () => _controller.reverse(),

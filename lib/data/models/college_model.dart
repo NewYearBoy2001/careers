@@ -10,6 +10,7 @@ class CollegeModel {
   final String? about;
   final List<String>? images;
   final List<String>? facilities;
+  final bool? isSaved;
 
   CollegeModel({
     required this.id,
@@ -23,6 +24,7 @@ class CollegeModel {
     this.about,
     this.images,
     this.facilities,
+    this.isSaved,
   });
 
   factory CollegeModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class CollegeModel {
       facilities: json['facilities'] != null
           ? List<String>.from(json['facilities'])
           : null,
+      isSaved: json['is_saved'] as bool?,
     );
   }
 

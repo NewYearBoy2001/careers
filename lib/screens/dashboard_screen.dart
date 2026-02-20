@@ -19,6 +19,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> with TickerProviderStateMixin {
   late int _currentIndex;
+  late PageController _pageController;
   late AnimationController _navAnimController;
   late Animation<double> _navScaleAnim;
 
@@ -26,6 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
   void initState() {
     super.initState();
     _currentIndex = widget.initialTab;
+    _pageController = PageController(initialPage: widget.initialTab); // Add this
     _navAnimController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -37,6 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
 
   @override
   void dispose() {
+    _pageController.dispose();
     _navAnimController.dispose();
     super.dispose();
   }
@@ -44,9 +47,10 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
   void _onNavTap(int index) {
     if (_currentIndex != index) {
       _navAnimController.forward().then((_) {
-        setState(() => _currentIndex = index);
         _navAnimController.reverse();
       });
+      setState(() => _currentIndex = index); // Add this
+      _pageController.jumpToPage(index);     // Change animateToPage to jumpToPage
     }
   }
 
@@ -59,36 +63,18 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     Responsive.init(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.05, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          );
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
         },
-        child: [
-          HomePage(
-            key: const ValueKey('home'),
-            onNavigateToPage: _navigateToPage,
-          ),
-          CareersPage(
-            key: const ValueKey('careers'),
-            currentEducation: '10th',
-          ),
-          AdmissionPage(key: const ValueKey('admission')),
-          ProfilePage(
-            key: const ValueKey('profile'),
-          ),
-        ][_currentIndex],
+        children: [
+          HomePage(onNavigateToPage: _navigateToPage),
+          CareersPage(currentEducation: '10th'),
+          AdmissionPage(),
+          ProfilePage(),
+        ],
       ),
       bottomNavigationBar: SafeArea(
       child: _buildBottomNav(),

@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:careers/constants/app_colors.dart';
+import 'package:careers/bloc/profile/profile_bloc.dart';
+import 'package:careers/bloc/profile/profile_event.dart';
+import 'package:careers/bloc/profile/profile_state.dart';
+import 'package:careers/utils/app_notifier.dart';
 import 'widgets/profile_option.dart';
+import 'package:careers/shimmer/profile_shimmer.dart';
+import 'package:careers/data/models/profile_model.dart';
+import 'package:careers/widgets/network_aware_widget.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -25,6 +33,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     );
 
     _animController.forward();
+
+    // ✅ Fetch profile data
+    context.read<ProfileBloc>().add(FetchProfile());
   }
 
   @override
@@ -35,28 +46,78 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            FadeTransition(
-              opacity: _fadeAnim,
-              child: _buildHeader(),
+    return NetworkAwareWidget(
+        child:  BlocConsumer<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileError) {
+          AppNotifier.show(context, state.message);
+        }
+      },
+      builder: (context, state) {
+        if (state is ProfileLoading) {
+          return const ProfileShimmer();
+        }
+
+        if (state is ProfileError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppColors.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load profile',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<ProfileBloc>().add(FetchProfile());
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  ..._buildProfileOptions(),
-                ],
-              ),
+          );
+        }
+
+        if (state is ProfileLoaded) {
+          final profile = state.profile;
+
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                FadeTransition(
+                  opacity: _fadeAnim,
+                  child: _buildHeader(profile),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      ..._buildProfileOptions(profile),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(profile) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(32, 40, 32, 36),
@@ -95,13 +156,13 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.school_rounded,
+                  profile.isStudent() ? Icons.school_rounded : Icons.family_restroom_rounded,
                   size: 16,
                   color: AppColors.white,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Student',
+                  profile.role,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.white,
@@ -114,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
           ),
           const SizedBox(height: 20),
           Text(
-            'Rahul Kumar',
+            profile.name,
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
@@ -125,7 +186,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
           ),
           const SizedBox(height: 8),
           Text(
-            '10th Grade • Science Stream',
+            profile.isStudent()
+                ? profile.currentEducation ?? 'No education info'
+                : '${profile.children?.length ?? 0} ${(profile.children?.length ?? 0) == 1 ? "Child" : "Children"}',
             style: TextStyle(
               fontSize: 15,
               color: AppColors.white.withOpacity(0.9),
@@ -138,15 +201,15 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     );
   }
 
-  List<Widget> _buildProfileOptions() {
+  List<Widget> _buildProfileOptions(ProfileModel profile) { // ✅ ADD profile parameter
     final options = [
-      {'icon': Icons.person_outline, 'title': 'Edit Profile', 'isLogout': false},
-      {'icon': Icons.notifications_outlined, 'title': 'Notifications', 'isLogout': false},
-      {'icon': Icons.bookmark_outline, 'title': 'Saved Colleges', 'isLogout': false},
-      {'icon': Icons.settings_outlined, 'title': 'Settings', 'isLogout': false},
-      {'icon': Icons.help_outline, 'title': 'Help & Support', 'isLogout': false},
-      {'icon': Icons.info_outline, 'title': 'About', 'isLogout': false},
-      {'icon': Icons.logout, 'title': 'Logout', 'isLogout': true},
+      {'icon': Icons.person_outline, 'title': 'Edit Profile', 'isLogout': false, 'route': '/edit-profile'},
+      {'icon': Icons.notifications_outlined, 'title': 'Notifications', 'isLogout': false, 'route': null},
+      {'icon': Icons.bookmark_outline, 'title': 'Saved Colleges', 'isLogout': false, 'route': '/saved-colleges'},
+      // {'icon': Icons.settings_outlined, 'title': 'Settings', 'isLogout': false, 'route': null},
+      // {'icon': Icons.help_outline, 'title': 'Help & Support', 'isLogout': false, 'route': null},
+      {'icon': Icons.lock_outline, 'title': 'Change Password', 'isLogout': false, 'route': '/change-password'},
+      {'icon': Icons.logout, 'title': 'Logout', 'isLogout': true, 'route': null},
     ];
 
     return List.generate(options.length, (index) {
@@ -170,6 +233,13 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
           icon: options[index]['icon'] as IconData,
           title: options[index]['title'] as String,
           isLogout: options[index]['isLogout'] as bool,
+          route: options[index]['route'] as String?,
+          profileData: options[index]['route'] == '/edit-profile' ? profile : null,
+          onReturn: () { // ✅ ADD callback
+            if (options[index]['route'] == '/edit-profile') {
+              context.read<ProfileBloc>().add(FetchProfile());
+            }
+          },
         ),
       );
     });

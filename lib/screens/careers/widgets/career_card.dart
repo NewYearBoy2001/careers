@@ -3,13 +3,15 @@ import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 
 class CareerCard extends StatefulWidget {
-  final Map<String, dynamic> path;
+  final String title;
+  final List<String> careerOptions;
   final int index;
   final VoidCallback? onTap;
 
   const CareerCard({
     super.key,
-    required this.path,
+    required this.title,
+    required this.careerOptions,
     required this.index,
     this.onTap,
   });
@@ -42,7 +44,26 @@ class _CareerCardState extends State<CareerCard> with SingleTickerProviderStateM
   }
 
   Color _getCardColor() {
-    return widget.path['color'] ?? AppColors.primary;
+    // Cycle through colors based on index
+    final colors = [
+      AppColors.primary,
+      AppColors.success,
+      AppColors.warning,
+      AppColors.accent,
+      AppColors.info,
+    ];
+    return colors[widget.index % colors.length];
+  }
+
+  IconData _getCardIcon() {
+    final title = widget.title.toLowerCase();
+
+    if (title.contains('computer')) return Icons.computer;
+    if (title.contains('science')) return Icons.biotech;
+    if (title.contains('commerce')) return Icons.account_balance;
+    if (title.contains('humanities')) return Icons.menu_book;
+    if (title.contains('iti')) return Icons.build;
+    return Icons.school;
   }
 
   @override
@@ -108,7 +129,7 @@ class _CareerCardState extends State<CareerCard> with SingleTickerProviderStateM
                           borderRadius: BorderRadius.circular(Responsive.w(3.5)),
                         ),
                         child: Icon(
-                          widget.path['icon'],
+                          _getCardIcon(),
                           color: _getCardColor(),
                           size: Responsive.sp(26),
                         ),
@@ -119,7 +140,7 @@ class _CareerCardState extends State<CareerCard> with SingleTickerProviderStateM
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.path['title'],
+                              widget.title,
                               style: TextStyle(
                                 fontSize: Responsive.sp(16),
                                 fontWeight: FontWeight.w600,
@@ -129,7 +150,10 @@ class _CareerCardState extends State<CareerCard> with SingleTickerProviderStateM
                             ),
                             SizedBox(height: Responsive.h(0.5)),
                             Text(
-                              widget.path['subjects'],
+                              widget.careerOptions.take(3).join(', ') +
+                                  (widget.careerOptions.length > 3
+                                      ? ', +${widget.careerOptions.length - 3} more'
+                                      : ''),
                               style: TextStyle(
                                 fontSize: Responsive.sp(13),
                                 color: AppColors.textSecondary,

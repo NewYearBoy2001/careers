@@ -4,8 +4,8 @@ class FormValidators {
     r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
   );
 
-  // Phone: 10–15 digits, supports country code
-  static final RegExp _phoneRegex = RegExp(r"^\+?[0-9]{10,15}$");
+  // Phone: Only digits, 10 digits exactly
+  static final RegExp _phoneRegex = RegExp(r"^[0-9]{10}$"); // ✅ CHANGE: Exactly 10 digits
 
   static String? required(String? value, {String field = 'This field'}) {
     if (value == null || value.trim().isEmpty) {
@@ -28,9 +28,12 @@ class FormValidators {
     if (required(value, field: 'Phone number') != null) {
       return 'Phone number is required';
     }
+
+    // ✅ CHANGE: Simple validation for 10 digits only
     if (!_phoneRegex.hasMatch(value!.trim())) {
-      return 'Enter a valid phone number';
+      return 'Phone number must be 10 digits';
     }
+
     return null;
   }
 
@@ -38,15 +41,30 @@ class FormValidators {
     if (required(value, field: 'Password') != null) {
       return 'Password is required';
     }
-    if (value!.length < 8) {
+
+    // ✅ ADD: Check for spaces
+    if (value!.contains(' ')) {
+      return 'Password cannot contain spaces';
+    }
+
+    // ✅ UPDATE: Check minimum length
+    if (value.length < 8) {
       return 'Password must be at least 8 characters';
     }
+
+    // ✅ ADD: Check maximum length
+    if (value.length > 16) {
+      return 'Password must not exceed 16 characters';
+    }
+
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
       return 'Password must contain at least one uppercase letter';
     }
+
     if (!RegExp(r'[0-9]').hasMatch(value)) {
       return 'Password must contain at least one number';
     }
+
     return null;
   }
 

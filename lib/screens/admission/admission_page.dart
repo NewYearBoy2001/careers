@@ -11,6 +11,9 @@ import 'package:careers/bloc/college/college_bloc.dart';
 import 'package:careers/bloc/college/college_event.dart';
 import 'package:careers/bloc/college/college_state.dart';
 import 'package:careers/data/models/college_model.dart';
+import 'package:go_router/go_router.dart';
+import 'package:careers/shimmer/college_card_shimmer.dart';
+import 'package:careers/widgets/network_aware_widget.dart';
 
 class AdmissionPage extends StatefulWidget {
   const AdmissionPage({super.key});
@@ -19,21 +22,27 @@ class AdmissionPage extends StatefulWidget {
   State<AdmissionPage> createState() => _AdmissionPageState();
 }
 
-class _AdmissionPageState extends State<AdmissionPage> {
+class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _locationFocusNode = FocusNode();
+
+  bool _hasNavigatedAway = false;
 
   @override
   void initState() {
     super.initState();
-    // Trigger initial data load when page is created
     _loadInitialData();
+
+    _searchFocusNode.addListener(_onSearchFocusChange);
+    _locationFocusNode.addListener(_onLocationFocusChange);
+
+    WidgetsBinding.instance.addObserver(this);
   }
 
   void _loadInitialData() {
-    // Load banners
     context.read<AdmissionBloc>().add(const FetchAdmissionBanners());
-
     context.read<CollegeBloc>().add(const SearchColleges());
   }
 
@@ -41,24 +50,60 @@ class _AdmissionPageState extends State<AdmissionPage> {
   void dispose() {
     _searchController.dispose();
     _locationController.dispose();
+    _searchFocusNode.dispose();
+    _locationFocusNode.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  void _performSearch() {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && _hasNavigatedAway) {
+      _hasNavigatedAway = false;
+      context.read<CollegeBloc>().add(const SearchColleges());
+    }
+  }
+
+  void _onSearchFocusChange() {
+    if (_searchFocusNode.hasFocus) {
+      _searchFocusNode.unfocus();
+      _navigateToSearchResults(focusField: 'keyword'); // ✅ Pass which field
+    }
+  }
+
+  void _onLocationFocusChange() {
+    if (_locationFocusNode.hasFocus) {
+      _locationFocusNode.unfocus();
+      _navigateToSearchResults(focusField: 'location'); // ✅ Pass which field
+    }
+  }
+
+  // ✅ MODIFY: Accept which field to focus
+  void _navigateToSearchResults({String? focusField}) async {
     final keyword = _searchController.text.trim();
     final location = _locationController.text.trim();
 
-    context.read<CollegeBloc>().add(SearchColleges(
-      keyword: keyword.isEmpty ? null : keyword,
-      location: location.isEmpty ? null : location,
-    ));
+    _hasNavigatedAway = true;
+
+    await context.push('/college-search', extra: {
+      'keyword': keyword.isEmpty ? null : keyword,
+      'location': location.isEmpty ? null : location,
+      'focusField': focusField, // ✅ ADD: Pass focus information
+    });
+
+    if (mounted) {
+      _hasNavigatedAway = false;
+      context.read<CollegeBloc>().add(const SearchColleges());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return Scaffold(
+    return NetworkAwareWidget(        // ADD
+        child: Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
@@ -107,7 +152,7 @@ class _AdmissionPageState extends State<AdmissionPage> {
             ),
           ),
         ],
-      ),
+      ),),
     );
   }
 
@@ -139,7 +184,7 @@ class _AdmissionPageState extends State<AdmissionPage> {
         Responsive.w(5),
         MediaQuery.of(context).padding.top + Responsive.h(1.5),
         Responsive.w(5),
-        Responsive.h(2),
+        Responsive.h(1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,14 +212,14 @@ class _AdmissionPageState extends State<AdmissionPage> {
             hint: 'Search colleges or courses',
             icon: Icons.search_rounded,
             controller: _searchController,
-            onChanged: (_) => _performSearch(),
+            focusNode: _searchFocusNode,
           ),
           SizedBox(height: Responsive.h(0.75)),
           SearchBarWidget(
             hint: 'Enter location',
             icon: Icons.location_on_rounded,
             controller: _locationController,
-            onChanged: (_) => _performSearch(),
+            focusNode: _locationFocusNode,
           ),
         ],
       ),
@@ -184,7 +229,6 @@ class _AdmissionPageState extends State<AdmissionPage> {
   Widget _buildCollegeList() {
     return BlocBuilder<CollegeBloc, CollegeState>(
       builder: (context, state) {
-        // ✅ CHANGE: Handle all states that might contain colleges
         List<CollegeModel>? colleges;
         bool isLoading = false;
         String? errorMessage;
@@ -194,24 +238,23 @@ class _AdmissionPageState extends State<AdmissionPage> {
         } else if (state is CollegeSearchLoaded) {
           colleges = state.colleges;
         } else if (state is CollegeDetailsLoading) {
-          // ✅ ADD: Show colleges while details are loading
           colleges = state.colleges;
         } else if (state is CollegeDetailsLoaded) {
-          // ✅ ADD: Show colleges even when on details page
           colleges = state.colleges;
         } else if (state is CollegeError) {
           errorMessage = state.message;
-          colleges = state.colleges; // ✅ ADD: Show colleges even on error
+          colleges = state.colleges;
         }
 
         if (isLoading) {
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: Responsive.h(5)),
-            child: const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
-            ),
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
+            itemCount: 6, // Number of shimmer cards
+            itemBuilder: (context, index) {
+              return const CollegeCardShimmer();
+            },
           );
         }
 
@@ -237,7 +280,7 @@ class _AdmissionPageState extends State<AdmissionPage> {
                   ),
                   SizedBox(height: Responsive.h(2)),
                   ElevatedButton(
-                    onPressed: _performSearch,
+                    onPressed: _loadInitialData,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,

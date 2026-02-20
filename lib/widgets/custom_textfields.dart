@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:careers/constants/app_colors.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final String label;
@@ -12,6 +13,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final AutovalidateMode? autovalidateMode;
   final Widget? suffixIcon;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -24,6 +26,7 @@ class CustomTextField extends StatelessWidget {
     this.prefixIcon,
     this.autovalidateMode,
     this.suffixIcon,
+    this.inputFormatters,
   });
 
   @override
@@ -73,6 +76,7 @@ class CustomTextField extends StatelessWidget {
                 keyboardType: keyboardType,
                 validator: validator,
                 autovalidateMode: autovalidateMode ?? AutovalidateMode.onUserInteraction,
+                inputFormatters: inputFormatters,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14,

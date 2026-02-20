@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -44,22 +45,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _navigateToLogin() async {
-    // Wait for animation to complete
     await Future.delayed(const Duration(milliseconds: 2500));
 
-    // Check if user is logged in (add your logic here)
-    // bool isLoggedIn = await checkLoginStatus();
-
     if (mounted) {
-      // Replace splash screen with login screen
-      context.go('/login');
+      final storage = AuthLocalStorage();
+      final token = await storage.getToken();
 
-      // If you want to check login status:
-      // if (isLoggedIn) {
-      //   context.go('/dashboard');
-      // } else {
-      //   context.go('/login');
-      // }
+      if (token != null && token.isNotEmpty) {
+        context.go('/dashboard');
+      } else {
+        context.go('/login');
+      }
     }
   }
 

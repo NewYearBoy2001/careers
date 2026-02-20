@@ -22,6 +22,7 @@ class AppColors {
 
   // Background Colors
   static const Color background = Color(0xFFFAFAFA);
+  static const Color backgroundTealGray = Color(0xFFE8EEEE); // Light teal/gray background for login/signup
   static const Color cardBackground = Colors.white;
   static const Color inputBackground = Color(0xFFF5F8F8);
 

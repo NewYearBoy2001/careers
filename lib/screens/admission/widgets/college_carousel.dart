@@ -6,6 +6,8 @@ import 'package:careers/utils/responsive/responsive.dart';
 import 'package:careers/bloc/admission_banner/admission_banner_bloc.dart';
 import 'package:careers/bloc/admission_banner/admission_banner_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:careers/shimmer/college_banner_shimmer.dart';
+import 'package:careers/shimmer/banner_image_shimmer.dart';
 
 class CollegeCarousel extends StatelessWidget {
   const CollegeCarousel({super.key});
@@ -17,14 +19,7 @@ class CollegeCarousel extends StatelessWidget {
     return BlocBuilder<AdmissionBloc, AdmissionState>(
       builder: (context, state) {
         if (state is AdmissionLoading) {
-          return SizedBox(
-            height: Responsive.h(22),
-            child: const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
-            ),
-          );
+          return const CollegeBannerShimmer();
         }
 
         if (state is AdmissionError) {
@@ -126,14 +121,7 @@ class _BannerCarouselState extends State<_BannerCarousel> {
             CachedNetworkImage(
               imageUrl: banner.imageUrl,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: AppColors.primary.withOpacity(0.1),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
+              placeholder: (context, url) => const BannerImageShimmer(),
               errorWidget: (context, url, error) => Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(

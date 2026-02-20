@@ -28,4 +28,7 @@ class Responsive {
 
   // Scaled font size
   static double sp(double size) => size * textScale;
+
+  static double get deviceWidth => screenWidth;
+  static double get deviceHeight => screenHeight;
 }

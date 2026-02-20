@@ -48,11 +48,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
   }
 
   void _initializeVideo() async {
-    if (widget.courseData['videoUrl'] == null) return;
+    if (widget.courseData['videoUrl'] == null && widget.courseData['video'] == null) return;
 
     try {
+      final videoUrl = widget.courseData['videoUrl'] ?? widget.courseData['video'];
       _videoController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.courseData['videoUrl']),
+        Uri.parse(videoUrl),
       );
 
       // Start loading the video in background
@@ -143,6 +144,30 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
     _showControlsTemporarily();
   }
 
+  // ✅ Helper method to safely get subjects as string
+  String _getSubjectsText() {
+    final subjects = widget.courseData['subjects'];
+    if (subjects == null) return '';
+
+    if (subjects is List) {
+      return subjects.join(', ');
+    }
+
+    return subjects.toString();
+  }
+
+  // ✅ Helper method to safely get career options as list
+  List<String> _getCareerOptions() {
+    final careerOptions = widget.courseData['careerOptions'] ?? widget.courseData['career_options'];
+    if (careerOptions == null) return [];
+
+    if (careerOptions is List) {
+      return careerOptions.map((e) => e.toString()).toList();
+    }
+
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
@@ -207,27 +232,23 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
 
                       // Video (fades in when ready)
                       if (_isVideoInitialized && _videoController != null)
-                        AnimatedOpacity(
-                          opacity: _isVideoInitialized ? 1 : 0,
-                          duration: const Duration(milliseconds: 500),
-                          child: GestureDetector(
-                            onTap: _showControlsTemporarily,
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                VideoPlayer(_videoController!),
-                                VideoControls(
-                                  controller: _videoController!,
-                                  showControls: _showControls,
-                                  playbackSpeed: _currentPlaybackSpeed,
-                                  accentColor: _getStreamColor(),
-                                  onPlayPause: _togglePlayPause,
-                                  onSpeedToggle: _togglePlaybackSpeed,
-                                  onSkip: _skipSeconds,
-                                  onSeek: (position) => _videoController?.seekTo(position),
-                                ),
-                              ],
-                            ),
+                        GestureDetector(
+                          onTap: _showControlsTemporarily,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              VideoPlayer(_videoController!),
+                              VideoControls(
+                                controller: _videoController!,
+                                showControls: _showControls,
+                                playbackSpeed: _currentPlaybackSpeed,
+                                accentColor: _getStreamColor(),
+                                onPlayPause: _togglePlayPause,
+                                onSpeedToggle: _togglePlaybackSpeed,
+                                onSkip: _skipSeconds,
+                                onSeek: (position) => _videoController?.seekTo(position),
+                              ),
+                            ],
                           ),
                         ),
 
@@ -238,12 +259,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                widget.courseData['icon'],
+                                widget.courseData['icon'] ?? Icons.school,
                                 size: Responsive.sp(80),
                                 color: Colors.white.withOpacity(0.9),
                               ),
                               SizedBox(height: Responsive.h(2)),
-                               Text(
+                              Text(
                                 'Video Coming Soon',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -288,7 +309,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
 
                                   ),
                                   child: Icon(
-                                    widget.courseData['icon'],
+                                    widget.courseData['icon'] ?? Icons.school,
                                     color: _getStreamColor(),
                                     size: Responsive.sp(28),
                                   ),
@@ -299,7 +320,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        widget.courseData['title'],
+                                        widget.courseData['title'] ?? '',
                                         style: TextStyle(
                                           fontSize: Responsive.sp(24),
                                           fontWeight: FontWeight.bold,
@@ -322,7 +343,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                               ],
                             ),
                             SizedBox(height: Responsive.h(3)),
-                             Text(
+                            Text(
                               'About This Stream',
                               style: TextStyle(
                                 fontSize: Responsive.sp(18),
@@ -344,56 +365,58 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                       ),
 
                       // Subjects Section
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
-                        padding: EdgeInsets.all(Responsive.w(5)),
-                        decoration: BoxDecoration(
-                          color: _getStreamColor().withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(Responsive.w(4)),
-                          border: Border.all(
-                            color: _getStreamColor().withOpacity(0.1),
-                            width: 1,
+                      if (_getSubjectsText().isNotEmpty)
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
+                          padding: EdgeInsets.all(Responsive.w(5)),
+                          decoration: BoxDecoration(
+                            color: _getStreamColor().withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(Responsive.w(4)),
+                            border: Border.all(
+                              color: _getStreamColor().withOpacity(0.1),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.book_outlined, color: _getStreamColor(), size: Responsive.sp(20)),
+                                  SizedBox(width: Responsive.w(2)),
+                                  Text(
+                                    'Core Subjects / Specializations',
+                                    style: TextStyle(
+                                      fontSize: Responsive.sp(16),
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: Responsive.h(1.5)),
+                              // ✅ FIXED: Properly handle List<String> subjects
+                              Text(
+                                _getSubjectsText(),
+                                style: TextStyle(
+                                  fontSize: Responsive.sp(14),
+                                  color: AppColors.textSecondary,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(Icons.book_outlined, color: _getStreamColor(), size: Responsive.sp(20)),
-                                SizedBox(width: Responsive.w(2)),
-                                 Text(
-                                  'Core Subjects',
-                                  style: TextStyle(
-                                    fontSize: Responsive.sp(16),
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: Responsive.h(1.5)),
-                            Text(
-                              widget.courseData['subjects'],
-                              style: TextStyle(
-                                fontSize: Responsive.sp(14),
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
 
                       // Career Options
-                      if (widget.courseData['careerOptions'] != null) ...[
+                      if (_getCareerOptions().isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.fromLTRB(Responsive.w(6), Responsive.h(4), Responsive.w(6), Responsive.h(2)),
                           child: Row(
                             children: [
                               Icon(Icons.work_outline, color: _getStreamColor(), size: Responsive.sp(20)),
                               SizedBox(width: Responsive.w(2)),
-                               Text(
+                              Text(
                                 'Career Opportunities',
                                 style: TextStyle(
                                   fontSize: Responsive.sp(18),
@@ -409,7 +432,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                           child: Wrap(
                             spacing: Responsive.w(2),
                             runSpacing: Responsive.h(1),
-                            children: (widget.courseData['careerOptions'] as List<String>)
+                            // ✅ FIXED: Use helper method to get career options
+                            children: _getCareerOptions()
                                 .map((career) => Container(
                               padding: EdgeInsets.symmetric(horizontal: Responsive.w(4), vertical: Responsive.h(1.25)),
                               decoration: BoxDecoration(
@@ -442,66 +466,140 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> with SingleTick
                       ],
 
                       // Entrance Exams
-                      if (widget.courseData['entranceExams'] != null) ...[
+                      // if (widget.courseData['entranceExams'] != null) ...[
+                      //   Padding(
+                      //     padding: EdgeInsets.fromLTRB(Responsive.w(6), Responsive.h(4), Responsive.w(6), Responsive.h(2)),
+                      //     child: Row(
+                      //       children: [
+                      //         Icon(Icons.article_outlined, color: _getStreamColor(), size: Responsive.sp(20)),
+                      //         SizedBox(width: Responsive.w(2)),
+                      //         Text(
+                      //           'Important Entrance Exams',
+                      //           style: TextStyle(
+                      //             fontSize: Responsive.sp(18),
+                      //             fontWeight: FontWeight.w600,
+                      //             color: AppColors.textPrimary,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      //   Padding(
+                      //     padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
+                      //     child: Column(
+                      //       children: (widget.courseData['entranceExams'] as List<dynamic>)
+                      //           .map((exam) => Container(
+                      //         margin: EdgeInsets.only(bottom: Responsive.h(1)),
+                      //         padding: EdgeInsets.all(Responsive.w(4)),
+                      //         decoration: BoxDecoration(
+                      //           color: AppColors.white,
+                      //           borderRadius: BorderRadius.circular(Responsive.w(3)),
+                      //           border: Border.all(
+                      //             color: AppColors.textSecondary.withOpacity(0.1),
+                      //             width: 1,
+                      //           ),
+                      //         ),
+                      //         child: Row(
+                      //           children: [
+                      //             Container(
+                      //               padding: EdgeInsets.all(Responsive.w(2)),
+                      //               decoration: BoxDecoration(
+                      //                 color: _getStreamColor().withOpacity(0.1),
+                      //                 borderRadius: BorderRadius.circular(Responsive.w(2)),
+                      //               ),
+                      //               child: Icon(Icons.school, size: Responsive.sp(18), color: _getStreamColor()),
+                      //             ),
+                      //             SizedBox(width: Responsive.w(3)),
+                      //             Text(
+                      //               exam.toString(),
+                      //               style: TextStyle(
+                      //                 fontSize: Responsive.sp(15),
+                      //                 fontWeight: FontWeight.w600,
+                      //                 color: AppColors.textPrimary,
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       ))
+                      //           .toList(),
+                      //     ),
+                      //   ),
+                      // ],
+
+
+
+                      if (widget.courseData['id'] != null)
                         Padding(
-                          padding: EdgeInsets.fromLTRB(Responsive.w(6), Responsive.h(4), Responsive.w(6), Responsive.h(2)),
-                          child: Row(
-                            children: [
-                              Icon(Icons.article_outlined, color: _getStreamColor(), size: Responsive.sp(20)),
-                              SizedBox(width: Responsive.w(2)),
-                               Text(
-                                'Important Entrance Exams',
-                                style: TextStyle(
-                                  fontSize: Responsive.sp(18),
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
+                          padding: EdgeInsets.fromLTRB(
+                            Responsive.w(6),
+                            Responsive.h(4),
+                            Responsive.w(6),
+                            0,
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
-                          child: Column(
-                            children: (widget.courseData['entranceExams'] as List<String>)
-                                .map((exam) => Container(
-                              margin: EdgeInsets.only(bottom: Responsive.h(1)),
-                              padding: EdgeInsets.all(Responsive.w(4)),
-                              decoration: BoxDecoration(
-                                color: AppColors.white,
-                                borderRadius: BorderRadius.circular(Responsive.w(3)),
-                                border: Border.all(
-                                  color: AppColors.textSecondary.withOpacity(0.1),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(Responsive.w(2)),
-                                    decoration: BoxDecoration(
-                                      color: _getStreamColor().withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(Responsive.w(2)),
-                                    ),
-                                    child: Icon(Icons.school, size: Responsive.sp(18), color: _getStreamColor()),
-                                  ),
-                                  SizedBox(width: Responsive.w(3)),
-                                  Text(
-                                    exam,
-                                    style: TextStyle(
-                                      fontSize: Responsive.sp(15),
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  _getStreamColor(),
+                                  _getStreamColor().withOpacity(0.8),
                                 ],
                               ),
-                            ))
-                                .toList(),
+                              borderRadius: BorderRadius.circular(Responsive.w(3)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _getStreamColor().withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  context.push('/career-child-nodes', extra: {
+                                    'parentId': widget.courseData['id'].toString(),  // ✅ Direct access
+                                    'parentTitle': widget.courseData['title'] ?? 'Career Paths',
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(Responsive.w(3)),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: Responsive.h(2),
+                                    horizontal: Responsive.w(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.explore_outlined,
+                                        color: AppColors.white,
+                                        size: Responsive.sp(24),
+                                      ),
+                                      SizedBox(width: Responsive.w(3)),
+                                      Text(
+                                        'Explore Future Paths',
+                                        style: TextStyle(
+                                          fontSize: Responsive.sp(16),
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.white,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      SizedBox(width: Responsive.w(2)),
+                                      Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: AppColors.white,
+                                        size: Responsive.sp(20),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ],
-
                       SizedBox(height: Responsive.h(4)),
                     ],
                   ),
