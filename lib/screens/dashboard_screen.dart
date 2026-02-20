@@ -49,8 +49,11 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
       _navAnimController.forward().then((_) {
         _navAnimController.reverse();
       });
-      setState(() => _currentIndex = index); // Add this
-      _pageController.jumpToPage(index);     // Change animateToPage to jumpToPage
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
