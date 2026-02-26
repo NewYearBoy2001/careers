@@ -447,24 +447,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
 
                   SizedBox(height: Responsive.h(2)),
-
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        // TODO: Navigate to change password
-                      },
-                      child: Text(
-                        'Change Password',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: Responsive.sp(14),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: Responsive.h(5)),
                 ],
             ),
           ),

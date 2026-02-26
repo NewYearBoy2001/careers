@@ -18,8 +18,8 @@ class ApiErrorHandler {
           errorMsg = message ?? "Bad request. Please try again.";
           break;
         case 401:
-          _handleUnauthorized();
-          errorMsg = ''; // empty, user won't see it anyway
+          errorMsg = message ?? "Authentication failed.";
+          _handleUnauthorizedIfLoggedIn();
           break;
         case 403:
           errorMsg = message ?? "Access denied.";
@@ -121,8 +121,13 @@ class ApiErrorHandler {
     }
   }
 
-  static Future<void> _handleUnauthorized() async {
-    await AuthLocalStorage().clearUser();
-    AppRouter.router.go('/login');
+  static Future<void> _handleUnauthorizedIfLoggedIn() async {
+    final storage = AuthLocalStorage();
+    final token = await storage.getToken();
+
+    if (token != null && token.isNotEmpty) {
+      await storage.clearUser();
+      AppRouter.router.go('/login');
+    }
   }
 }

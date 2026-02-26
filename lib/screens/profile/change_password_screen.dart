@@ -6,6 +6,8 @@ import 'package:careers/bloc/change_password/change_password_bloc.dart';
 import 'package:careers/bloc/change_password/change_password_event.dart';
 import 'package:careers/bloc/change_password/change_password_state.dart';
 import 'package:careers/utils/app_notifier.dart';
+import 'package:careers/utils/validators/form_validators.dart';
+import 'package:flutter/services.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -44,19 +46,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   String? _validateCurrentPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter current password';
-    }
-    return null;
+    return FormValidators.required(value, field: 'Current password');
   }
 
   String? _validateNewPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter new password';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
+    final baseError = FormValidators.password(value);
+    if (baseError != null) return baseError;
     if (value == _currentPasswordController.text) {
       return 'New password must be different from current password';
     }
@@ -64,13 +59,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value != _newPasswordController.text) {
-      return 'Passwords do not match';
-    }
-    return null;
+    return FormValidators.confirmPassword(value, _newPasswordController.text);
   }
 
   @override
@@ -161,6 +150,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                       validator: _validateNewPassword,
                       enabled: !isLoading,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                        LengthLimitingTextInputFormatter(16),
+                      ],
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                     const SizedBox(height: 20),
 
@@ -177,6 +171,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                       validator: _validateConfirmPassword,
                       enabled: !isLoading,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                        LengthLimitingTextInputFormatter(16),
+                      ],
+                      autovalidateMode: AutovalidateMode.onUnfocus,
                     ),
                     const SizedBox(height: 40),
 
@@ -233,6 +232,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     required VoidCallback onToggleVisibility,
     required String? Function(String?) validator,
     required bool enabled,
+    List<TextInputFormatter>? inputFormatters,
+    AutovalidateMode? autovalidateMode,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,6 +250,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         TextFormField(
           controller: controller,
           obscureText: !isVisible,
+          inputFormatters: inputFormatters,
+          autovalidateMode: autovalidateMode,
           enabled: enabled,
           validator: validator,
           decoration: InputDecoration(

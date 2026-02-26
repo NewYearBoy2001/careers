@@ -53,29 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleForgotPassword() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Responsive.w(5))),
-        title: Text(
-          'Forgot Password',
-          style: TextStyle(fontSize: Responsive.sp(18)),
-        ),
-        content: Text(
-          'Password reset link will be sent to your email.',
-          style: TextStyle(fontSize: Responsive.sp(14)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: Text(
-              'OK',
-              style: TextStyle(fontSize: Responsive.sp(14)),
-            ),
-          ),
-        ],
-      ),
-    );
+    context.push('/forgot-password');  // ← hyphen, not space
   }
 
   @override
@@ -226,24 +204,28 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Don't have an account? ",
+                              "Don't have an account?",
                               style: TextStyle(
                                 color: AppColors.textSecondary,
-                                fontSize: Responsive.sp(14),
+                                fontSize: Responsive.sp(16),
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
+                            TextButton(
+                              onPressed: () {
                                 context.push('/signup');
                               },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: Responsive.w(2), vertical: Responsive.h(1)),
+                                minimumSize: Size(Responsive.w(20), Responsive.h(5)),
+                                tapTargetSize: MaterialTapTargetSize.padded,
+                              ),
                               child: Text(
                                 'Sign Up',
                                 style: TextStyle(
                                   color: AppColors.accent,
-                                  fontSize: Responsive.sp(14),
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
+                                  fontSize: Responsive.sp(16),
+                                  fontWeight: FontWeight.w700,
                                   decorationColor: AppColors.accent,
                                 ),
                               ),

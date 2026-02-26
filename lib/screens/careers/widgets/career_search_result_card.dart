@@ -6,7 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 class CareerSearchResultCard extends StatefulWidget {
   final String title;
   final String? thumbnail;
-  final VoidCallback onTap;
+  final VoidCallback onTap; // back to VoidCallback — card is not responsible for loading
 
   const CareerSearchResultCard({
     super.key,
@@ -24,15 +24,16 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
   late AnimationController _controller;
   late Animation<double> _scaleAnim;
   bool _isPressed = false;
+  bool _isTapLocked = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 120),
       vsync: this,
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.93).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -41,6 +42,23 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleTap() async {
+    if (_isTapLocked) return;
+    _isTapLocked = true;
+
+    // Play full shrink → bounce-back so the user sees the tap registered.
+    await _controller.forward();
+    await Future.delayed(const Duration(milliseconds: 80));
+    await _controller.reverse();
+
+    // Fire navigation immediately — CourseDetailScreen handles its own loading.
+    if (mounted) widget.onTap();
+
+    // Short grace period to block accidental double-taps.
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (mounted) _isTapLocked = false;
   }
 
   @override
@@ -53,15 +71,17 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
           scale: _scaleAnim.value,
           child: GestureDetector(
             onTapDown: (_) {
+              if (_isTapLocked) return;
               setState(() => _isPressed = true);
               _controller.forward();
             },
             onTapUp: (_) {
+              if (_isTapLocked) return;
               setState(() => _isPressed = false);
-              _controller.reverse();
-              widget.onTap();
+              _handleTap();
             },
             onTapCancel: () {
+              if (_isTapLocked) return;
               setState(() => _isPressed = false);
               _controller.reverse();
             },
@@ -77,7 +97,7 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                   BoxShadow(
                     color: _isPressed
                         ? Colors.transparent
-                        : AppColors.teal.withOpacity(0.08),  // ✅ Changed to teal with opacity
+                        : AppColors.teal.withOpacity(0.08),
                     blurRadius: _isPressed ? 0 : 8,
                     offset: Offset(0, _isPressed ? 0 : 2),
                   ),
@@ -86,7 +106,7 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Image Container
+                  // Image
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -120,7 +140,8 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                       ),
                     ),
                   ),
-                  // Title Container
+
+                  // Title + Explore badge
                   Padding(
                     padding: EdgeInsets.all(Responsive.w(3)),
                     child: Column(
@@ -132,7 +153,7 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                           style: TextStyle(
                             fontSize: Responsive.sp(14),
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primary,  // ✅ Changed to primary (deep teal)
+                            color: AppColors.primary,
                             letterSpacing: -0.3,
                           ),
                           maxLines: 2,
@@ -145,8 +166,9 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                             vertical: Responsive.h(0.4),
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.teal2.withOpacity(0.15),  // ✅ Changed to teal2 with higher opacity
-                            borderRadius: BorderRadius.circular(Responsive.w(1.5)),
+                            color: AppColors.teal2.withOpacity(0.15),
+                            borderRadius:
+                            BorderRadius.circular(Responsive.w(1.5)),
                           ),
                           child: Text(
                             'Explore',

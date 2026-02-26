@@ -17,48 +17,34 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> with TickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen> {
   late int _currentIndex;
-  late PageController _pageController;
-  late AnimationController _navAnimController;
-  late Animation<double> _navScaleAnim;
+
+  // Keys force the page to fully rebuild (and re-run initState) on each tap
+  final List<GlobalKey> _pageKeys = [
+    GlobalKey(),
+    GlobalKey(),
+    GlobalKey(),
+    GlobalKey(),
+  ];
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialTab;
-    _pageController = PageController(initialPage: widget.initialTab); // Add this
-    _navAnimController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _navScaleAnim = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _navAnimController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _navAnimController.dispose();
-    super.dispose();
   }
 
   void _onNavTap(int index) {
-    if (_currentIndex != index) {
-      _navAnimController.forward().then((_) {
-        _navAnimController.reverse();
-      });
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+    if (_currentIndex == index) return;
+    setState(() {
+      _currentIndex = index;
+      // Assign a new GlobalKey to force the page to fully rebuild
+      _pageKeys[index] = GlobalKey();
+    });
   }
 
   void _navigateToPage(int pageIndex) {
-    setState(() => _currentIndex = pageIndex);
+    _onNavTap(pageIndex);
   }
 
   @override
@@ -66,21 +52,17 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     Responsive.init(context);
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
-        },
+      body: IndexedStack(
+        index: _currentIndex,
         children: [
-          HomePage(onNavigateToPage: _navigateToPage),
-          CareersPage(currentEducation: '10th'),
-          AdmissionPage(),
-          ProfilePage(),
+          HomePage(key: _pageKeys[0], onNavigateToPage: _navigateToPage),
+          CareersPage(key: _pageKeys[1], currentEducation: '10th'),
+          AdmissionPage(key: _pageKeys[2]),
+          ProfilePage(key: _pageKeys[3]),
         ],
       ),
       bottomNavigationBar: SafeArea(
-      child: _buildBottomNav(),
+        child: _buildBottomNav(),
       ),
     );
   }
@@ -97,23 +79,22 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
         ),
       ),
       child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: Responsive.w(4),
-            vertical: Responsive.h(1),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.home_rounded, 'Home'),
-              _buildNavItem(1, Icons.explore_rounded, 'Careers'),
-              _buildNavItem(2, Icons.school_rounded, 'Admissions'),
-              _buildNavItem(3, Icons.person_rounded, 'Profile'),
-            ],
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(4),
+          vertical: Responsive.h(1),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(0, Icons.home_rounded, 'Home'),
+            _buildNavItem(1, Icons.explore_rounded, 'Careers'),
+            _buildNavItem(2, Icons.school_rounded, 'Admissions'),
+            _buildNavItem(3, Icons.person_rounded, 'Profile'),
+          ],
         ),
       ),
     );
   }
-
 
   Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;
@@ -139,20 +120,15 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             Icon(
               icon,
               size: Responsive.w(6),
-              color: isSelected
-                  ? AppColors.primary
-                  : AppColors.iconSecondary,
+              color: isSelected ? AppColors.primary : AppColors.iconSecondary,
             ),
             SizedBox(height: Responsive.h(0.3)),
             Text(
               label,
               style: TextStyle(
                 fontSize: Responsive.sp(11),
-                fontWeight:
-                isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.iconSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? AppColors.primary : AppColors.iconSecondary,
               ),
             ),
           ],

@@ -298,32 +298,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Text(
+                        child: Text(
                           '🎯',
-                          style: TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: Responsive.sp(18)),
                         ),
                       ),
                       SizedBox(width: Responsive.w(3)),
-                      const Text(
-                        'Take Career Assessment Test',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 0.3,
+                      Expanded(
+                        child: Text(
+                          'Take Career Assessment Test',
+                          style: TextStyle(
+                            fontSize: Responsive.sp(14),
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                            letterSpacing: 0.3,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ),
-                      const Spacer(),
+                      SizedBox(width: Responsive.w(2)),
                       Container(
                         padding: EdgeInsets.all(Responsive.w(1.5)),
                         decoration: BoxDecoration(
                           color: AppColors.teal2.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.arrow_forward_rounded,
                           color: AppColors.teal2,
-                          size: 20,
+                          size: Responsive.w(5),
                         ),
                       ),
                     ],

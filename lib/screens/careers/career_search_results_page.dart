@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../bloc/career_search/career_search_bloc.dart';
 import '../../bloc/career_search/career_search_event.dart';
 import '../../bloc/career_search/career_search_state.dart';
 import '../../constants/app_colors.dart';
 import '../../utils/responsive/responsive.dart';
 import '../../utils/app_notifier.dart';
-import '../../data/repositories/career_search_repository.dart';
 import './widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
 
@@ -38,13 +36,10 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
     _searchController = TextEditingController(text: widget.initialKeyword ?? '');
     _searchFocusNode = FocusNode();
 
-    // Trigger search if initial keyword provided
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.initialKeyword != null && widget.initialKeyword!.isNotEmpty) {
         context.read<CareerSearchBloc>().add(SearchCareersEvent(widget.initialKeyword!));
       }
-
-      // Focus on search field if specified
       if (widget.focusField == 'keyword') {
         _searchFocusNode.requestFocus();
       }
@@ -59,7 +54,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
   }
 
   void _performSearch() {
-    FocusScope.of(context).unfocus(); // ✅ Dismiss keyboard
+    FocusScope.of(context).unfocus();
     final keyword = _searchController.text.trim();
     if (keyword.isEmpty) {
       AppNotifier.show(context, 'Please enter a career keyword');
@@ -68,9 +63,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
     context.read<CareerSearchBloc>().add(SearchCareersEvent(keyword));
   }
 
-  void _navigateToCourseDetail(Map<String, dynamic> courseData) {
-    context.push('/course-detail', extra: courseData);
-  }
+  // ✅ REMOVED: _navigateToCourseDetail() method — replaced by inline push
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +74,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // Custom App Bar
+            // App Bar
             SliverAppBar(
               backgroundColor: AppColors.backgroundTealGray,
               elevation: 0,
@@ -159,7 +152,8 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                                   color: AppColors.textSecondary.withOpacity(0.6),
                                 ),
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(vertical: Responsive.h(1.5)),
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: Responsive.h(1.5)),
                               ),
                               onSubmitted: (_) => _performSearch(),
                             ),
@@ -171,7 +165,8 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                                 setState(() {});
                               },
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: Responsive.w(3.5)),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: Responsive.w(3.5)),
                                 child: Icon(
                                   Icons.close,
                                   color: AppColors.textSecondary,
@@ -208,7 +203,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
               ),
             ),
 
-            // Search Results or Empty State
+            // Results
             BlocBuilder<CareerSearchBloc, CareerSearchState>(
               builder: (context, state) {
                 if (state is CareerSearchInitial) {
@@ -246,9 +241,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                 }
 
                 if (state is CareerSearchLoading) {
-                  return CareerSearchGridShimmer(
-                    itemCount: 4,
-                  );
+                  return CareerSearchGridShimmer(itemCount: 4);
                 }
 
                 if (state is CareerSearchError) {
@@ -273,7 +266,8 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                           ),
                           SizedBox(height: Responsive.h(1)),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: Responsive.w(8)),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: Responsive.w(8)),
                             child: Text(
                               state.message,
                               textAlign: TextAlign.center,
@@ -287,7 +281,9 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                           ElevatedButton(
                             onPressed: () {
                               _searchController.clear();
-                              context.read<CareerSearchBloc>().add(ClearSearchResultsEvent());
+                              context
+                                  .read<CareerSearchBloc>()
+                                  .add(ClearSearchResultsEvent());
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
@@ -341,7 +337,6 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                     );
                   }
 
-                  // ✅ GRID LAYOUT FOR SEARCH RESULTS
                   return SliverPadding(
                     padding: EdgeInsets.all(Responsive.w(4)),
                     sliver: SliverGrid(
@@ -357,32 +352,15 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                           return CareerSearchResultCard(
                             title: career.title,
                             thumbnail: career.thumbnail,
-                            onTap: () async {
-                              try {
-                                // ✅ Fetch full career details from API
-                                final details = await context
-                                    .read<CareerSearchRepository>()
-                                    .getCareerNodeDetails(career.id);
-
-                                if (context.mounted) {
-                                  // ✅ Convert CareerNodeDetails to courseData map
-                                  final courseData = <String, dynamic>{
-                                    'id': details.id,
-                                    'title': details.title,
-                                    'thumbnail': details.thumbnail,
-                                    'subjects': details.subjects,
-                                    'careerOptions': details.careerOptions,
-                                    'description': details.description,
-                                    'video': details.video,
-                                    'videoUrl': details.video,
-                                  };
-                                  _navigateToCourseDetail(courseData);
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  AppNotifier.show(context, 'Failed to load career details: $e');
-                                }
-                              }
+                            // ✅ CHANGED: navigate instantly with minimal data.
+                            // Removed the entire async try/catch + repository call.
+                            // CourseDetailScreen fetches full details itself.
+                            onTap: () {
+                              context.push('/course-detail', extra: <String, dynamic>{
+                                'id': career.id,
+                                'title': career.title,
+                                'thumbnail': career.thumbnail,
+                              });
                             },
                           );
                         },

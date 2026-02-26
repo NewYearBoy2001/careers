@@ -18,5 +18,7 @@ class ApiConstants {
   static const String careerNodeDetails = "careernode-details";
   static const String careerHomeNodes = "career-home-nodes";
   static const String careerChildNodes = "career-child-basic";
+  static const String forgotPassword = 'forgot-password';
+  static const String resetPassword = 'reset-password';
 
 }

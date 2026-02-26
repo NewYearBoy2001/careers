@@ -14,7 +14,6 @@ import 'package:go_router/go_router.dart';
 import 'package:careers/shimmer/college_details_shimmer.dart';
 import 'package:careers/shimmer/banner_image_shimmer.dart';
 import 'package:careers/utils/app_notifier.dart';
-import 'package:careers/widgets/network_aware_widget.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
@@ -57,16 +56,24 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   }
 
   Future<void> _launchEmail(String email) async {
-    final Uri url = Uri(scheme: 'mailto', path: email);
+    final Uri url = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {'subject': ''},
+    );
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
   }
 
   Future<void> _launchWebsite(String website) async {
-    final Uri url = Uri.parse(website);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
+    String url = website;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://$url';
+    }
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 

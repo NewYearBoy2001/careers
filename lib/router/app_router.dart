@@ -24,6 +24,10 @@ import 'package:careers/screens/careers/career_search_results_page.dart';
 import 'package:careers/screens/careers/career_child_nodes_page.dart';
 import 'package:careers/bloc/career_child_nodes/career_child_nodes_bloc.dart';
 import 'package:careers/data/repositories/career_child_nodes_repository.dart';
+import 'package:careers/screens/forgot_password_screen.dart';
+import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
+import 'package:careers/data/repositories/forgot_password_repository.dart';
+import 'package:careers/data/api/forgot_password_api_service.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -377,6 +381,32 @@ class AppRouter {
             },
           );
         },
+      ),
+
+      GoRoute(
+        path: '/forgot-password',  // ← must be exactly this, with hyphen
+        name: 'forgot-password',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: BlocProvider(
+            create: (_) => ForgotPasswordBloc(
+              ForgotPasswordRepository(ForgotPasswordApiService()),
+            ),
+            child: const ForgotPasswordScreen(),
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
+        ),
       ),
     ],
   );

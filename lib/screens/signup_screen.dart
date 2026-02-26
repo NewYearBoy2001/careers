@@ -31,7 +31,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   String _selectedRole = 'Student';
   String? _currentEducation;
-  bool _isLoading = false;
   bool _showChildrenError = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
@@ -128,16 +127,18 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return BlocListener<SignupBloc, SignupState>(
-      listener: (context, state) {
-        if (state is SignupSuccess) {
-          AppNotifier.show(context, state.message);
-          context.go('/dashboard');
-        } else if (state is SignupFailure) {
-          AppNotifier.show(context, state.error);
-        }
-      },
-      child: Scaffold(
+    return BlocConsumer<SignupBloc, SignupState>(
+        listener: (context, state) {
+      if (state is SignupSuccess) {
+        AppNotifier.show(context, state.message);
+        context.go('/dashboard');
+      } else if (state is SignupFailure) {
+        AppNotifier.show(context, state.error);
+      }
+    },
+      builder: (context, state) {
+        final isLoading = state is SignupLoading;
+        return Scaffold(
         backgroundColor: AppColors.backgroundTealGray,
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -443,8 +444,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     SizedBox(height: Responsive.h(3)),
                     CustomButton(
                       text: 'Sign Up',
-                      onPressed: _handleSignup,
-                      isLoading: _isLoading,
+                      onPressed: isLoading ? null : _handleSignup,  // disable tap when loading
+                      isLoading: isLoading,   // ← new
                     ),
                     SizedBox(height: Responsive.h(2)),
                     Row(
@@ -476,7 +477,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
           ),
-        ),
+        );},
     );
   }
 }
