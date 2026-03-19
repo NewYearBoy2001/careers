@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:careers/constants/app_colors.dart';
-import 'widgets/video_controls_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:go_router/go_router.dart';
@@ -23,12 +22,9 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen>
     with SingleTickerProviderStateMixin {
-  // ── Video ──────────────────────────────────────────────────────────────────
-  VideoPlayerController? _videoController;
-  bool _isVideoInitialized = false;
-  bool _hasVideoError = false;
-  bool _showControls = true;
-  double _currentPlaybackSpeed = 1.0;
+  // ── YouTube ────────────────────────────────────────────────────────────────
+  YoutubePlayerController? _ytController;
+  bool _isYoutubeReady = false;
 
   // ── Entry animation ────────────────────────────────────────────────────────
   late AnimationController _animController;
@@ -36,14 +32,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   late Animation<Offset> _slideAnim;
 
   // ── Detail loading ─────────────────────────────────────────────────────────
-  // Holds the *full* data once the API responds.
-  // Until then we use widget.courseData which already has id, title, thumbnail.
   Map<String, dynamic>? _fullData;
   bool _isLoadingDetails = false;
   String? _detailsError;
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  /// The best available data at any moment — full if loaded, partial otherwise.
   Map<String, dynamic> get _data => _fullData ?? widget.courseData;
 
   @override
@@ -64,20 +56,15 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
 
     _animController.forward();
-
-    // Fetch full details in the background immediately.
     _fetchDetails();
   }
 
-  // ── Fetch full career details ──────────────────────────────────────────────
   Future<void> _fetchDetails() async {
     final id = widget.courseData['id']?.toString();
 
-    // If the caller already passed all fields (legacy path from CareersPage),
-    // skip the extra API call — we have everything we need.
     if (_isDataComplete(widget.courseData)) {
       setState(() => _fullData = widget.courseData);
-      _initializeVideo();
+      _initYoutube();
       return;
     }
 
@@ -96,24 +83,15 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
       if (!mounted) return;
 
       final full = <String, dynamic>{
+        ...widget.courseData,
         'id': details.id,
         'title': details.title,
-        'thumbnail': details.thumbnail,
+        'thumbnail': (details.thumbnail?.trim().isEmpty ?? true) ? null : details.thumbnail,
         'subjects': details.subjects,
         'careerOptions': details.careerOptions,
         'description': details.description,
-        'video': details.video,
-        'videoUrl': details.video,
-        // preserve any extra fields the caller may have passed (e.g. color, icon)
-        ...widget.courseData,
-        // overwrite with fresh API values
-        'title': details.title,
-        'thumbnail': details.thumbnail,
-        'subjects': details.subjects,
-        'careerOptions': details.careerOptions,
-        'description': details.description,
-        'video': details.video,
-        'videoUrl': details.video,
+        'videoId': details.videoId.trim().isEmpty ? '' : details.videoId,
+        'videoUrl': details.videoUrl.trim().isEmpty ? '' : details.videoUrl,
       };
 
       setState(() {
@@ -121,7 +99,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         _isLoadingDetails = false;
       });
 
-      _initializeVideo();
+      _initYoutube();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -131,100 +109,44 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     }
   }
 
-  /// Returns true when the map already has everything needed to render the
-  /// full screen without an extra API call.
   bool _isDataComplete(Map<String, dynamic> data) {
     return data['description'] != null &&
         (data['subjects'] != null || data['careerOptions'] != null);
   }
 
-  // ── Video ──────────────────────────────────────────────────────────────────
-  void _initializeVideo() async {
-    final videoUrl = _data['videoUrl'] ?? _data['video'];
-    if (videoUrl == null) return;
+  // ── YouTube init ───────────────────────────────────────────────────────────
+  void _initYoutube() {
+    final videoId = _data['videoId']?.toString().trim() ?? '';
 
-    try {
-      _videoController =
-          VideoPlayerController.networkUrl(Uri.parse(videoUrl as String));
-
-      await _videoController!.initialize();
-      if (!mounted) return;
-
-      _videoController!
-        ..setLooping(true)
-        ..setVolume(0)
-        ..play();
-
-      setState(() => _isVideoInitialized = true);
-
-      _videoController!.addListener(() {
-        if (mounted) setState(() {});
-      });
-    } catch (_) {
-      if (mounted) setState(() => _hasVideoError = true);
+    // Nothing to initialize — no video available
+    if (videoId.isEmpty) {
+      setState(() => _isYoutubeReady = false);
+      return;
     }
+
+    _ytController = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+        enableCaption: false,
+        loop: false,
+        forceHD: false,
+      ),
+    );
+
+    setState(() => _isYoutubeReady = true);
   }
 
   @override
   void dispose() {
-    _videoController?.dispose();
+    _ytController?.dispose();
     _animController.dispose();
     super.dispose();
   }
 
   Color _getStreamColor() =>
       (_data['color'] as Color?) ?? AppColors.primary;
-
-  void _togglePlayPause() {
-    setState(() {
-      if (_videoController!.value.isPlaying) {
-        _videoController!.pause();
-      } else {
-        _videoController!.play();
-        _hideControlsAfterDelay();
-      }
-    });
-  }
-
-  void _togglePlaybackSpeed() {
-    setState(() {
-      if (_currentPlaybackSpeed == 1.0) {
-        _currentPlaybackSpeed = 1.5;
-      } else if (_currentPlaybackSpeed == 1.5) {
-        _currentPlaybackSpeed = 2.0;
-      } else {
-        _currentPlaybackSpeed = 1.0;
-      }
-      _videoController?.setPlaybackSpeed(_currentPlaybackSpeed);
-    });
-  }
-
-  void _hideControlsAfterDelay() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted && _videoController?.value.isPlaying == true) {
-        setState(() => _showControls = false);
-      }
-    });
-  }
-
-  void _showControlsTemporarily() {
-    setState(() => _showControls = true);
-    if (_videoController?.value.isPlaying == true) _hideControlsAfterDelay();
-  }
-
-  void _skipSeconds(int seconds) {
-    final current = _videoController?.value.position ?? Duration.zero;
-    final max = _videoController?.value.duration ?? Duration.zero;
-    final raw = current + Duration(seconds: seconds);
-    // Duration doesn't have .clamp() — compare manually
-    final next = raw < Duration.zero
-        ? Duration.zero
-        : raw > max
-        ? max
-        : raw;
-    _videoController?.seekTo(next);
-    _showControlsTemporarily();
-  }
 
   String _getSubjectsText() {
     final subjects = _data['subjects'];
@@ -240,11 +162,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     return [];
   }
 
-  // ── Build ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
-    return Scaffold(
+
+    // YoutubePlayer must be the root widget (not inside a sliver) when active.
+    // We wrap with YoutubePlayerBuilder for proper lifecycle handling.
+    final child = Scaffold(
       backgroundColor: AppColors.background,
       body: FadeTransition(
         opacity: _fadeAnim,
@@ -253,9 +177,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              // ── App bar / hero image ───────────────────────────────────────
+              // ── App bar / hero ─────────────────────────────────────────────
               SliverAppBar(
-                expandedHeight: Responsive.h(35),
+                expandedHeight: MediaQuery.of(context).size.width * 9 / 16,
                 pinned: true,
                 backgroundColor: _getStreamColor(),
                 leading: IconButton(
@@ -271,86 +195,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                   onPressed: () => context.pop(),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Gradient base
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              _getStreamColor(),
-                              _getStreamColor().withOpacity(0.7),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Thumbnail
-                      if (_data['thumbnail'] != null && !_isVideoInitialized)
-                        CachedNetworkImage(
-                          imageUrl: _data['thumbnail'] as String,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: _getStreamColor().withOpacity(0.3),
-                          ),
-                          errorWidget: (context, url, error) =>
-                          const SizedBox(),
-                        ),
-
-                      // Video
-                      if (_isVideoInitialized && _videoController != null)
-                        GestureDetector(
-                          onTap: _showControlsTemporarily,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              VideoPlayer(_videoController!),
-                              VideoControls(
-                                controller: _videoController!,
-                                showControls: _showControls,
-                                playbackSpeed: _currentPlaybackSpeed,
-                                accentColor: _getStreamColor(),
-                                onPlayPause: _togglePlayPause,
-                                onSpeedToggle: _togglePlaybackSpeed,
-                                onSkip: _skipSeconds,
-                                onSeek: (p) => _videoController?.seekTo(p),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      // Error fallback
-                      if (_hasVideoError && _data['thumbnail'] == null)
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                _data['icon'] as IconData? ?? Icons.school,
-                                size: Responsive.sp(80),
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              SizedBox(height: Responsive.h(2)),
-                              Text(
-                                'Video Coming Soon',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: Responsive.sp(16),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+                  background: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: _buildHero(),
                   ),
                 ),
               ),
 
-              // ── Body ──────────────────────────────────────────────────────
+              // ── Body ───────────────────────────────────────────────────────
               SliverToBoxAdapter(
                 child: Container(
                   decoration: BoxDecoration(
@@ -361,10 +213,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                     ),
                   ),
                   child: _isLoadingDetails
-                      ? _buildShimmer()       // ← shimmer while API is in-flight
+                      ? _buildShimmer()
                       : _detailsError != null
-                      ? _buildError()     // ← error state with retry
-                      : _buildContent(),  // ← real content once loaded
+                      ? _buildError()
+                      : _buildContent(),
                 ),
               ),
             ],
@@ -372,9 +224,175 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         ),
       ),
     );
+
+    // Wrap with YoutubePlayerBuilder only when player is ready
+    if (_isYoutubeReady && _ytController != null) {
+      return YoutubePlayerBuilder(
+        player: YoutubePlayer(
+          controller: _ytController!,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: _getStreamColor(),
+          progressColors: ProgressBarColors(
+            playedColor: _getStreamColor(),
+            handleColor: _getStreamColor(),
+          ),
+        ),
+        builder: (context, player) {
+          return Scaffold(
+            backgroundColor: AppColors.background,
+            body: FadeTransition(
+              opacity: _fadeAnim,
+              child: SlideTransition(
+                position: _slideAnim,
+                child: CustomScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: Responsive.h(30),
+                      pinned: true,
+                      backgroundColor: _getStreamColor(),
+                      leading: IconButton(
+                        icon: Container(
+                          padding: EdgeInsets.all(Responsive.w(2)),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(Responsive.w(3)),
+                          ),
+                          child: Icon(Icons.arrow_back,
+                              color: Colors.white, size: Responsive.sp(20)),
+                        ),
+                        onPressed: () => context.pop(),
+                      ),
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Gradient base
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    _getStreamColor(),
+                                    _getStreamColor().withOpacity(0.7),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // YouTube player fills the hero
+                            player,
+                          ],
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(Responsive.w(7.5)),
+                            topRight: Radius.circular(Responsive.w(7.5)),
+                          ),
+                        ),
+                        child: _isLoadingDetails
+                            ? _buildShimmer()
+                            : _detailsError != null
+                            ? _buildError()
+                            : _buildContent(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    return child;
   }
 
-  // ── Shimmer skeleton ───────────────────────────────────────────────────────
+  // ── Hero (shown before YouTube loads) ────────────────────────────────────
+  Widget _buildHero() {
+    final color = _getStreamColor();
+    final thumbnail = _data['thumbnail']?.toString().trim();
+    final videoId = _data['videoId']?.toString().trim() ?? '';
+
+    // Treat empty string same as null
+    final hasThumbnail = thumbnail != null && thumbnail.isNotEmpty;
+    final hasVideo = videoId.isNotEmpty;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Gradient base (always shown)
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [color, color.withOpacity(0.7)],
+            ),
+          ),
+        ),
+
+        // Thumbnail — only if non-null and non-empty
+        if (hasThumbnail)
+          CachedNetworkImage(
+            imageUrl: thumbnail!,
+            fit: BoxFit.cover,
+            placeholder: (context, url) =>
+                Container(color: color.withOpacity(0.3)),
+            errorWidget: (context, url, error) => const SizedBox(),
+          ),
+
+        // If no thumbnail and no video, show icon fallback
+        if (!hasThumbnail && !hasVideo)
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _data['icon'] as IconData? ?? Icons.school,
+                  size: Responsive.sp(64),
+                  color: Colors.white.withOpacity(0.7),
+                ),
+                SizedBox(height: Responsive.h(1.5)),
+                Text(
+                  (_data['title'] ?? '') as String,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: Responsive.sp(16),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        // Play icon overlay — only if video is available
+        if (hasVideo)
+          Center(
+            child: Container(
+              padding: EdgeInsets.all(Responsive.w(4)),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.45),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: Responsive.sp(48),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ── Shimmer (unchanged from original) ────────────────────────────────────
   Widget _buildShimmer() {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade200,
@@ -385,8 +403,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: Responsive.h(1)),
-
-            // Title row
             Row(
               children: [
                 _shimmerBox(w: Responsive.w(14), h: Responsive.w(14), radius: Responsive.w(3)),
@@ -403,50 +419,30 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 ),
               ],
             ),
-
             SizedBox(height: Responsive.h(3)),
-
-            // "About This Stream" heading
             _shimmerBox(w: Responsive.w(45), h: Responsive.h(2.5), radius: 6),
             SizedBox(height: Responsive.h(1.5)),
-
-            // Description lines
             _shimmerBox(w: double.infinity, h: Responsive.h(1.8), radius: 6),
             SizedBox(height: Responsive.h(1)),
             _shimmerBox(w: double.infinity, h: Responsive.h(1.8), radius: 6),
             SizedBox(height: Responsive.h(1)),
             _shimmerBox(w: Responsive.w(60), h: Responsive.h(1.8), radius: 6),
-
             SizedBox(height: Responsive.h(3)),
-
-            // Subjects box
             _shimmerBox(w: double.infinity, h: Responsive.h(12), radius: Responsive.w(4)),
-
             SizedBox(height: Responsive.h(3)),
-
-            // Career options heading
             _shimmerBox(w: Responsive.w(50), h: Responsive.h(2.5), radius: 6),
             SizedBox(height: Responsive.h(2)),
-
-            // Career chips
             Wrap(
               spacing: Responsive.w(2),
               runSpacing: Responsive.h(1),
-              children: List.generate(
-                6,
-                    (_) => _shimmerBox(
-                  w: Responsive.w(25) + (Responsive.w(5)),
-                  h: Responsive.h(4.5),
-                  radius: Responsive.w(3),
-                ),
-              ),
+              children: List.generate(6, (_) => _shimmerBox(
+                w: Responsive.w(25) + Responsive.w(5),
+                h: Responsive.h(4.5),
+                radius: Responsive.w(3),
+              )),
             ),
-
             SizedBox(height: Responsive.h(3)),
-
-            // CTA button
             _shimmerBox(w: double.infinity, h: Responsive.h(6.5), radius: Responsive.w(3)),
-
             SizedBox(height: Responsive.h(4)),
           ],
         ),
@@ -454,11 +450,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     );
   }
 
-  Widget _shimmerBox({
-    required double w,
-    required double h,
-    double radius = 8,
-  }) {
+  Widget _shimmerBox({required double w, required double h, double radius = 8}) {
     return Container(
       width: w,
       height: h,
@@ -469,7 +461,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     );
   }
 
-  // ── Error state ────────────────────────────────────────────────────────────
+  // ── Error (unchanged) ─────────────────────────────────────────────────────
   Widget _buildError() {
     return Padding(
       padding: EdgeInsets.all(Responsive.w(6)),
@@ -479,32 +471,24 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           Icon(Icons.error_outline,
               size: Responsive.sp(56), color: AppColors.error.withOpacity(0.6)),
           SizedBox(height: Responsive.h(2)),
-          Text(
-            'Failed to load details',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          Text('Failed to load details',
+              style: TextStyle(
+                  fontSize: Responsive.sp(16),
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary)),
           SizedBox(height: Responsive.h(1)),
-          Text(
-            _detailsError ?? '',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: Responsive.sp(13),
-              color: AppColors.textSecondary,
-            ),
-          ),
+          Text(_detailsError ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: Responsive.sp(13), color: AppColors.textSecondary)),
           SizedBox(height: Responsive.h(3)),
           ElevatedButton.icon(
             onPressed: _fetchDetails,
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-            ),
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.white),
           ),
           SizedBox(height: Responsive.h(4)),
         ],
@@ -512,13 +496,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     );
   }
 
-  // ── Full content (unchanged from original) ─────────────────────────────────
+  // ── Content ───────────────────────────────────────────────────────────────
   Widget _buildContent() {
     final color = _getStreamColor();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title Section
         Padding(
           padding: EdgeInsets.all(Responsive.w(6)),
           child: Column(
@@ -603,8 +586,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               children: [
                 Row(
                   children: [
-                    Icon(Icons.book_outlined,
-                        color: color, size: Responsive.sp(20)),
+                    Icon(Icons.book_outlined, color: color, size: Responsive.sp(20)),
                     SizedBox(width: Responsive.w(2)),
                     Text(
                       'Core Subjects / Specializations',
@@ -632,8 +614,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         // Career Options
         if (_getCareerOptions().isNotEmpty) ...[
           Padding(
-            padding: EdgeInsets.fromLTRB(Responsive.w(6), Responsive.h(4),
-                Responsive.w(6), Responsive.h(2)),
+            padding: EdgeInsets.fromLTRB(
+                Responsive.w(6), Responsive.h(4), Responsive.w(6), Responsive.h(2)),
             child: Row(
               children: [
                 Icon(Icons.work_outline, color: color, size: Responsive.sp(20)),
@@ -655,36 +637,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               spacing: Responsive.w(2),
               runSpacing: Responsive.h(1),
               children: _getCareerOptions()
-                  .map(
-                    (career) => Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: Responsive.w(4),
-                      vertical: Responsive.h(1.25)),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius:
-                    BorderRadius.circular(Responsive.w(3)),
-                    border: Border.all(
-                        color: color.withOpacity(0.2), width: 1),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle_outline,
-                          size: Responsive.sp(16), color: color),
-                      SizedBox(width: Responsive.w(1.5)),
-                      Text(
-                        career,
-                        style: TextStyle(
-                          fontSize: Responsive.sp(13),
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
+                  .map((career) => Container(
+                padding: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(4),
+                    vertical: Responsive.h(1.25)),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(Responsive.w(3)),
+                  border: Border.all(
+                      color: color.withOpacity(0.2), width: 1),
                 ),
-              )
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle_outline,
+                        size: Responsive.sp(16), color: color),
+                    SizedBox(width: Responsive.w(1.5)),
+                    Text(
+                      career,
+                      style: TextStyle(
+                        fontSize: Responsive.sp(13),
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ))
                   .toList(),
             ),
           ),
@@ -699,8 +678,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [color, color.withOpacity(0.8)],
-                ),
+                    colors: [color, color.withOpacity(0.8)]),
                 borderRadius: BorderRadius.circular(Responsive.w(3)),
                 boxShadow: [
                   BoxShadow(
@@ -750,7 +728,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               ),
             ),
           ),
-
         SizedBox(height: Responsive.h(4)),
       ],
     );

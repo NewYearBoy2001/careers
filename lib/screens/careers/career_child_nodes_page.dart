@@ -184,7 +184,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                         crossAxisCount: 2,
                         crossAxisSpacing: Responsive.w(3),
                         mainAxisSpacing: Responsive.h(2),
-                        childAspectRatio: 0.85,
+                        childAspectRatio: 0.9,
                       ),
                       itemCount: state.nodes.length,
                       itemBuilder: (context, index) {

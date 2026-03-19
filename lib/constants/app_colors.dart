@@ -67,4 +67,5 @@ class AppColors {
   static const Color teal5 = Color(0xFF99F6E4); // Pale Teal
   static const Color tealBlue = Color(0xFF06B6D4); // Cyan Teal
   static const Color tealGreen = Color(0xFF10B981); // Green Teal
+  static const Color tealnetwork = Color(0xFF1A9C86);
 }

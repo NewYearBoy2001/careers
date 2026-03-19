@@ -107,9 +107,10 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Image
-                  Expanded(
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
                     child: Container(
-                      decoration: BoxDecoration(
+                    decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(Responsive.w(3.5)),
                           topRight: Radius.circular(Responsive.w(3.5)),

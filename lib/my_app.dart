@@ -35,6 +35,17 @@ import 'bloc/career_home/career_home_bloc.dart';
 import 'data/api/career_child_nodes_api_service.dart';
 import 'data/repositories/career_child_nodes_repository.dart';
 import 'bloc/career_child_nodes/career_child_nodes_bloc.dart';
+import 'data/repositories/career_record_video_repository.dart';
+import 'data/api/career_record_video_api_service.dart';
+import 'bloc/career_record_video/career_record_video_bloc.dart';
+import 'bloc/career_record_video/career_record_video_event.dart';
+import 'data/api/career_guidance_banner_api_service.dart';
+import 'data/repositories/career_guidance_banner_repository.dart';
+import 'bloc/career_guidance_banner/career_guidance_banner_bloc.dart';
+import 'bloc/career_guidance_banner/career_guidance_banner_event.dart';
+import 'data/api/career_guidance_register_api_service.dart';
+import 'data/repositories/career_guidance_register_repository.dart';
+import 'bloc/career_guidance_register/career_guidance_register_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -104,13 +115,27 @@ class MyApp extends StatelessWidget {
         ),
 
         RepositoryProvider<CareerHomeApiService>(
-          create: (context) => CareerHomeApiService(), // No parameter
+          create: (context) => CareerHomeApiService(),
         ),
 
         RepositoryProvider<CareerChildNodesApiService>(
           create: (context) => CareerChildNodesApiService(
             context.read<AuthLocalStorage>(),
           ),
+        ),
+
+        RepositoryProvider<CareerRecordVideoApiService>(
+          create: (context) => CareerRecordVideoApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
+
+        RepositoryProvider<CareerGuidanceBannerApiService>(
+          create: (_) => CareerGuidanceBannerApiService(),
+        ),
+
+        RepositoryProvider<CareerGuidanceRegisterApiService>(
+          create: (_) => CareerGuidanceRegisterApiService(),
         ),
 
         // ========================================
@@ -183,6 +208,23 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<CareerRecordVideoRepository>(
+          create: (context) => CareerRecordVideoRepository(
+            context.read<CareerRecordVideoApiService>(),
+          ),
+        ),
+
+        RepositoryProvider<CareerGuidanceBannerRepository>(
+          create: (context) => CareerGuidanceBannerRepository(
+            context.read<CareerGuidanceBannerApiService>(),
+          ),
+        ),
+
+        RepositoryProvider<CareerGuidanceRegisterRepository>(
+          create: (context) => CareerGuidanceRegisterRepository(
+            context.read<CareerGuidanceRegisterApiService>(),
+          ),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -243,6 +285,25 @@ class MyApp extends StatelessWidget {
           BlocProvider<CareerChildNodesBloc>(
             create: (context) => CareerChildNodesBloc(
               context.read<CareerChildNodesRepository>(),
+            ),
+          ),
+
+          // Single BLoC for both home preview and full video list
+          BlocProvider<CareerRecordVideoBloc>(
+            create: (context) => CareerRecordVideoBloc(
+              context.read<CareerRecordVideoRepository>(),
+            )..add(FetchHomeVideos()),
+          ),
+
+          BlocProvider<CareerGuidanceBannerBloc>(
+            create: (context) => CareerGuidanceBannerBloc(
+              context.read<CareerGuidanceBannerRepository>(),
+            )..add(FetchCareerGuidanceBanners()),
+          ),
+
+          BlocProvider<CareerGuidanceRegisterBloc>(
+            create: (context) => CareerGuidanceRegisterBloc(
+              context.read<CareerGuidanceRegisterRepository>(),
             ),
           ),
         ],

@@ -32,8 +32,9 @@ class CareerNodeDetails {
   final List<String> subjects;
   final List<String> careerOptions;
   final String description;
-  final String video;
-  final String thumbnail;
+  final String videoId;
+  final String videoUrl;
+  final String? thumbnail;
 
   CareerNodeDetails({
     required this.id,
@@ -41,8 +42,9 @@ class CareerNodeDetails {
     required this.subjects,
     required this.careerOptions,
     required this.description,
-    required this.video,
-    required this.thumbnail,
+    required this.videoId,
+    required this.videoUrl,
+    this.thumbnail,
   });
 
   factory CareerNodeDetails.fromJson(Map<String, dynamic> json) {
@@ -52,8 +54,13 @@ class CareerNodeDetails {
       subjects: _parseStringList(json['subjects']),
       careerOptions: _parseStringList(json['career_options']),
       description: json['description'] ?? '',
-      video: json['video'] ?? '',
-      thumbnail: json['thumbnail'] ?? '',
+      // Treat null or empty string the same way
+      videoId: (json['video_id']?.toString() ?? '').trim(),
+      videoUrl: (json['video_url']?.toString() ?? '').trim(),
+      // null stays null; empty string becomes null
+      thumbnail: (json['thumbnail']?.toString() ?? '').trim().isEmpty
+          ? null
+          : json['thumbnail'].toString().trim(),
     );
   }
 
@@ -118,7 +125,8 @@ class CareerNodeDetails {
       'subjects': subjects,
       'career_options': careerOptions,
       'description': description,
-      'video': video,
+      'video_id': videoId,
+      'video_url': videoUrl,
       'thumbnail': thumbnail,
     };
   }
