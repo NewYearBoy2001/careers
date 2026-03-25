@@ -7,8 +7,8 @@ class CareerSearchRepository {
   CareerSearchRepository(this._apiService);
 
   /// Search careers by keyword
-  Future<SearchCareersResponse> searchCareers(String keyword) async {
-    return await _apiService.searchCareers(keyword);
+  Future<SearchCareersResponse> searchCareers(String keyword, {int page = 1, int perPage = 10}) {
+    return _apiService.searchCareers(keyword, page: page, perPage: perPage);
   }
 
   /// Get career node details

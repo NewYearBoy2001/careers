@@ -6,7 +6,15 @@ class CareerChildNodesRepository {
 
   CareerChildNodesRepository(this._apiService);
 
-  Future<List<CareerNode>> getChildNodes(String parentId) async {
-    return await _apiService.fetchChildNodes(parentId);
+  Future<CareerChildNodesResponse> getChildNodes(
+      String parentId, {
+        int page = 1,
+        int perPage = 10,
+      }) async {
+    return await _apiService.fetchChildNodes(
+      parentId,
+      page: page,
+      perPage: perPage,
+    );
   }
 }

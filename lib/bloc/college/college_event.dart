@@ -10,11 +10,18 @@ abstract class CollegeEvent extends Equatable {
 class SearchColleges extends CollegeEvent {
   final String? keyword;
   final String? location;
+  final int page;
+  final int perPage;
 
-  const SearchColleges({this.keyword, this.location});
+  const SearchColleges({
+    this.keyword,
+    this.location,
+    this.page = 1,
+    this.perPage = 10,
+  });
 
   @override
-  List<Object?> get props => [keyword, location];
+  List<Object?> get props => [keyword, location, page, perPage];
 }
 
 class FetchCollegeDetails extends CollegeEvent {

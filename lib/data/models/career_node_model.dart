@@ -155,26 +155,56 @@ class CareerNodeDetails {
 class SearchCareersResponse {
   final List<CareerNode> careernodes;
   final int totalNodes;
+  final int currentPage;
+  final int lastPage;
+  final int perPage;
 
   SearchCareersResponse({
     required this.careernodes,
     required this.totalNodes,
+    required this.currentPage,
+    required this.lastPage,
+    required this.perPage,
   });
 
   factory SearchCareersResponse.fromJson(Map<String, dynamic> json) {
     return SearchCareersResponse(
       careernodes: (json['careernodes'] as List?)
           ?.map((e) => CareerNode.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-          [],
+          .toList() ?? [],
       totalNodes: int.tryParse(json['total_nodes']?.toString() ?? '0') ?? 0,
+      currentPage: int.tryParse(json['current_page']?.toString() ?? '1') ?? 1,
+      lastPage: int.tryParse(json['last_page']?.toString() ?? '1') ?? 1,
+      perPage: int.tryParse(json['per_page']?.toString() ?? '5') ?? 5,
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'careernodes': careernodes.map((e) => e.toJson()).toList(),
-      'total_nodes': totalNodes,
-    };
+class CareerChildNodesResponse {
+  final List<CareerNode> childNodes;
+  final int currentPage;
+  final int lastPage;
+  final int perPage;
+  final int totalChildren;
+
+  CareerChildNodesResponse({
+    required this.childNodes,
+    required this.currentPage,
+    required this.lastPage,
+    required this.perPage,
+    required this.totalChildren,
+  });
+
+  factory CareerChildNodesResponse.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>;
+    return CareerChildNodesResponse(
+      childNodes: (data['child_nodes'] as List<dynamic>? ?? [])
+          .map((e) => CareerNode.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      currentPage: int.tryParse(data['current_page']?.toString() ?? '1') ?? 1,
+      lastPage: int.tryParse(data['last_page']?.toString() ?? '1') ?? 1,
+      perPage: int.tryParse(data['per_page']?.toString() ?? '5') ?? 5,
+      totalChildren: int.tryParse(data['total_children']?.toString() ?? '0') ?? 0,
+    );
   }
 }

@@ -29,12 +29,21 @@ class CareerSearchResultsPage extends StatefulWidget {
 class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
   late TextEditingController _searchController;
   late FocusNode _searchFocusNode;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.initialKeyword ?? '');
     _searchFocusNode = FocusNode();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      // Trigger load-more when 200px from the bottom
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        context.read<CareerSearchBloc>().add(LoadMoreCareersEvent());
+      }
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.initialKeyword != null && widget.initialKeyword!.isNotEmpty) {
@@ -51,6 +60,8 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+    _scrollController.dispose();
+
   }
 
   void _performSearch() {
@@ -72,6 +83,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
       backgroundColor: AppColors.backgroundTealGray,
       body: SafeArea(
         child: CustomScrollView(
+          controller: _scrollController,
           physics: const BouncingScrollPhysics(),
           slivers: [
             // App Bar
@@ -337,36 +349,63 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                     );
                   }
 
-                  return SliverPadding(
-                    padding: EdgeInsets.all(Responsive.w(4)),
-                    sliver: SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: Responsive.deviceWidth > 600 ? 3 : 2,
-                        mainAxisSpacing: Responsive.w(4),
-                        crossAxisSpacing: Responsive.w(4),
-                        childAspectRatio: 0.75,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                          final career = state.careers[index];
-                          return CareerSearchResultCard(
-                            title: career.title,
-                            thumbnail: career.thumbnail,
-                            // ✅ CHANGED: navigate instantly with minimal data.
-                            // Removed the entire async try/catch + repository call.
-                            // CourseDetailScreen fetches full details itself.
-                            onTap: () {
-                              context.push('/course-detail', extra: <String, dynamic>{
-                                'id': career.id,
-                                'title': career.title,
-                                'thumbnail': career.thumbnail,
-                              });
+                  return SliverMainAxisGroup(
+                    slivers: [
+                      SliverPadding(
+                        padding: EdgeInsets.all(Responsive.w(4)),
+                        sliver: SliverGrid(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: Responsive.deviceWidth > 600 ? 3 : 2,
+                            mainAxisSpacing: Responsive.w(4),
+                            crossAxisSpacing: Responsive.w(4),
+                            childAspectRatio: 0.75,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                              final career = state.careers[index];
+                              return CareerSearchResultCard(
+                                title: career.title,
+                                thumbnail: career.thumbnail,
+                                onTap: () {
+                                  context.push('/course-detail', extra: <String, dynamic>{
+                                    'id': career.id,
+                                    'title': career.title,
+                                    'thumbnail': career.thumbnail,
+                                  });
+                                },
+                              );
                             },
-                          );
-                        },
-                        childCount: state.careers.length,
+                            childCount: state.careers.length,
+                          ),
+                        ),
                       ),
-                    ),
+
+                      // Load more spinner
+                      if (state.isLoadingMore)
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        ),
+
+                      // End of results
+                      if (!state.hasMore && state.careers.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: Text(
+                                'No more results',
+                                style: TextStyle(
+                                  fontSize: Responsive.sp(13),
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 }
 

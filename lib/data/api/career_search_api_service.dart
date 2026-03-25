@@ -7,25 +7,17 @@ import 'package:careers/utils/prefs/auth_local_storage.dart';
 class CareerSearchApiService extends BaseDioClient {
   CareerSearchApiService(AuthLocalStorage authStorage) : super(authStorage: authStorage);
 
-  Future<SearchCareersResponse> searchCareers(String keyword) async {
-    try {
-      final response = await dio.post(
-        ApiConstants.searchCareers,
-        data: {
-          'keyword': keyword,
-        },
-      );
+  Future<SearchCareersResponse> searchCareers(String keyword, {int page = 1, int perPage = 10}) async {
+    final response = await dio.post(
+      '${ApiConstants.searchCareers}?page=$page&per_page=$perPage',
+      data: {'keyword': keyword},
+    );
 
-      if (response.statusCode == 200 && response.data['status'] == '1') {
-        final data = response.data['data'] as Map<String, dynamic>;
-        return SearchCareersResponse.fromJson(data);
-      } else {
-        throw Exception(
-          response.data['message'] ?? 'Failed to search careers',
-        );
-      }
-    } catch (e) {
-      rethrow;
+    if (response.statusCode == 200 && response.data['status'] == '1') {
+      final data = response.data['data'] as Map<String, dynamic>;
+      return SearchCareersResponse.fromJson(data);
+    } else {
+      throw Exception(response.data['message'] ?? 'Failed to search careers');
     }
   }
 

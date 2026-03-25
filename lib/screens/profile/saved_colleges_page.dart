@@ -17,11 +17,26 @@ class SavedCollegesPage extends StatefulWidget {
 }
 
 class _SavedCollegesPageState extends State<SavedCollegesPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    // Fetch saved colleges when page loads
     context.read<SavedCollegesListBloc>().add(FetchSavedCollegesList());
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<SavedCollegesListBloc>().add(FetchNextSavedCollegesPage());
+    }
   }
 
   @override
@@ -39,10 +54,7 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
         ),
         title: const Text(
           'Saved Colleges',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -64,7 +76,7 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
             return ListView.builder(
               padding: EdgeInsets.all(Responsive.w(4)),
               itemCount: 6,
-              itemBuilder: (context, index) => const CollegeCardShimmer(),
+              itemBuilder: (_, __) => const CollegeCardShimmer(),
             );
           }
 
@@ -75,35 +87,30 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: Responsive.w(15),
-                      color: AppColors.error,
-                    ),
+                    Icon(Icons.error_outline,
+                        size: Responsive.w(15), color: AppColors.error),
                     SizedBox(height: Responsive.h(2)),
                     Text(
                       state.message,
                       style: TextStyle(
-                        fontSize: Responsive.sp(14),
-                        color: AppColors.textSecondary,
-                      ),
+                          fontSize: Responsive.sp(14),
+                          color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: Responsive.h(2)),
                     ElevatedButton(
-                      onPressed: () {
-                        context.read<SavedCollegesListBloc>().add(FetchSavedCollegesList());
-                      },
+                      onPressed: () => context
+                          .read<SavedCollegesListBloc>()
+                          .add(FetchSavedCollegesList()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(
-                          horizontal: Responsive.w(6),
-                          vertical: Responsive.h(1.5),
-                        ),
+                            horizontal: Responsive.w(6),
+                            vertical: Responsive.h(1.5)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Responsive.w(2)),
-                        ),
+                            borderRadius:
+                            BorderRadius.circular(Responsive.w(2))),
                       ),
                       child: const Text('Retry'),
                     ),
@@ -120,29 +127,20 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.bookmark_border,
-                      size: Responsive.w(20),
-                      color: AppColors.textSecondary,
-                    ),
+                    Icon(Icons.bookmark_border,
+                        size: Responsive.w(20), color: AppColors.textSecondary),
                     SizedBox(height: Responsive.h(2)),
-                    Text(
-                      'No Saved Colleges',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(18),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    Text('No Saved Colleges',
+                        style: TextStyle(
+                            fontSize: Responsive.sp(18),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary)),
                     SizedBox(height: Responsive.h(1)),
-                    Text(
-                      'Start saving colleges to view them here',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(14),
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    Text('Start saving colleges to view them here',
+                        style: TextStyle(
+                            fontSize: Responsive.sp(14),
+                            color: AppColors.textSecondary),
+                        textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -152,14 +150,27 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
           if (state is SavedCollegesListLoaded) {
             return RefreshIndicator(
               onRefresh: () async {
-                context.read<SavedCollegesListBloc>().add(RefreshSavedCollegesList());
+                context
+                    .read<SavedCollegesListBloc>()
+                    .add(RefreshSavedCollegesList());
                 await Future.delayed(const Duration(milliseconds: 500));
               },
               color: AppColors.primary,
               child: ListView.builder(
+                controller: _scrollController,
                 padding: EdgeInsets.all(Responsive.w(4)),
-                itemCount: state.colleges.length,
+                // +1 for the bottom loader when fetching more
+                itemCount: state.colleges.length + (state.isFetchingMore ? 1 : 0),
                 itemBuilder: (context, index) {
+                  if (index == state.colleges.length) {
+                    // Bottom loading indicator
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: Responsive.h(2)),
+                      child: Center(
+                        child: CircularProgressIndicator(color: AppColors.primary),
+                      ),
+                    );
+                  }
                   return CollegeCard(college: state.colleges[index]);
                 },
               ),

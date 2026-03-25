@@ -14,11 +14,21 @@ class CollegeSearchLoading extends CollegeState {}
 
 class CollegeSearchLoaded extends CollegeState {
   final List<CollegeModel> colleges;
+  final int currentPage;
+  final int lastPage;
+  final int totalColleges;
 
-  const CollegeSearchLoaded(this.colleges);
+  const CollegeSearchLoaded(
+      this.colleges, {
+        this.currentPage = 1,
+        this.lastPage = 1,
+        this.totalColleges = 0,
+      });
+
+  bool get hasMore => currentPage < lastPage;
 
   @override
-  List<Object?> get props => [colleges];
+  List<Object?> get props => [colleges, currentPage, lastPage, totalColleges];
 }
 
 class CollegeDetailsLoading extends CollegeState {

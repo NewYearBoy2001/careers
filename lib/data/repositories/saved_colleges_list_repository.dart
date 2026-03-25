@@ -6,7 +6,7 @@ class SavedCollegesListRepository {
 
   SavedCollegesListRepository(this._apiService);
 
-  Future<List<CollegeModel>> getSavedColleges() async {
-    return await _apiService.getSavedColleges();
+  Future<SavedCollegesPageResult> getSavedColleges({int page = 1}) async {
+    return await _apiService.getSavedColleges(page: page);
   }
 }

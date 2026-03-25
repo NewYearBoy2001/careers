@@ -10,6 +10,7 @@ import 'package:careers/bloc/college/college_state.dart';
 import 'package:careers/data/models/college_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careers/shimmer/college_card_shimmer.dart';
+import 'widgets/location_filter_sheet.dart';
 
 class CollegeSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;
@@ -32,6 +33,12 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
   late TextEditingController _locationController;
   late FocusNode _searchFocusNode;
   late FocusNode _locationFocusNode;
+  final ScrollController _scrollController = ScrollController(); // ADD
+  int _currentPage = 1; // ADD
+  bool _isLoadingMore = false; // ADD
+  bool _hasMore = false;
+  String? _selectedState;
+  String? _selectedDistrict;
 
   @override
   void initState() {
@@ -41,14 +48,14 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
     _searchFocusNode = FocusNode();
     _locationFocusNode = FocusNode();
 
-    // ✅ ADD: Auto-focus the field that was tapped after build completes
+    _scrollController.addListener(_onScroll); // ADD
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.focusField == 'keyword') {
         _searchFocusNode.requestFocus();
       } else if (widget.focusField == 'location') {
         _locationFocusNode.requestFocus();
       }
-      // Perform initial search
       _performSearch();
     });
   }
@@ -59,16 +66,66 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
     _locationController.dispose();
     _searchFocusNode.dispose();
     _locationFocusNode.dispose();
+    _scrollController.dispose(); // ADD
     super.dispose();
   }
 
-  void _performSearch() {
-    final keyword = _searchController.text.trim();
-    final location = _locationController.text.trim();
+  // ADD
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (_hasMore && !_isLoadingMore) { // CHANGE THIS
+        _isLoadingMore = true;
+        _currentPage++;
+        _loadMore();
+      }
+    }
+  }
 
+  Future<void> _openLocationFilter() async {
+    final result = await showModalBottomSheet<Map<String, String?>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => LocationFilterSheet(
+        selectedState: _selectedState,
+        selectedDistrict: _selectedDistrict,
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _selectedState = result['state'];
+        _selectedDistrict = result['district'];
+        // Sync display text
+        _locationController.text = result['district'] ??
+            result['state'] ?? '';
+      });
+      _performSearch();
+    }
+  }
+
+  // ADD
+  void _loadMore() {
     context.read<CollegeBloc>().add(SearchColleges(
-      keyword: keyword.isEmpty ? null : keyword,
-      location: location.isEmpty ? null : location,
+      keyword: _searchController.text.trim().isEmpty
+          ? null
+          : _searchController.text.trim(),
+      location: _selectedDistrict ?? _selectedState,
+      page: _currentPage,
+    ));
+  }
+
+  void _performSearch() {
+    _currentPage = 1;
+    _isLoadingMore = false;
+    _hasMore = false;
+    context.read<CollegeBloc>().add(SearchColleges(
+      keyword: _searchController.text.trim().isEmpty
+          ? null
+          : _searchController.text.trim(),
+      location: _selectedDistrict ?? _selectedState,
+      page: 1,
     ));
   }
 
@@ -160,20 +217,32 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
           ),
           SizedBox(height: Responsive.h(0.15)),
           // ✅ Pass focus nodes to search bars
+          // Keyword bar — normal, typeable
           SearchBarWidget(
             hint: 'Search colleges or courses',
             icon: Icons.search_rounded,
             controller: _searchController,
-            focusNode: _searchFocusNode, // ✅ ADD focus node
+            focusNode: _searchFocusNode,
             onChanged: (_) => _performSearch(),
           ),
           SizedBox(height: Responsive.h(0.75)),
+// Location bar — read-only, opens filter sheet on tap
           SearchBarWidget(
-            hint: 'Enter location',
+            hint: 'Filter by state / district',
             icon: Icons.location_on_rounded,
             controller: _locationController,
-            focusNode: _locationFocusNode, // ✅ ADD focus node
-            onChanged: (_) => _performSearch(),
+            focusNode: _locationFocusNode,
+            readOnly: true,
+            onTap: _openLocationFilter,
+            onChanged: (val) {
+              if (val.isEmpty) {
+                setState(() {
+                  _selectedState = null;
+                  _selectedDistrict = null;
+                });
+                _performSearch();
+              }
+            },
           ),
         ],
       ),
@@ -182,122 +251,108 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
 
   Widget _buildSearchResults() {
     return NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-      if (notification is ScrollUpdateNotification &&
-          notification.scrollDelta != null &&
-          notification.scrollDelta! > 0) {
-        FocusScope.of(context).unfocus();
-      }
-      return false;
-    },
-    child: BlocBuilder<CollegeBloc, CollegeState>(
-      builder: (context, state) {
-        List<CollegeModel>? colleges;
-        bool isLoading = false;
-        String? errorMessage;
-
-        if (state is CollegeSearchLoading) {
-          isLoading = true;
-        } else if (state is CollegeSearchLoaded) {
-          colleges = state.colleges;
-        } else if (state is CollegeDetailsLoading) {
-          colleges = state.colleges;
-        } else if (state is CollegeDetailsLoaded) {
-          colleges = state.colleges;
-        } else if (state is CollegeError) {
-          errorMessage = state.message;
-          colleges = state.colleges;
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification &&
+            notification.scrollDelta != null &&
+            notification.scrollDelta! > 0) {
+          FocusScope.of(context).unfocus();
         }
+        return false;
+      },
+      child: BlocConsumer<CollegeBloc, CollegeState>(
+        listener: (context, state) {
+          if (state is CollegeSearchLoaded) {
+            _isLoadingMore = false;
+            _hasMore = state.hasMore;
+          }
+        },
+        builder: (context, state) {
+          List<CollegeModel>? colleges;
+          bool isLoading = false;
+          String? errorMessage;
 
-        if (isLoading) {
+          if (state is CollegeSearchLoading) {
+            isLoading = true;
+          } else if (state is CollegeSearchLoaded) {
+            colleges = state.colleges;
+          } else if (state is CollegeDetailsLoading) {
+            colleges = state.colleges;
+          } else if (state is CollegeDetailsLoaded) {
+            colleges = state.colleges;
+          } else if (state is CollegeError) {
+            errorMessage = state.message;
+            colleges = state.colleges;
+          }
+
+          if (isLoading) {
+            return ListView.builder(
+              padding: EdgeInsets.all(Responsive.w(4)),
+              itemCount: 6,
+              itemBuilder: (context, index) => const CollegeCardShimmer(),
+            );
+          }
+
+          if (errorMessage != null && (colleges == null || colleges.isEmpty)) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(Responsive.w(4)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: Responsive.w(15), color: AppColors.textSecondary),
+                    SizedBox(height: Responsive.h(2)),
+                    Text(errorMessage, style: TextStyle(color: AppColors.textSecondary, fontSize: Responsive.sp(14)), textAlign: TextAlign.center),
+                    SizedBox(height: Responsive.h(2)),
+                    ElevatedButton(
+                      onPressed: _performSearch,
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+
+          if (colleges == null || colleges.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(Responsive.w(4)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.school_outlined, size: Responsive.w(15), color: AppColors.textSecondary),
+                    SizedBox(height: Responsive.h(2)),
+                    Text('No colleges found', style: TextStyle(color: AppColors.textPrimary, fontSize: Responsive.sp(16), fontWeight: FontWeight.w600)),
+                    SizedBox(height: Responsive.h(1)),
+                    Text('Try adjusting your search criteria', style: TextStyle(color: AppColors.textSecondary, fontSize: Responsive.sp(14))),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final bool hasMore = _hasMore;
+
           return ListView.builder(
+            controller: _scrollController,
             padding: EdgeInsets.all(Responsive.w(4)),
-            itemCount: 6, // Number of shimmer cards
+            itemCount: colleges.length + (hasMore ? 1 : 0),
             itemBuilder: (context, index) {
-              return const CollegeCardShimmer();
+              if (index == colleges!.length) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: Responsive.h(2)),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                );
+              }
+              return CollegeCard(college: colleges![index]);
             },
           );
-        }
-
-        if (errorMessage != null && (colleges == null || colleges.isEmpty)) {
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.all(Responsive.w(4)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: Responsive.w(15),
-                    color: AppColors.textSecondary,
-                  ),
-                  SizedBox(height: Responsive.h(2)),
-                  Text(
-                    errorMessage,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: Responsive.sp(14),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: Responsive.h(2)),
-                  ElevatedButton(
-                    onPressed: _performSearch,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (colleges == null || colleges.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.all(Responsive.w(4)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.school_outlined,
-                    size: Responsive.w(15),
-                    color: AppColors.textSecondary,
-                  ),
-                  SizedBox(height: Responsive.h(2)),
-                  Text(
-                    'No colleges found',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: Responsive.sp(16),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: Responsive.h(1)),
-                  Text(
-                    'Try adjusting your search criteria',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: Responsive.sp(14),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return ListView.builder(
-          padding: EdgeInsets.all(Responsive.w(4)),
-          itemCount: colleges.length,
-          itemBuilder: (context, index) {
-            return CollegeCard(college: colleges![index]);
-          },
-        );
-      },),
+        },
+      ),
     );
   }
 }

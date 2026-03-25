@@ -15,10 +15,16 @@ class CollegeApiService {
   Future<ApiResponse<List<CollegeModel>>> searchColleges({
     String? keyword,
     String? location,
+    int page = 1,
+    int perPage = 7,
   }) async {
     try {
       final response = await _dio.post(
         ApiConstants.searchColleges,
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
         data: {
           'keyword': keyword ?? '',
           'location': location ?? '',
@@ -29,16 +35,17 @@ class CollegeApiService {
         final data = response.data;
 
         if (data['status'] == '1') {
-          // ✅ FIX: Handle null colleges data
           final collegesData = data['data']['colleges'] as List?;
 
-          // If colleges is null or empty, return empty list
           if (collegesData == null || collegesData.isEmpty) {
             return ApiResponse(
               success: true,
               statusCode: 200,
               message: data['message'] ?? 'No colleges found',
-              data: [], // Return empty list instead of crashing
+              data: [],
+              currentPage: int.tryParse(data['data']['current_page'].toString()) ?? 1,
+              lastPage: int.tryParse(data['data']['last_page'].toString()) ?? 1,
+              totalColleges: int.tryParse(data['data']['total_colleges'].toString()) ?? 0,
             );
           }
 
@@ -51,6 +58,9 @@ class CollegeApiService {
             statusCode: 200,
             message: data['message'] ?? 'Colleges fetched successfully',
             data: colleges,
+            currentPage: int.tryParse(data['data']['current_page'].toString()) ?? 1,
+            lastPage: int.tryParse(data['data']['last_page'].toString()) ?? 1,
+            totalColleges: int.tryParse(data['data']['total_colleges'].toString()) ?? 0,
           );
         } else {
           return ApiResponse(
@@ -73,7 +83,6 @@ class CollegeApiService {
         message: ApiErrorHandler.handleDioError(e),
       );
     } catch (e) {
-      // ✅ FIX: Catch any other errors (like type casting)
       return ApiResponse(
         success: false,
         statusCode: 500,

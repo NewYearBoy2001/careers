@@ -7,40 +7,69 @@ class SavedCollegesListBloc extends Bloc<SavedCollegesListEvent, SavedCollegesLi
   final SavedCollegesListRepository _repository;
 
   SavedCollegesListBloc(this._repository) : super(SavedCollegesListInitial()) {
-    on<FetchSavedCollegesList>(_onFetchSavedCollegesList);
-    on<RefreshSavedCollegesList>(_onRefreshSavedCollegesList);
+    on<FetchSavedCollegesList>(_onFetch);
+    on<FetchNextSavedCollegesPage>(_onFetchNext);
+    on<RefreshSavedCollegesList>(_onRefresh);
   }
 
-  Future<void> _onFetchSavedCollegesList(
+  Future<void> _onFetch(
       FetchSavedCollegesList event,
       Emitter<SavedCollegesListState> emit,
       ) async {
     emit(SavedCollegesListLoading());
     try {
-      final colleges = await _repository.getSavedColleges();
-
-      if (colleges.isEmpty) {
+      final result = await _repository.getSavedColleges(page: 1);
+      if (result.colleges.isEmpty) {
         emit(SavedCollegesListEmpty('No saved colleges found'));
       } else {
-        emit(SavedCollegesListLoaded(colleges));
+        emit(SavedCollegesListLoaded(
+          colleges: result.colleges,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
+        ));
       }
     } catch (e) {
       emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));
     }
   }
 
-  Future<void> _onRefreshSavedCollegesList(
+  Future<void> _onFetchNext(
+      FetchNextSavedCollegesPage event,
+      Emitter<SavedCollegesListState> emit,
+      ) async {
+    final current = state;
+    if (current is! SavedCollegesListLoaded) return;
+    if (!current.hasMore || current.isFetchingMore) return;
+
+    emit(current.copyWith(isFetchingMore: true));
+    try {
+      final result = await _repository.getSavedColleges(page: current.currentPage + 1);
+      emit(current.copyWith(
+        colleges: [...current.colleges, ...result.colleges],
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        isFetchingMore: false,
+      ));
+    } catch (e) {
+      // On next-page error, revert isFetchingMore but keep existing data
+      emit(current.copyWith(isFetchingMore: false));
+    }
+  }
+
+  Future<void> _onRefresh(
       RefreshSavedCollegesList event,
       Emitter<SavedCollegesListState> emit,
       ) async {
-    // Don't show loading on refresh, keep current state
     try {
-      final colleges = await _repository.getSavedColleges();
-
-      if (colleges.isEmpty) {
+      final result = await _repository.getSavedColleges(page: 1);
+      if (result.colleges.isEmpty) {
         emit(SavedCollegesListEmpty('No saved colleges found'));
       } else {
-        emit(SavedCollegesListLoaded(colleges));
+        emit(SavedCollegesListLoaded(
+          colleges: result.colleges,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
+        ));
       }
     } catch (e) {
       emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));

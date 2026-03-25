@@ -6,7 +6,10 @@ import '../../data/models/college_model.dart';
 
 class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
   final CollegeRepository _repository;
-  List<CollegeModel> _lastSearchResults = []; // ✅ ADD: Cache last search results
+  List<CollegeModel> _lastSearchResults = [];
+  List<CollegeModel> _accumulatedColleges = []; // for pagination append
+  String? _lastKeyword;
+  String? _lastLocation;
 
   CollegeBloc(this._repository) : super(CollegeInitial()) {
     on<SearchColleges>(_onSearchColleges);
@@ -17,17 +20,32 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
       SearchColleges event,
       Emitter<CollegeState> emit,
       ) async {
-    emit(CollegeSearchLoading());
+    // If page 1, it's a fresh search — reset accumulated list
+    if (event.page == 1) {
+      _accumulatedColleges = [];
+      _lastKeyword = event.keyword;
+      _lastLocation = event.location;
+      emit(CollegeSearchLoading());
+    }
+    // else it's a "load more" — don't show full loading, keep existing list
 
     try {
       final response = await _repository.searchColleges(
         keyword: event.keyword,
         location: event.location,
+        page: event.page,
+        perPage: event.perPage,
       );
 
       if (response.success && response.data != null) {
-        _lastSearchResults = response.data!; // ✅ ADD: Save search results
-        emit(CollegeSearchLoaded(_lastSearchResults));
+        _accumulatedColleges = [..._accumulatedColleges, ...response.data!];
+        _lastSearchResults = _accumulatedColleges;
+        emit(CollegeSearchLoaded(
+          _lastSearchResults,
+          currentPage: response.currentPage,
+          lastPage: response.lastPage,
+          totalColleges: response.totalColleges,
+        ));
       } else {
         emit(CollegeError(response.message ?? 'Failed to fetch colleges'));
       }

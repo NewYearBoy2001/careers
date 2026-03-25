@@ -7,9 +7,11 @@ import 'career_search_state.dart';
 
 class CareerSearchBloc extends Bloc<CareerSearchEvent, CareerSearchState> {
   final CareerSearchRepository _repository;
+  String _lastKeyword = '';
 
   CareerSearchBloc(this._repository) : super(CareerSearchInitial()) {
     on<SearchCareersEvent>(_onSearchCareers);
+    on<LoadMoreCareersEvent>(_onLoadMore);
     on<FetchCareerDetailsEvent>(_onFetchCareerDetails);
     on<ClearSearchResultsEvent>(_onClearSearchResults);
   }
@@ -18,20 +20,48 @@ class CareerSearchBloc extends Bloc<CareerSearchEvent, CareerSearchState> {
       SearchCareersEvent event,
       Emitter<CareerSearchState> emit,
       ) async {
+    _lastKeyword = event.keyword;
     emit(CareerSearchLoading());
     try {
-      final response = await _repository.searchCareers(event.keyword);
-      emit(
-        CareerSearchLoaded(
-          careers: response.careernodes,
-          totalCount: response.totalNodes,
-        ),
-      );
+      final response = await _repository.searchCareers(event.keyword, page: 1);
+      emit(CareerSearchLoaded(
+        careers: response.careernodes,
+        totalCount: response.totalNodes,
+        currentPage: response.currentPage,
+        lastPage: response.lastPage,
+      ));
     } on DioException catch (e) {
-      final errorMessage = ApiErrorHandler.handleDioError(e);
-      emit(CareerSearchError(errorMessage));
+      emit(CareerSearchError(ApiErrorHandler.handleDioError(e)));
     } catch (e) {
       emit(CareerSearchError('An unexpected error occurred: $e'));
+    }
+  }
+
+  Future<void> _onLoadMore(
+      LoadMoreCareersEvent event,
+      Emitter<CareerSearchState> emit,
+      ) async {
+    final current = state;
+    if (current is! CareerSearchLoaded || !current.hasMore || current.isLoadingMore) return;
+
+    emit(current.copyWith(isLoadingMore: true));
+    try {
+      final response = await _repository.searchCareers(
+        _lastKeyword,
+        page: current.currentPage + 1,
+      );
+      emit(current.copyWith(
+        careers: [...current.careers, ...response.careernodes],
+        currentPage: response.currentPage,
+        lastPage: response.lastPage,
+        totalCount: response.totalNodes,
+        isLoadingMore: false,
+      ));
+    } on DioException catch (e) {
+      // On error, just stop the loading indicator — keep existing results
+      emit(current.copyWith(isLoadingMore: false));
+    } catch (_) {
+      emit(current.copyWith(isLoadingMore: false));
     }
   }
 
@@ -44,8 +74,7 @@ class CareerSearchBloc extends Bloc<CareerSearchEvent, CareerSearchState> {
       final careerDetails = await _repository.getCareerNodeDetails(event.careerNodeId);
       emit(CareerDetailsLoaded(careerDetails));
     } on DioException catch (e) {
-      final errorMessage = ApiErrorHandler.handleDioError(e);
-      emit(CareerDetailsError(errorMessage));
+      emit(CareerDetailsError(ApiErrorHandler.handleDioError(e)));
     } catch (e) {
       emit(CareerDetailsError('An unexpected error occurred: $e'));
     }
@@ -55,6 +84,7 @@ class CareerSearchBloc extends Bloc<CareerSearchEvent, CareerSearchState> {
       ClearSearchResultsEvent event,
       Emitter<CareerSearchState> emit,
       ) async {
+    _lastKeyword = '';
     emit(CareerSearchInitial());
   }
 }

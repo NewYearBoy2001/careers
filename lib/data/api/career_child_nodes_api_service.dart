@@ -11,24 +11,21 @@ class CareerChildNodesApiService {
   CareerChildNodesApiService(AuthLocalStorage authStorage)
       : _dio = BaseDioClient(authStorage: authStorage).dio;
 
-  Future<List<CareerNode>> fetchChildNodes(String parentId) async {
+  Future<CareerChildNodesResponse> fetchChildNodes(
+      String parentId, {
+        int page = 1,
+        int perPage = 5,
+      }) async {
     try {
       final response = await _dio.post(
-        ApiConstants.careerChildNodes,
-        data: {'id': parentId},
+        '${ApiConstants.careerChildNodes}?page=$page&per_page=$perPage',
+        data: {'id': int.tryParse(parentId) ?? parentId},
       );
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-
-        if (data['status'] == '1' && data['data'] != null) {
-          final childNodes = data['data']['child_nodes'] as List<dynamic>?;
-          if (childNodes != null) {
-            return childNodes
-                .map((node) => CareerNode.fromJson(node))
-                .toList();
-          }
-        }
+      if (response.statusCode == 200 &&
+          response.data != null &&
+          response.data['status'] == '1') {
+        return CareerChildNodesResponse.fromJson(response.data);
       }
 
       throw Exception(response.data?['message'] ?? 'Failed to fetch child nodes');

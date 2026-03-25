@@ -8,6 +8,8 @@ class SearchBarWidget extends StatefulWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final VoidCallback? onTap;
+  final bool readOnly;
 
   const SearchBarWidget({
     super.key,
@@ -16,6 +18,8 @@ class SearchBarWidget extends StatefulWidget {
     this.controller,
     this.onChanged,
     this.focusNode,
+    this.onTap,
+    this.readOnly = false,
   });
 
   @override
@@ -80,6 +84,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         child: TextField(
           focusNode: _focusNode,
           controller: _controller,
+          readOnly: widget.readOnly,
+          onTap: widget.onTap,
           style: TextStyle(
             fontSize: Responsive.sp(14),
             color: AppColors.textPrimary,

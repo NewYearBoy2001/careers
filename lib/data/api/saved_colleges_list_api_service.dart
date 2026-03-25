@@ -5,19 +5,44 @@ import '../../utils/network/base_dio_client.dart';
 import '../../utils/network/api_error_handler.dart';
 import '../../utils/prefs/auth_local_storage.dart';
 
+class SavedCollegesPageResult {
+  final List<CollegeModel> colleges;
+  final int currentPage;
+  final int lastPage;
+
+  SavedCollegesPageResult({
+    required this.colleges,
+    required this.currentPage,
+    required this.lastPage,
+  });
+}
+
 class SavedCollegesListApiService {
   final BaseDioClient _dioClient;
+  static const int _perPage = 10;
 
   SavedCollegesListApiService(AuthLocalStorage authStorage)
       : _dioClient = BaseDioClient(authStorage: authStorage);
 
-  Future<List<CollegeModel>> getSavedColleges() async {
+  Future<SavedCollegesPageResult> getSavedColleges({int page = 1}) async {
     try {
-      final response = await _dioClient.dio.get(ApiConstants.savedColleges);
+      final response = await _dioClient.dio.get(
+        ApiConstants.savedColleges,
+        queryParameters: {
+          'page': page,
+          'per_page': _perPage,
+        },
+      );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {
-        final List<dynamic> collegesJson = response.data['data']['colleges'] ?? [];
-        return collegesJson.map((json) => CollegeModel.fromJson(json)).toList();
+        final data = response.data['data'];
+        final List<dynamic> collegesJson = data['colleges'] ?? [];
+
+        return SavedCollegesPageResult(
+          colleges: collegesJson.map((json) => CollegeModel.fromJson(json)).toList(),
+          currentPage: int.tryParse(data['current_page'].toString()) ?? page,
+          lastPage: int.tryParse(data['last_page'].toString()) ?? 1,
+        );
       } else {
         throw Exception(response.data['message'] ?? 'Failed to fetch saved colleges');
       }

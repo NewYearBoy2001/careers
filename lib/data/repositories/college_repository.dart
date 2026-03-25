@@ -10,10 +10,14 @@ class CollegeRepository {
   Future<ApiResponse<List<CollegeModel>>> searchColleges({
     String? keyword,
     String? location,
+    int page = 1,
+    int perPage = 7,
   }) async {
     return await _apiService.searchColleges(
       keyword: keyword,
       location: location,
+      page: page,
+      perPage: perPage,
     );
   }
 

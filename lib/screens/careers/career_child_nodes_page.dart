@@ -24,10 +24,17 @@ class CareerChildNodesPage extends StatefulWidget {
 }
 
 class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
+
   @override
   void initState() {
     super.initState();
-    context.read<CareerChildNodesBloc>().add(FetchCareerChildNodes(widget.parentId));
+    context.read<CareerChildNodesBloc>()
+        .add(FetchCareerChildNodes(widget.parentId));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -65,16 +72,13 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
           ],
         ),
       ),
-      // ✅ REMOVED: BlocListener wrapper — no longer needed
-      // ✅ REMOVED: _isNavigating, _navigateToDetails()
+
       body: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
         builder: (context, state) {
           if (state is CareerChildNodesLoading) {
             return CustomScrollView(
               physics: const NeverScrollableScrollPhysics(),
-              slivers: [
-                CareerSearchGridShimmer(itemCount: 4),
-              ],
+              slivers: [CareerSearchGridShimmer(itemCount: 4)],
             );
           }
 
@@ -157,53 +161,108 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
               );
             }
 
-            return Padding(
-              padding: EdgeInsets.all(Responsive.w(4)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: Responsive.w(1),
-                      vertical: Responsive.h(1),
-                    ),
-                    child: Text(
-                      'Choose your path',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(16),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+            return NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.pixels >=
+                    notification.metrics.maxScrollExtent - 200 &&
+                    !state.hasReachedMax &&
+                    !state.isFetchingMore) {
+                  context
+                      .read<CareerChildNodesBloc>()
+                      .add(FetchMoreCareerChildNodes());
+                }
+                return false;
+              },
+              child: CustomScrollView(               // ← same pattern as search page
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+
+                  // Section header
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        Responsive.w(5),
+                        Responsive.h(1.5),
+                        Responsive.w(5),
+                        Responsive.h(1),
+                      ),
+                      child: Text(
+                        'Choose your path',
+                        style: TextStyle(
+                          fontSize: Responsive.sp(16),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: Responsive.h(1)),
-                  Expanded(
-                    child: GridView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: Responsive.w(3),
-                        mainAxisSpacing: Responsive.h(2),
-                        childAspectRatio: 0.9,
+
+                  // Grid — same SliverMainAxisGroup pattern as CareerSearchResultsPage
+                  SliverMainAxisGroup(
+                    slivers: [
+
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                          Responsive.w(4),
+                          0,
+                          Responsive.w(4),
+                          Responsive.h(1),
+                        ),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: Responsive.w(3),
+                            mainAxisSpacing: Responsive.h(2),
+                            childAspectRatio: 0.9,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                              final node = state.nodes[index];
+                              return CareerSearchResultCard(
+                                title: node.title,
+                                thumbnail: node.thumbnail,
+                                onTap: () {
+                                  context.push('/course-detail',
+                                      extra: <String, dynamic>{
+                                        'id': node.id,
+                                        'title': node.title,
+                                        'thumbnail': node.thumbnail,
+                                      });
+                                },
+                              );
+                            },
+                            childCount: state.nodes.length,
+                          ),
+                        ),
                       ),
-                      itemCount: state.nodes.length,
-                      itemBuilder: (context, index) {
-                        final node = state.nodes[index];
-                        return CareerSearchResultCard(
-                          title: node.title,
-                          thumbnail: node.thumbnail,
-                          // ✅ CHANGED: just navigate instantly with minimal data
-                          // CourseDetailScreen fetches full details itself
-                          onTap: () {
-                            context.push('/course-detail', extra: <String, dynamic>{
-                              'id': node.id,
-                              'title': node.title,
-                              'thumbnail': node.thumbnail,
-                            });
-                          },
-                        );
-                      },
-                    ),
+
+                      // ✅ Spinner sliver — renders AFTER grid, never overlaps
+                      if (state.isFetchingMore)
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        ),
+
+                      // End of results
+                      if (state.hasReachedMax && state.nodes.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: Text(
+                                'No more results',
+                                style: TextStyle(
+                                  fontSize: Responsive.sp(13),
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
