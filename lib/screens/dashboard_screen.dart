@@ -5,6 +5,7 @@ import 'package:careers/screens/careers/careers_page.dart';
 import 'admission/admission_page.dart';
 import 'profile/profile_page.dart';
 import 'package:careers/utils/responsive/responsive.dart';
+import 'package:flutter/services.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int initialTab;
@@ -50,19 +51,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     Responsive.init(context);
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          HomePage(key: _pageKeys[0], onNavigateToPage: _navigateToPage),
-          CareersPage(key: _pageKeys[1], currentEducation: '10th'),
-          AdmissionPage(key: _pageKeys[2]),
-          ProfilePage(key: _pageKeys[3]),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: _buildBottomNav(),
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _getStatusBarStyle(),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: [
+            HomePage(key: _pageKeys[0], onNavigateToPage: _navigateToPage),
+            CareersPage(key: _pageKeys[1], currentEducation: '10th'),
+            AdmissionPage(key: _pageKeys[2]),
+            ProfilePage(key: _pageKeys[3]),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          child: _buildBottomNav(),
+        ),
       ),
     );
   }
@@ -135,5 +140,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  SystemUiOverlayStyle _getStatusBarStyle() {
+    switch (_currentIndex) {
+      case 0: // Home
+        return SystemUiOverlayStyle.dark;
+      case 1: // Careers
+        return SystemUiOverlayStyle.dark;
+      case 2: // Admissions (gradient header)
+        return SystemUiOverlayStyle.light;
+      case 3: // Profile (dark gradient)
+        return SystemUiOverlayStyle.light;
+      default:
+        return SystemUiOverlayStyle.dark;
+    }
   }
 }

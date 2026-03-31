@@ -27,6 +27,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
   late YoutubePlayerController _controller;
   OverlayEntry? _replayOverlayEntry;
   bool _isPlaying = false;
+  bool _isFullScreen = false;
 
   @override
   void initState() {
@@ -45,14 +46,10 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
     if (!mounted) return;
     final playerState = _controller.value.playerState;
 
-    if (playerState == PlayerState.playing && !_isPlaying) {
-      setState(() => _isPlaying = true);
-    } else if (playerState != PlayerState.playing && _isPlaying) {
-      setState(() => _isPlaying = false);
-    }
-
     if (playerState == PlayerState.ended && _replayOverlayEntry == null) {
-      _showReplayOverlay();
+      if (_isFullScreen) {
+        _showReplayOverlay();
+      }
     } else if (playerState == PlayerState.playing && _replayOverlayEntry != null) {
       _removeReplayOverlay();
     }
@@ -121,14 +118,36 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
 
   @override
   Widget build(BuildContext context) {
+
     final screenWidth = MediaQuery.of(context).size.width;
     final playerHeight = screenWidth * 9 / 16;
 
     return YoutubePlayerBuilder(
-      onEnterFullScreen: () => SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]),
-      onExitFullScreen: () => SystemChrome.setPreferredOrientations(
-          [DeviceOrientation.portraitUp]),
+      onEnterFullScreen: () {
+        setState(() => _isFullScreen = true);
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+        // Hide status bar in fullscreen
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      },
+      onExitFullScreen: () {
+        setState(() => _isFullScreen = false);  // ADD
+        _removeReplayOverlay();
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+        // Restore status bar when exiting fullscreen
+        SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values, // restores both status & nav bar
+        );
+        // Small delay to ensure UI redraws correctly
+        Future.delayed(const Duration(milliseconds: 300), () {
+          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+        });
+      },
       player: YoutubePlayer(
         controller: _controller,
         showVideoProgressIndicator: true,

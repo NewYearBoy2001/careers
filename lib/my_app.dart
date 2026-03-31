@@ -46,6 +46,9 @@ import 'bloc/career_guidance_banner/career_guidance_banner_event.dart';
 import 'data/api/career_guidance_register_api_service.dart';
 import 'data/repositories/career_guidance_register_repository.dart';
 import 'bloc/career_guidance_register/career_guidance_register_bloc.dart';
+import 'data/api/location_api_service.dart';
+import 'data/repositories/location_repository.dart';
+import 'bloc/location/location_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -138,6 +141,10 @@ class MyApp extends StatelessWidget {
           create: (_) => CareerGuidanceRegisterApiService(),
         ),
 
+        RepositoryProvider<LocationApiService>(
+          create: (_) => LocationApiService(),
+        ),
+
         // ========================================
         // REPOSITORIES (Business Logic Layer)
         // ========================================
@@ -225,6 +232,12 @@ class MyApp extends StatelessWidget {
             context.read<CareerGuidanceRegisterApiService>(),
           ),
         ),
+
+        RepositoryProvider<LocationRepository>(
+          create: (context) => LocationRepository(
+            context.read<LocationApiService>(),
+          ),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -304,6 +317,12 @@ class MyApp extends StatelessWidget {
           BlocProvider<CareerGuidanceRegisterBloc>(
             create: (context) => CareerGuidanceRegisterBloc(
               context.read<CareerGuidanceRegisterRepository>(),
+            ),
+          ),
+
+          BlocProvider<LocationBloc>(
+            create: (context) => LocationBloc(
+              context.read<LocationRepository>(),
             ),
           ),
         ],

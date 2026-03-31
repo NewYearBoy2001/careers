@@ -31,8 +31,10 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
   bool _isLoadingMore = false;
   bool _hasMore = false;
   bool _hasNavigatedAway = false;
-  String? _selectedState;
-  String? _selectedDistrict;
+  int? _selectedStateId;
+  String? _selectedStateName;
+  int? _selectedDistrictId;
+  String? _selectedDistrictName;
 
   @override
   void initState() {
@@ -52,11 +54,15 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
         _isLoadingMore = true;
         _currentPage++;
         context.read<CollegeBloc>().add(SearchColleges(
-          location: _selectedDistrict ?? _selectedState,
+          location: _selectedDistrictName  ?? _selectedStateName ,
           page: _currentPage,
         ));
       }
     }
+  }
+
+  void _onNetworkRestored() {
+    _loadInitialData();
   }
 
   void _loadInitialData() {
@@ -65,32 +71,36 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     _hasMore = false;
     context.read<AdmissionBloc>().add(const FetchAdmissionBanners());
     context.read<CollegeBloc>().add(SearchColleges(
-      location: _selectedDistrict ?? _selectedState,
+      location: _selectedDistrictName  ?? _selectedStateName ,
       page: 1,
     ));
   }
 
   Future<void> _openLocationFilter() async {
-    final result = await showModalBottomSheet<Map<String, String?>>(
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => LocationFilterSheet(
-        selectedState: _selectedState,
-        selectedDistrict: _selectedDistrict,
+        selectedStateId: _selectedStateId,
+        selectedStateName: _selectedStateName,
+        selectedDistrictId: _selectedDistrictId,
+        selectedDistrictName: _selectedDistrictName,
       ),
     );
 
     if (result != null && mounted) {
       setState(() {
-        _selectedState = result['state'];
-        _selectedDistrict = result['district'];
+        _selectedStateId = result['stateId'] as int?;
+        _selectedStateName = result['stateName'] as String?;
+        _selectedDistrictId = result['districtId'] as int?;
+        _selectedDistrictName = result['districtName'] as String?;
       });
       _currentPage = 1;
       _isLoadingMore = false;
       _hasMore = false;
       context.read<CollegeBloc>().add(SearchColleges(
-        location: _selectedDistrict ?? _selectedState,
+        location: _selectedDistrictName ?? _selectedStateName,
         page: 1,
       ));
     }
@@ -135,7 +145,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     if (mounted) {
       _hasNavigatedAway = false;
       context.read<CollegeBloc>().add(SearchColleges(
-        location: _selectedDistrict ?? _selectedState,
+        location: _selectedDistrictName  ?? _selectedStateName,
       ));
     }
   }
@@ -144,7 +154,8 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return NetworkAwareWidget(        // ADD
+    return NetworkAwareWidget(
+      onNetworkRestored: _onNetworkRestored,
         child: Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
@@ -161,7 +172,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
                 controller: _scrollController,
                 padding: EdgeInsets.symmetric(vertical: Responsive.h(2)),
                 children: [
-                  if (_selectedState == null) ...[
+                  if (_selectedStateName == null) ...[
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
                       child: Text(
@@ -261,10 +272,10 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
   }
 
   Widget _buildLocationFilterButton() {
-    final bool hasFilter = _selectedState != null;
-    final String label = _selectedDistrict != null
-        ? '$_selectedDistrict, $_selectedState'
-        : _selectedState ?? '';
+    final bool hasFilter = _selectedStateName != null;
+    final String label = _selectedDistrictName != null
+        ? '$_selectedDistrictName, $_selectedStateName'
+        : _selectedStateName ?? '';
 
     return GestureDetector(
       onTap: _openLocationFilter,
@@ -316,8 +327,10 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
                 ? GestureDetector(
               onTap: () {
                 setState(() {
-                  _selectedState = null;
-                  _selectedDistrict = null;
+                  _selectedStateId = null;
+                  _selectedStateName = null;
+                  _selectedDistrictId = null;
+                  _selectedDistrictName = null;
                 });
                 _loadInitialData();
               },
@@ -447,7 +460,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
   }
 
   Widget _buildCollegesLabel() {
-    if (_selectedState == null) {
+    if (_selectedStateName == null) {
       return Text(
         'All Colleges',
         style: TextStyle(
@@ -459,9 +472,9 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
       );
     }
 
-    final String locationLabel = _selectedDistrict != null
-        ? '$_selectedDistrict, $_selectedState'
-        : _selectedState!;
+    final String locationLabel = _selectedDistrictName != null
+        ? '$_selectedDistrictName, $_selectedStateName'
+        : _selectedStateName!;
 
     return RichText(
       text: TextSpan(

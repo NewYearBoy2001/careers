@@ -1,9 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:careers/utils/network/network_service.dart';
 
-class NetworkAwareWidget extends StatelessWidget {
+class NetworkAwareWidget extends StatefulWidget {
   final Widget child;
-  const NetworkAwareWidget({super.key, required this.child});
+  final VoidCallback? onNetworkRestored;
+
+  const NetworkAwareWidget({
+    super.key,
+    required this.child,
+    this.onNetworkRestored,
+  });
+
+  @override
+  State<NetworkAwareWidget> createState() => _NetworkAwareWidgetState();
+}
+
+class _NetworkAwareWidgetState extends State<NetworkAwareWidget> {
+  bool _wasDisconnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Track the initial state
+    _wasDisconnected = !NetworkService.isConnected.value;
+    NetworkService.isConnected.addListener(_onConnectivityChanged);
+  }
+
+  @override
+  void dispose() {
+    NetworkService.isConnected.removeListener(_onConnectivityChanged);
+    super.dispose();
+  }
+
+  void _onConnectivityChanged() {
+    final isConnected = NetworkService.isConnected.value;
+
+    if (isConnected && _wasDisconnected) {
+      // Network just restored — trigger refresh
+      widget.onNetworkRestored?.call();
+    }
+
+    _wasDisconnected = !isConnected;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +49,7 @@ class NetworkAwareWidget extends StatelessWidget {
       valueListenable: NetworkService.isConnected,
       builder: (context, isConnected, _) {
         if (!isConnected) return const _NoInternetScreen();
-        return child;
+        return widget.child;
       },
     );
   }

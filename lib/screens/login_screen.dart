@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:careers/widgets/custom_textfields.dart';
 import 'package:careers/widgets/custom_button.dart';
 import 'package:careers/constants/app_colors.dart';
@@ -13,6 +14,7 @@ import '../../data/repositories/auth_repository.dart';
 import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:careers/utils/validators/form_validators.dart';
+import 'package:careers/widgets/status_bar_wrapper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -67,7 +69,10 @@ class _LoginScreenState extends State<LoginScreen> {
           AuthLocalStorage(),
         ),
       ),
-      child: Scaffold(
+
+      child: StatusBarWrapper(
+        iconBrightness: Brightness.dark,
+        child: Scaffold(
         backgroundColor: AppColors.backgroundTealGray,
         body: SingleChildScrollView(
           child: Padding(
@@ -239,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
+      ),),
     );
   }
 }

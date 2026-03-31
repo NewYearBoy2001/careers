@@ -12,6 +12,7 @@ import '../../bloc/signup/signup_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/utils/validators/form_validators.dart';
+import 'package:careers/widgets/status_bar_wrapper.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -138,35 +139,34 @@ class _SignupScreenState extends State<SignupScreen> {
     },
       builder: (context, state) {
         final isLoading = state is SignupLoading;
-        return Scaffold(
-        backgroundColor: AppColors.backgroundTealGray,
-        resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          // leading: IconButton(
-          //   icon: Icon(
-          //     Icons.arrow_back_ios,
-          //     color: AppColors.textPrimary,
-          //     size: Responsive.w(5),
-          //   ),
-          //   onPressed: () => context.pop(),
-          // ),
-          title: Text(
-            'Create Account',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-              fontSize: Responsive.sp(18),
-            ),
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
-            child: Form(
-                key: _formKey,
-                child: Column(
+        return StatusBarWrapper(
+            iconBrightness: Brightness.dark,
+            child: Scaffold(
+            backgroundColor: AppColors.backgroundTealGray,
+            resizeToAvoidBottomInset: true,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                systemOverlayStyle: SystemUiOverlayStyle.dark, // ✅ THIS FIXES IT
+                iconTheme: IconThemeData(
+                  color: AppColors.textPrimary,
+                ),
+                title: Text(
+                  'Create Account',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: Responsive.sp(18),
+                  ),
+                ),
+              ),
+        body: SafeArea(
+        child: SingleChildScrollView(
+        child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
+        child: Form(
+        key: _formKey,
+        child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: Responsive.h(1.5)),
@@ -476,7 +476,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
               ),
             ),
-          ),
+          ),),),
         );},
     );
   }

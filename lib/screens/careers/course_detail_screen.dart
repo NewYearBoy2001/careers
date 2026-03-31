@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../data/repositories/career_search_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final Map<String, dynamic> courseData;
@@ -35,6 +36,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   Map<String, dynamic>? _fullData;
   bool _isLoadingDetails = false;
   String? _detailsError;
+  bool _showReplay = false;
+  bool _isFullScreen = false;
 
   Map<String, dynamic> get _data => _fullData ?? widget.courseData;
 
@@ -114,11 +117,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         (data['subjects'] != null || data['careerOptions'] != null);
   }
 
+
   // ── YouTube init ───────────────────────────────────────────────────────────
   void _initYoutube() {
     final videoId = _data['videoId']?.toString().trim() ?? '';
-
-    // Nothing to initialize — no video available
     if (videoId.isEmpty) {
       setState(() => _isYoutubeReady = false);
       return;
@@ -135,14 +137,117 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
       ),
     );
 
+    // ← Add this
+    _ytController!.addListener(_youtubeListener);
+
     setState(() => _isYoutubeReady = true);
   }
 
   @override
   void dispose() {
+    _removeFullScreenOverlay();
+    _ytController?.removeListener(_youtubeListener);
     _ytController?.dispose();
     _animController.dispose();
     super.dispose();
+  }
+
+  void _setupYoutubeListener() {
+    _ytController?.addListener(_youtubeListener);
+  }
+
+  void _youtubeListener() {
+    if (!mounted) return;
+    final state = _ytController?.value.playerState;
+
+    if (state == PlayerState.ended) {
+      if (_isFullScreen) {
+        // Fullscreen: use root overlay
+        if (_fullScreenOverlayEntry == null) {
+          _showFullScreenOverlay();
+        }
+      } else {
+        // Normal mode: use local Stack overlay
+        if (!_showReplay) setState(() => _showReplay = true);
+      }
+    } else if (state == PlayerState.playing) {
+      if (_showReplay) setState(() => _showReplay = false);
+      _removeFullScreenOverlay();
+    }
+  }
+
+  void _replay() {
+    setState(() => _showReplay = false);
+    _removeFullScreenOverlay();  // ← Add this
+    _ytController?.seekTo(Duration.zero);
+    _ytController?.play();
+  }
+
+  OverlayEntry? _fullScreenOverlayEntry;
+
+  void _showFullScreenOverlay() {
+    if (_fullScreenOverlayEntry != null) return;
+    _fullScreenOverlayEntry = OverlayEntry(
+      builder: (_) => Positioned.fill(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _replay,
+          child: Container(
+            color: Colors.black87,
+            child : Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.6),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.replay_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.45),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Tap to replay',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context, rootOverlay: true).insert(_fullScreenOverlayEntry!);
+  }
+
+  void _removeFullScreenOverlay() {
+    _fullScreenOverlayEntry?.remove();
+    _fullScreenOverlayEntry = null;
   }
 
   Color _getStreamColor() =>
@@ -228,6 +333,31 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     // Wrap with YoutubePlayerBuilder only when player is ready
     if (_isYoutubeReady && _ytController != null) {
       return YoutubePlayerBuilder(
+        onEnterFullScreen: () {
+          setState(() => _isFullScreen = true);  // ← Add this
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]);
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        },
+        onExitFullScreen: () {
+          setState(() => _isFullScreen = false);  // ← Add this
+          // Also remove any fullscreen overlay if it exists
+          _removeFullScreenOverlay();             // ← Add this
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.portraitUp,
+          ]);
+          SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.manual,
+            overlays: SystemUiOverlay.values,
+          );
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+            }
+          });
+        },
         player: YoutubePlayer(
           controller: _ytController!,
           showVideoProgressIndicator: true,
@@ -267,7 +397,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                         background: Stack(
                           fit: StackFit.expand,
                           children: [
-                            // Gradient base
                             Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
@@ -280,8 +409,43 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                                 ),
                               ),
                             ),
-                            // YouTube player fills the hero
                             player,
+                            // ← Add replay overlay here, scoped to video area only
+                            if (_showReplay)
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: _replay,
+                                child: Container(
+                                  color: Colors.black87,
+                                  child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: Colors.white, width: 1.2),
+                                        ),
+                                        child: const Icon(
+                                          Icons.replay_rounded,
+                                          color: Colors.white,
+                                          size: 40,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      const Text(
+                                        'Tap to replay',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),),
+                                ),
+                              ),
                           ],
                         ),
                       ),

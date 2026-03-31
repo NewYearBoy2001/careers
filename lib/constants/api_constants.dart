@@ -24,5 +24,7 @@ class ApiConstants {
   static const String careerRecordVideos = "career-record-videos";
   static const String careerGuidanceBanners = "career-guidance-banners";
   static const String careerGuidanceRegister = "career-guidance-register";
+  static const String states = 'states';
+  static const String districts = 'districts';
 
 }

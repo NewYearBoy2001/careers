@@ -44,9 +44,14 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     super.dispose();
   }
 
+  void _onNetworkRestored() {
+    context.read<ProfileBloc>().add(FetchProfile());
+  }
+
   @override
   Widget build(BuildContext context) {
     return NetworkAwareWidget(
+      onNetworkRestored: _onNetworkRestored,
         child:  BlocConsumer<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is ProfileError) {

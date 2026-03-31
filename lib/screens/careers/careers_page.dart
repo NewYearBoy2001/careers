@@ -76,6 +76,11 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
     super.dispose();
   }
 
+  void _onNetworkRestored() {
+    context.read<CareerBannerBloc>().add(FetchCareerBanners());
+    context.read<CareerHomeBloc>().add(FetchCareerNodes());
+  }
+
   void _navigateToCourseDetail(String nodeId, String title) {
     if (_isNavigating) return;
     setState(() => _isNavigating = true);
@@ -149,18 +154,21 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return NetworkAwareWidget(        // ADD
+    return NetworkAwareWidget(
+      onNetworkRestored: _onNetworkRestored,
+        child: SafeArea(
+        bottom: false,
         child: RefreshIndicator(
-      onRefresh: _refreshData,
-      color: AppColors.primary,
-      backgroundColor: AppColors.white,
-      child: CustomScrollView(
+        onRefresh: _refreshData,
+        color: AppColors.primary,
+        backgroundColor: AppColors.white,
+        child: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           // Animated Header
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(top: Responsive.h(4)),
+               padding: EdgeInsets.only(top: Responsive.h(1.5)),
               child: FadeTransition(
                 opacity: _headerFadeAnim,
                 child: SlideTransition(
@@ -497,7 +505,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
             },
           ),
         ],
-      ),),
+      ),),),
     );
   }
 

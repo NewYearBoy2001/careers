@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
+import 'package:careers/widgets/status_bar_wrapper.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -69,25 +71,28 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: Responsive.w(90),
-                  height: Responsive.w(90),
-                  child: Image.asset(
-                    'assets/images/careers_logo_teal-removebg.png',
-                    fit: BoxFit.contain,
+    return StatusBarWrapper(
+      iconBrightness: Brightness.light,
+      child: Scaffold(
+        backgroundColor: AppColors.primary,
+        body: Center(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: Responsive.w(90),
+                    height: Responsive.w(90),
+                    child: Image.asset(
+                      'assets/images/careers_logo_teal-removebg.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -37,8 +37,10 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
   int _currentPage = 1; // ADD
   bool _isLoadingMore = false; // ADD
   bool _hasMore = false;
-  String? _selectedState;
-  String? _selectedDistrict;
+  int? _selectedStateId;
+  String? _selectedStateName;
+  int? _selectedDistrictId;
+  String? _selectedDistrictName;
 
   @override
   void initState() {
@@ -83,23 +85,26 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
   }
 
   Future<void> _openLocationFilter() async {
-    final result = await showModalBottomSheet<Map<String, String?>>(
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => LocationFilterSheet(
-        selectedState: _selectedState,
-        selectedDistrict: _selectedDistrict,
+        selectedStateId: _selectedStateId,
+        selectedStateName: _selectedStateName,
+        selectedDistrictId: _selectedDistrictId,
+        selectedDistrictName: _selectedDistrictName,
       ),
     );
 
     if (result != null && mounted) {
       setState(() {
-        _selectedState = result['state'];
-        _selectedDistrict = result['district'];
-        // Sync display text
-        _locationController.text = result['district'] ??
-            result['state'] ?? '';
+        _selectedStateId = result['stateId'] as int?;
+        _selectedStateName = result['stateName'] as String?;
+        _selectedDistrictId = result['districtId'] as int?;
+        _selectedDistrictName = result['districtName'] as String?;
+        _locationController.text =
+            result['districtName'] ?? result['stateName'] ?? '';
       });
       _performSearch();
     }
@@ -111,7 +116,7 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
       keyword: _searchController.text.trim().isEmpty
           ? null
           : _searchController.text.trim(),
-      location: _selectedDistrict ?? _selectedState,
+      location: _selectedDistrictName ?? _selectedStateName,
       page: _currentPage,
     ));
   }
@@ -124,7 +129,7 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
       keyword: _searchController.text.trim().isEmpty
           ? null
           : _searchController.text.trim(),
-      location: _selectedDistrict ?? _selectedState,
+      location: _selectedDistrictName ?? _selectedStateName,
       page: 1,
     ));
   }
@@ -237,8 +242,10 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
             onChanged: (val) {
               if (val.isEmpty) {
                 setState(() {
-                  _selectedState = null;
-                  _selectedDistrict = null;
+                  _selectedStateId = null;
+                  _selectedStateName = null;
+                  _selectedDistrictId = null;
+                  _selectedDistrictName = null;
                 });
                 _performSearch();
               }

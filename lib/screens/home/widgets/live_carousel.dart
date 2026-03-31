@@ -13,6 +13,8 @@ import 'package:careers/data/models/career_guidance_banner_model.dart';
 import 'package:careers/utils/validators/form_validators.dart';
 import 'package:careers/utils/app_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/services.dart';
 
 class LiveCarousel extends StatefulWidget {
   const LiveCarousel({super.key});
@@ -46,23 +48,33 @@ class _LiveCarouselState extends State<LiveCarousel> {
     super.dispose();
   }
 
-  void _showRegisterSheet(CareerGuidanceBannerModel banner) {
-    showModalBottomSheet(
+  Future<void> _showRegisterSheet(CareerGuidanceBannerModel banner) async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      if (!mounted) return;
+      AppNotifier.show(context, 'No internet connection. Please try again.');
+      return;
+    }
+
+    if (!mounted) return;
+
+    final bannerBloc = context.read<CareerGuidanceBannerBloc>();
+    final registerBloc = context.read<CareerGuidanceRegisterBloc>();
+
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => MultiBlocProvider(
         providers: [
-          BlocProvider.value(value: context.read<CareerGuidanceBannerBloc>()),
-          BlocProvider.value(value: context.read<CareerGuidanceRegisterBloc>()),
+          BlocProvider.value(value: bannerBloc),
+          BlocProvider.value(value: registerBloc),
         ],
         child: _RegisterSheet(banner: banner),
       ),
-    ).then((_) {
-      context
-          .read<CareerGuidanceRegisterBloc>()
-          .add(ResetCareerGuidanceRegistration());
-    });
+    );
+
+    registerBloc.add(ResetCareerGuidanceRegistration());
   }
 
   @override
@@ -391,6 +403,8 @@ class _RegisterSheetState extends State<_RegisterSheet> {
           AppNotifier.show(
               context, 'Registered! Meeting link sent to your email.');
         } else if (state is CareerGuidanceRegisterError) {
+          // Close the sheet first, then show the message on the page behind
+          Navigator.pop(context);
           AppNotifier.show(context, state.message);
         }
       },
@@ -546,6 +560,10 @@ class _RegisterSheetState extends State<_RegisterSheet> {
                       keyboardType: TextInputType.phone,
                       validator: FormValidators.phone,
                       enabled: !isLoading,
+                      inputFormatters: [ // ADD these lines
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                     ),
                     SizedBox(height: Responsive.h(3)),
 
@@ -630,12 +648,14 @@ class _RegisterSheetState extends State<_RegisterSheet> {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     bool enabled = true,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       enabled: enabled,
       validator: validator,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

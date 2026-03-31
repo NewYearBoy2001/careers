@@ -99,11 +99,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       final bannerBloc = context.read<CareerGuidanceBannerBloc>();
       final bannerState = bannerBloc.state;
       final hasBannerData = bannerState is CareerGuidanceBannerLoaded;
+      final bannerHadError = bannerState is CareerGuidanceBannerError;
 
       if (!hasBannerData) {
-        bannerBloc.add(FetchCareerGuidanceBanners());
+        bannerBloc.add(FetchCareerGuidanceBanners()); // covers initial + error
       } else {
-        bannerBloc.add(RefreshCareerGuidanceBanners()); // ADD THIS
+        bannerBloc.add(RefreshCareerGuidanceBanners());
       }
     });
   }
@@ -122,6 +123,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _showComingSoonDialog(feature['title'] as String);
     }
   }
+  void _onNetworkRestored() {
+    // Re-fetch both blocs when network comes back
+    context.read<CareerRecordVideoBloc>().add(FetchHomeVideos());
+    context.read<CareerGuidanceBannerBloc>().add(FetchCareerGuidanceBanners());
+  }
+
+  Future<void> _onRefresh() async {
+    context.read<CareerRecordVideoBloc>().add(RefreshHomeVideos());
+    context.read<CareerGuidanceBannerBloc>().add(RefreshCareerGuidanceBanners());
+
+    // Wait until both blocs settle (max 5 seconds)
+    await Future.any([
+      Future.delayed(const Duration(seconds: 5)),
+      Future.doWhile(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+        final videoState = context.read<CareerRecordVideoBloc>().state;
+        final bannerState = context.read<CareerGuidanceBannerBloc>().state;
+        final videoSettled = videoState is HomeVideosLoaded ||
+            videoState is VideosLoaded ||
+            videoState is HomeVideosError;
+        final bannerSettled = bannerState is CareerGuidanceBannerLoaded ||
+            bannerState is CareerGuidanceBannerError;
+        return !(videoSettled && bannerSettled);
+      }),
+    ]);
+  }
+
 
   void _showComingSoonDialog(String featureName) {
     showDialog(
@@ -203,11 +231,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final cardHeight = cardWidth * (9 / 16) + 64.0;
 
     return NetworkAwareWidget(
+        onNetworkRestored: _onNetworkRestored,
+        child: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+        color: AppColors.teal1,
+        onRefresh: _onRefresh,
         child: SingleChildScrollView(
-      child: Column(
+        physics: const AlwaysScrollableScrollPhysics(), // Required for pull-to-refresh to work even when content is short
+        child: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.only(top: Responsive.h(3)),
+        Padding(
+        padding: EdgeInsets.only(top: Responsive.h(1.5)),
             child: FadeTransition(
               opacity: _headerFadeAnim,
               child: SlideTransition(
@@ -365,9 +400,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                         SizedBox(height: Responsive.h(0.6)),
                         GestureDetector(
-                          onTap: () => context
-                              .read<CareerRecordVideoBloc>()
-                              .add(FetchHomeVideos()),
+                          onTap: () {
+                            context.read<CareerRecordVideoBloc>().add(FetchHomeVideos());
+                            context.read<CareerGuidanceBannerBloc>().add(FetchCareerGuidanceBanners());
+                          },
                           child: Text(
                             'Tap to retry',
                             style: TextStyle(
@@ -527,7 +563,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
           SizedBox(height: Responsive.h(2)),
         ],
-      ),),
+      ),),),),
     );
   }
 
