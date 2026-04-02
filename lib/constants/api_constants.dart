@@ -26,5 +26,6 @@ class ApiConstants {
   static const String careerGuidanceRegister = "career-guidance-register";
   static const String states = 'states';
   static const String districts = 'districts';
+  static const String courseFeeStructure = 'course-fee-structure';
 
 }

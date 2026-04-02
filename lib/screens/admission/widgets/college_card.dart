@@ -107,7 +107,7 @@ class CollegeCard extends StatelessWidget {
                 ),
                 SizedBox(height: Responsive.h(0.7)),
                 Text(
-                  college.courses,
+                  college.courseList.map((c) => c.courseName).join(', '),
                   style: TextStyle(
                     fontSize: Responsive.sp(12),
                     color: AppColors.textSecondary,

@@ -49,6 +49,9 @@ import 'bloc/career_guidance_register/career_guidance_register_bloc.dart';
 import 'data/api/location_api_service.dart';
 import 'data/repositories/location_repository.dart';
 import 'bloc/location/location_bloc.dart';
+import 'data/api/course_fee_api_service.dart';
+import 'data/repositories/course_fee_repository.dart';
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -57,6 +60,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
+
         // ========================================
         // CORE SERVICES (Foundation Layer)
         // ========================================
@@ -143,6 +147,12 @@ class MyApp extends StatelessWidget {
 
         RepositoryProvider<LocationApiService>(
           create: (_) => LocationApiService(),
+        ),
+
+        RepositoryProvider<CourseFeeApiService>(
+          create: (context) => CourseFeeApiService(
+            context.read<AuthLocalStorage>(),
+          ),
         ),
 
         // ========================================
@@ -238,6 +248,13 @@ class MyApp extends StatelessWidget {
             context.read<LocationApiService>(),
           ),
         ),
+
+        RepositoryProvider<CourseFeeRepository>(
+          create: (context) => CourseFeeRepository(
+            context.read<CourseFeeApiService>(),
+          ),
+        ),
+
       ],
       child: MultiBlocProvider(
         providers: [

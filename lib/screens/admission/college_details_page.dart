@@ -14,6 +14,9 @@ import 'package:go_router/go_router.dart';
 import 'package:careers/shimmer/college_details_shimmer.dart';
 import 'package:careers/shimmer/banner_image_shimmer.dart';
 import 'package:careers/utils/app_notifier.dart';
+import 'package:careers/screens/admission/course_fee_sheet.dart';
+import 'package:careers/data/repositories/course_fee_repository.dart';
+import 'package:careers/data/models/college_model.dart'; // for CourseItem
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
@@ -488,23 +491,41 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Courses Offered',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          Row(
+            children: [
+              Text(
+                'Courses Offered',
+                style: TextStyle(
+                  fontSize: Responsive.sp(16),
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(width: Responsive.w(2)),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(2),
+                  vertical: Responsive.h(0.3),
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(Responsive.w(3)),
+                ),
+                child: Text(
+                  'Tap for fees',
+                  style: TextStyle(
+                    fontSize: Responsive.sp(11),
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: Responsive.h(1)),
-          Text(
-            college.courses,
-            style: TextStyle(
-              fontSize: Responsive.sp(15),
-              color: AppColors.textSecondary,
-              height: 1.5,
-            ),
-          ),
+          SizedBox(height: Responsive.h(1.5)),
+          ...college.courseList.map<Widget>((course) {
+            return _buildCourseRow(course);
+          }).toList(),
           if (college.about != null) ...[
             SizedBox(height: Responsive.h(2.5)),
             Text(
@@ -526,6 +547,91 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildCourseRow(CourseItem course) {
+    return Container(
+      margin: EdgeInsets.only(bottom: Responsive.h(1)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            CourseFeeSheet.show(
+              context,
+              courseId: course.courseId,
+              courseName: course.courseName,
+              repository: context.read<CourseFeeRepository>(),
+            );
+          },
+          borderRadius: BorderRadius.circular(Responsive.w(3)),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: Responsive.w(4),
+              vertical: Responsive.h(1.5),
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(Responsive.w(3)),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.12),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(Responsive.w(1.5)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.school_rounded,
+                    color: AppColors.primary,
+                    size: Responsive.w(4),
+                  ),
+                ),
+                SizedBox(width: Responsive.w(3)),
+                Expanded(
+                  child: Text(
+                    course.courseName,
+                    style: TextStyle(
+                      fontSize: Responsive.sp(14),
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: Responsive.w(3.5),
+                      color: AppColors.primary,
+                    ),
+                    SizedBox(width: Responsive.w(1)),
+                    Text(
+                      'View Fees',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(12),
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(width: Responsive.w(1)),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: Responsive.w(3),
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

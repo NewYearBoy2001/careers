@@ -156,51 +156,51 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
 
     return NetworkAwareWidget(
       onNetworkRestored: _onNetworkRestored,
-        child: Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                _loadInitialData();
-                await Future.delayed(const Duration(milliseconds: 500));
-              },
-              color: AppColors.primary,
-              child: ListView(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(vertical: Responsive.h(2)),
-                children: [
-                  if (_selectedStateName == null) ...[
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
-                      child: Text(
-                        'Featured Colleges',
-                        style: TextStyle(
-                          fontSize: Responsive.sp(18),
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.3,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  _loadInitialData();
+                  await Future.delayed(const Duration(milliseconds: 500));
+                },
+                color: AppColors.primary,
+                child: ListView(
+                  controller: _scrollController,
+                  padding: EdgeInsets.symmetric(vertical: Responsive.h(2)),
+                  children: [
+                    if (_selectedStateName == null) ...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
+                        child: Text(
+                          'Featured Colleges',
+                          style: TextStyle(
+                            fontSize: Responsive.sp(18),
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ),
+                      SizedBox(height: Responsive.h(1.5)),
+                      const CollegeCarousel(),
+                      SizedBox(height: Responsive.h(2.75)),
+                    ],
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
+                      child: _buildCollegesLabel(),
                     ),
-                    SizedBox(height: Responsive.h(1.5)),
-                    const CollegeCarousel(),
-                    SizedBox(height: Responsive.h(2.75)),
+                    SizedBox(height: Responsive.h(0.75)),
+                    _buildCollegeList(),
                   ],
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
-                    child: _buildCollegesLabel(),
-                  ),
-                  SizedBox(height: Responsive.h(0.75)),
-                  _buildCollegeList(),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),),
+          ],
+        ),),
     );
   }
 
