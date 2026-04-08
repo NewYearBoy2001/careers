@@ -349,21 +349,18 @@ class MyApp extends StatelessWidget {
           routerConfig: AppRouter.router,
           theme: ThemeData(useMaterial3: true),
 
-          // ADD MediaQuery wrapper here ↓
+          // Global keyboard dismiss
           builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), // 👈 add this
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  final currentFocus = FocusScope.of(context);
-                  if (!currentFocus.hasPrimaryFocus &&
-                      currentFocus.focusedChild != null) {
-                    currentFocus.unfocus();
-                  }
-                },
-                child: child!,
-              ),
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                final currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus &&
+                    currentFocus.focusedChild != null) {
+                  currentFocus.unfocus();
+                }
+              },
+              child: child!,
             );
           },
         ),
