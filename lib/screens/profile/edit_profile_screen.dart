@@ -241,6 +241,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       color: AppColors.iconPrimary,
                       size: Responsive.w(6),
                     ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'[0-9]')), // ✅ Block digits
+                    ],
                     validator: (v) => FormValidators.minLength(v, 3, 'Full name'),
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
@@ -416,6 +419,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 label: "Child's Name",
                                 hint: 'Enter child name',
                                 controller: child['nameController'],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.deny(RegExp(r'[0-9]')), // ✅ Block digits
+                                ],
                                 validator: (v) => FormValidators.required(v, field: "Child's name"),
                                 autovalidateMode: AutovalidateMode.onUserInteraction,
                               ),

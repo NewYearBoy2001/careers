@@ -209,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   List<Widget> _buildProfileOptions(ProfileModel profile) { // ✅ ADD profile parameter
     final options = [
       {'icon': Icons.person_outline, 'title': 'Edit Profile', 'isLogout': false, 'route': '/edit-profile'},
-      {'icon': Icons.notifications_outlined, 'title': 'Notifications', 'isLogout': false, 'route': null},
+      // {'icon': Icons.notifications_outlined, 'title': 'Notifications', 'isLogout': false, 'route': null},
       {'icon': Icons.bookmark_outline, 'title': 'Saved Colleges', 'isLogout': false, 'route': '/saved-colleges'},
       // {'icon': Icons.settings_outlined, 'title': 'Settings', 'isLogout': false, 'route': null},
       // {'icon': Icons.help_outline, 'title': 'Help & Support', 'isLogout': false, 'route': null},
