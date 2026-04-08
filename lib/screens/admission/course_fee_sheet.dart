@@ -327,24 +327,24 @@ class CourseFeeSheet extends StatelessWidget {
                   ),
                 ),
                 // Total badge
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: Responsive.w(3),
-                    vertical: Responsive.h(0.75),
-                  ),
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(Responsive.w(2)),
-                  ),
-                  child: Text(
-                    '₹$formattedTotal',
-                    style: TextStyle(
-                      fontSize: Responsive.sp(13),
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                // Container(
+                //   padding: EdgeInsets.symmetric(
+                //     horizontal: Responsive.w(3),
+                //     vertical: Responsive.h(0.75),
+                //   ),
+                //   decoration: BoxDecoration(
+                //     color: color,
+                //     borderRadius: BorderRadius.circular(Responsive.w(2)),
+                //   ),
+                //   child: Text(
+                //     '₹$formattedTotal',
+                //     style: TextStyle(
+                //       fontSize: Responsive.sp(13),
+                //       fontWeight: FontWeight.w700,
+                //       color: Colors.white,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
