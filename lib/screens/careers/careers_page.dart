@@ -16,6 +16,10 @@ import '../../bloc/career_home/career_home_event.dart';
 import '../../bloc/career_home/career_home_state.dart';
 import '/shimmer/career_card_shimmer.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
+import '../../bloc/newgen_courses/newgen_courses_bloc.dart';
+import '../../bloc/newgen_courses/newgen_courses_event.dart';
+import '../../bloc/newgen_courses/newgen_courses_state.dart';
+import 'package:lottie/lottie.dart';
 
 class CareersPage extends StatefulWidget {
   final String currentEducation;
@@ -44,6 +48,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CareerBannerBloc>().add(FetchCareerBanners());
       context.read<CareerHomeBloc>().add(FetchCareerNodes()); // ✅ FETCH NODES
+      context.read<NewgenCoursesBloc>().add(FetchNewgenCourses());
     });
 
     _headerAnimController = AnimationController(
@@ -79,6 +84,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
   void _onNetworkRestored() {
     context.read<CareerBannerBloc>().add(FetchCareerBanners());
     context.read<CareerHomeBloc>().add(FetchCareerNodes());
+    context.read<NewgenCoursesBloc>().add(FetchNewgenCourses());
   }
 
   void _navigateToCourseDetail(String nodeId, String title) {
@@ -95,6 +101,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
   Future<void> _refreshData() async {
     context.read<CareerBannerBloc>().add(FetchCareerBanners());
     context.read<CareerHomeBloc>().add(FetchCareerNodes());
+    context.read<NewgenCoursesBloc>().add(FetchNewgenCourses());
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
@@ -362,6 +369,23 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
             ),
           ),
 
+          // ── NewGen Courses Section ──────────────────────────────────
+          BlocBuilder<NewgenCoursesBloc, NewgenCoursesState>(
+            builder: (context, state) {
+              if (state is NewgenCoursesLoading) {
+                return SliverToBoxAdapter(
+                  child: _buildNewgenSectionShimmer(),
+                );
+              }
+              if (state is NewgenCoursesLoaded && state.courses.isNotEmpty) {
+                return SliverToBoxAdapter(
+                  child: _buildNewgenSection(state),
+                );
+              }
+              return const SliverToBoxAdapter(child: SizedBox.shrink());
+            },
+          ),
+
           // Career Paths Section Header
           SliverPadding(
             padding: EdgeInsets.fromLTRB(Responsive.w(5), Responsive.h(1), Responsive.w(5), 0),
@@ -452,14 +476,24 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                     child: Container(
                       margin: EdgeInsets.all(Responsive.w(5)),
                       padding: EdgeInsets.all(Responsive.w(5)),
-                      child: Center(
-                        child: Text(
-                          'No career paths available',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(14),
-                            color: AppColors.textSecondary,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Lottie.asset(
+                            'assets/animations/search_sad.json',
+                            width: Responsive.w(50),
+                            height: Responsive.h(20),
+                            fit: BoxFit.contain,
                           ),
-                        ),
+                          SizedBox(height: Responsive.h(1)),
+                          Text(
+                            'No career paths available',
+                            style: TextStyle(
+                              fontSize: Responsive.sp(14),
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -506,6 +540,257 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
           ),
         ],
       ),),),
+    );
+  }
+
+  Widget _buildNewgenSectionShimmer() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+          Responsive.w(5), Responsive.h(1.5), Responsive.w(5), 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header shimmer
+          Container(
+            height: Responsive.h(3),
+            width: Responsive.w(50),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(Responsive.w(1)),
+            ),
+          ),
+          SizedBox(height: Responsive.h(1.2)),
+          SizedBox(
+            height: Responsive.h(18),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (_, __) => Container(
+                width: Responsive.w(38),
+                margin: EdgeInsets.only(right: Responsive.w(3)),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(Responsive.w(3)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNewgenSection(NewgenCoursesLoaded state) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+          0, Responsive.h(1.5), 0, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(5)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Responsive.w(2.5),
+                        vertical: Responsive.h(0.4),
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6C3BF5), Color(0xFF9B59F5)],
+                        ),
+                        borderRadius:
+                        BorderRadius.circular(Responsive.w(2)),
+                      ),
+                      child: Text(
+                        'NEWGEN',
+                        style: TextStyle(
+                          fontSize: Responsive.sp(11),
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: Responsive.w(2)),
+                    Text(
+                      'Courses',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(18),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () => context.push('/newgen-courses'),
+                  child: Text(
+                    'See all',
+                    style: TextStyle(
+                      fontSize: Responsive.sp(13),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: Responsive.h(1.2)),
+          // Horizontal scroll list
+          SizedBox(
+            height: Responsive.h(20),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: Responsive.w(5)),
+              itemCount: state.courses.length > 6
+                  ? 6
+                  : state.courses.length, // preview max 6
+              itemBuilder: (context, index) {
+                final course = state.courses[index];
+                return GestureDetector(
+                  onTap: () => context.push('/course-detail',
+                      extra: <String, dynamic>{
+                        'id': course.id,
+                        'title': course.title,
+                        'thumbnail': course.thumbnail,
+                      }),
+                  child: Container(
+                    width: Responsive.w(38),
+                    margin:
+                    EdgeInsets.only(right: Responsive.w(3)),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius:
+                      BorderRadius.circular(Responsive.w(3)),
+                      border: Border.all(
+                        color: const Color(0xFF6C3BF5)
+                            .withOpacity(0.25),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6C3BF5)
+                              .withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment.stretch,
+                      children: [
+                        // Thumbnail
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(
+                                  Responsive.w(3)),
+                              topRight: Radius.circular(
+                                  Responsive.w(3)),
+                            ),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                course.thumbnail != null
+                                    ? CachedNetworkImage(
+                                  imageUrl:
+                                  course.thumbnail!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) =>
+                                      Container(
+                                          color: AppColors
+                                              .background),
+                                  errorWidget:
+                                      (_, __, ___) =>
+                                      Container(
+                                        color:
+                                        AppColors.background,
+                                        child: Icon(
+                                          Icons.school,
+                                          color: AppColors.primary
+                                              .withOpacity(0.3),
+                                          size: Responsive.sp(32),
+                                        ),
+                                      ),
+                                )
+                                    : Container(
+                                  color: AppColors.background,
+                                  child: Icon(
+                                    Icons.school,
+                                    color: AppColors.primary
+                                        .withOpacity(0.3),
+                                    size: Responsive.sp(32),
+                                  ),
+                                ),
+                                // NEWGEN badge
+                                Positioned(
+                                  top: Responsive.h(0.6),
+                                  left: Responsive.w(1.5),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: Responsive.w(1.5),
+                                      vertical: Responsive.h(0.3),
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient:
+                                      const LinearGradient(
+                                        colors: [
+                                          Color(0xFF6C3BF5),
+                                          Color(0xFF9B59F5),
+                                        ],
+                                      ),
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                          Responsive.w(1.5)),
+                                    ),
+                                    child: Text(
+                                      'NEWGEN',
+                                      style: TextStyle(
+                                        fontSize: Responsive.sp(8),
+                                        fontWeight:
+                                        FontWeight.w800,
+                                        color: Colors.white,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Title
+                        Padding(
+                          padding: EdgeInsets.all(Responsive.w(2)),
+                          child: Text(
+                            course.title,
+                            style: TextStyle(
+                              fontSize: Responsive.sp(11),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 

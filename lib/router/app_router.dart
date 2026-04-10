@@ -29,10 +29,13 @@ import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
 import 'package:careers/data/repositories/forgot_password_repository.dart';
 import 'package:careers/data/api/forgot_password_api_service.dart';
 import 'package:careers/screens/home/career_record_videos_page.dart';
-import 'package:careers/data/repositories/career_record_video_repository.dart';
-import 'package:careers/bloc/career_record_video/career_record_video_bloc.dart';
-import 'package:careers/bloc/career_record_video/career_record_video_event.dart';
-import 'package:careers/data/models/career_record_video_model.dart';
+// import 'package:careers/data/repositories/career_record_video_repository.dart';
+// import 'package:careers/bloc/career_record_video/career_record_video_bloc.dart';
+// import 'package:careers/bloc/career_record_video/career_record_video_event.dart';
+// import 'package:careers/data/models/career_record_video_model.dart';
+import 'package:careers/screens/careers/newgen_courses_page.dart';
+import 'package:careers/bloc/newgen_courses/newgen_courses_bloc.dart';
+import 'package:careers/data/repositories/newgen_courses_repository.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -422,6 +425,31 @@ class AppRouter {
           // Re-use the global CareerRecordVideoBloc — no new BlocProvider needed.
           // CareerRecordVideosPage dispatches FetchVideosFirstPage on init.
           child: const CareerRecordVideosPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.1, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+        ),
+      ),
+
+      GoRoute(
+        path: '/newgen-courses',
+        name: 'newgen-courses',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: BlocProvider(
+            create: (context) => NewgenCoursesBloc(
+              context.read<NewgenCoursesRepository>(),
+            ),
+            child: const NewgenCoursesPage(),
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(
                 opacity: animation,

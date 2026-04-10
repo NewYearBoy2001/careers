@@ -2,11 +2,13 @@ class CareerNode {
   final String id;
   final String title;
   final String? thumbnail;
+  final bool isNewgenCourse;
 
   CareerNode({
     required this.id,
     required this.title,
     this.thumbnail,
+    this.isNewgenCourse = false,
   });
 
   factory CareerNode.fromJson(Map<String, dynamic> json) {
@@ -14,6 +16,9 @@ class CareerNode {
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
       thumbnail: json['thumbnail'],
+      isNewgenCourse: json['is_newgen_course'] == 1 ||   // ADD THIS
+          json['is_newgen_course'] == '1' ||
+          json['is_newgen_course'] == true,
     );
   }
 
@@ -22,6 +27,7 @@ class CareerNode {
       'id': id,
       'title': title,
       'thumbnail': thumbnail,
+      'is_newgen_course': isNewgenCourse ? 1 : 0,
     };
   }
 }
@@ -35,6 +41,8 @@ class CareerNodeDetails {
   final String videoId;
   final String videoUrl;
   final String? thumbnail;
+  final bool isNewgenCourse;
+
 
   CareerNodeDetails({
     required this.id,
@@ -45,6 +53,7 @@ class CareerNodeDetails {
     required this.videoId,
     required this.videoUrl,
     this.thumbnail,
+    required this.isNewgenCourse,
   });
 
   factory CareerNodeDetails.fromJson(Map<String, dynamic> json) {
@@ -61,6 +70,9 @@ class CareerNodeDetails {
       thumbnail: (json['thumbnail']?.toString() ?? '').trim().isEmpty
           ? null
           : json['thumbnail'].toString().trim(),
+      isNewgenCourse: json['is_newgen_course'] == 1 ||
+          json['is_newgen_course'] == '1' ||
+          json['is_newgen_course'] == true,
     );
   }
 
@@ -128,6 +140,7 @@ class CareerNodeDetails {
       'video_id': videoId,
       'video_url': videoUrl,
       'thumbnail': thumbnail,
+      'is_newgen_course': isNewgenCourse ? 1 : 0,
     };
   }
 

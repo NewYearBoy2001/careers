@@ -51,7 +51,10 @@ import 'data/repositories/location_repository.dart';
 import 'bloc/location/location_bloc.dart';
 import 'data/api/course_fee_api_service.dart';
 import 'data/repositories/course_fee_repository.dart';
-
+import 'data/api/newgen_courses_api_service.dart';
+import 'data/repositories/newgen_courses_repository.dart';
+import 'bloc/newgen_courses/newgen_courses_bloc.dart';
+import 'bloc/newgen_courses/newgen_courses_event.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -151,6 +154,12 @@ class MyApp extends StatelessWidget {
 
         RepositoryProvider<CourseFeeApiService>(
           create: (context) => CourseFeeApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
+
+        RepositoryProvider<NewgenCoursesApiService>(
+          create: (context) => NewgenCoursesApiService(
             context.read<AuthLocalStorage>(),
           ),
         ),
@@ -255,6 +264,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<NewgenCoursesRepository>(
+          create: (context) => NewgenCoursesRepository(
+            context.read<NewgenCoursesApiService>(),
+          ),
+        ),
+
+
       ],
       child: MultiBlocProvider(
         providers: [
@@ -340,6 +356,12 @@ class MyApp extends StatelessWidget {
           BlocProvider<LocationBloc>(
             create: (context) => LocationBloc(
               context.read<LocationRepository>(),
+            ),
+          ),
+
+          BlocProvider<NewgenCoursesBloc>(
+            create: (context) => NewgenCoursesBloc(
+              context.read<NewgenCoursesRepository>(),
             ),
           ),
         ],

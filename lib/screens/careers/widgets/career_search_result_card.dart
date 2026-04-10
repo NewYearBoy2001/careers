@@ -6,17 +6,20 @@ import 'package:cached_network_image/cached_network_image.dart';
 class CareerSearchResultCard extends StatefulWidget {
   final String title;
   final String? thumbnail;
-  final VoidCallback onTap; // back to VoidCallback — card is not responsible for loading
+  final VoidCallback onTap;
+  final bool isNewgen;   // ADD THIS
 
   const CareerSearchResultCard({
     super.key,
     required this.title,
     this.thumbnail,
     required this.onTap,
+    this.isNewgen = false,   // ADD THIS
   });
 
   @override
-  State<CareerSearchResultCard> createState() => _CareerSearchResultCardState();
+  State<CareerSearchResultCard> createState() =>
+      _CareerSearchResultCardState();
 }
 
 class _CareerSearchResultCardState extends State<CareerSearchResultCard>
@@ -47,16 +50,10 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
   Future<void> _handleTap() async {
     if (_isTapLocked) return;
     _isTapLocked = true;
-
-    // Play full shrink → bounce-back so the user sees the tap registered.
     await _controller.forward();
     await Future.delayed(const Duration(milliseconds: 80));
     await _controller.reverse();
-
-    // Fire navigation immediately — CourseDetailScreen handles its own loading.
     if (mounted) widget.onTap();
-
-    // Short grace period to block accidental double-taps.
     await Future.delayed(const Duration(milliseconds: 400));
     if (mounted) _isTapLocked = false;
   }
@@ -90,13 +87,18 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(Responsive.w(3.5)),
                 border: Border.all(
-                  color: AppColors.textSecondary.withOpacity(0.08),
-                  width: 1,
+                  // NEWGEN gets a purple border highlight
+                  color: widget.isNewgen
+                      ? const Color(0xFF6C3BF5).withOpacity(0.4)
+                      : AppColors.textSecondary.withOpacity(0.08),
+                  width: widget.isNewgen ? 1.5 : 1,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: _isPressed
                         ? Colors.transparent
+                        : widget.isNewgen
+                        ? const Color(0xFF6C3BF5).withOpacity(0.10)
                         : AppColors.teal.withOpacity(0.08),
                     blurRadius: _isPressed ? 0 : 8,
                     offset: Offset(0, _isPressed ? 0 : 2),
@@ -106,43 +108,87 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Image
+                  // Image with NEWGEN badge overlay
                   AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(Responsive.w(3.5)),
-                          topRight: Radius.circular(Responsive.w(3.5)),
-                        ),
-                        color: AppColors.background,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(Responsive.w(3.5)),
-                          topRight: Radius.circular(Responsive.w(3.5)),
-                        ),
-                        child: widget.thumbnail != null
-                            ? CachedNetworkImage(
-                          imageUrl: widget.thumbnail ?? '',
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(Responsive.w(3.5)),
+                              topRight: Radius.circular(Responsive.w(3.5)),
+                            ),
                             color: AppColors.background,
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(Responsive.w(3.5)),
+                              topRight: Radius.circular(Responsive.w(3.5)),
+                            ),
+                            child: widget.thumbnail != null
+                                ? CachedNetworkImage(
+                              imageUrl: widget.thumbnail ?? '',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              placeholder: (context, url) => Container(
+                                color: AppColors.background,
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  _buildPlaceholder(),
+                            )
+                                : _buildPlaceholder(),
+                          ),
+                        ),
+                        // NEWGEN badge in top-left corner
+                        if (widget.isNewgen)
+                          Positioned(
+                            top: Responsive.h(0.8),
+                            left: Responsive.w(1.5),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Responsive.w(1.8),
+                                vertical: Responsive.h(0.35),
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF6C3BF5),
+                                    Color(0xFF9B59F5),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    Responsive.w(1.5)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF6C3BF5)
+                                        .withOpacity(0.4),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                'NEWGEN',
+                                style: TextStyle(
+                                  fontSize: Responsive.sp(9),
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: 0.6,
+                                ),
                               ),
                             ),
                           ),
-                          errorWidget: (context, url, error) =>
-                              _buildPlaceholder(),
-                        )
-                            : _buildPlaceholder(),
-                      ),
+                      ],
                     ),
                   ),
 
-                  // Title + Explore badge
+                  // Title + badge row
                   Padding(
                     padding: EdgeInsets.all(Responsive.w(3)),
                     child: Column(
@@ -161,24 +207,28 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                           overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: Responsive.h(0.75)),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: Responsive.w(2),
-                            vertical: Responsive.h(0.4),
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.teal2.withOpacity(0.15),
-                            borderRadius:
-                            BorderRadius.circular(Responsive.w(1.5)),
-                          ),
-                          child: Text(
-                            'Explore',
-                            style: TextStyle(
-                              fontSize: Responsive.sp(12),
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Responsive.w(2),
+                                vertical: Responsive.h(0.4),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.teal2.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(
+                                    Responsive.w(1.5)),
+                              ),
+                              child: Text(
+                                'Explore',
+                                style: TextStyle(
+                                  fontSize: Responsive.sp(12),
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

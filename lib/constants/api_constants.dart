@@ -28,5 +28,6 @@ class ApiConstants {
   static const String states = 'states';
   static const String districts = 'districts';
   static const String courseFeeStructure = 'course-fee-structure';
+  static const String newgenCourses = 'newgen-courses';
 
 }

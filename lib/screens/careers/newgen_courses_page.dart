@@ -1,41 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
-import 'package:go_router/go_router.dart';
-import '../../bloc/career_child_nodes/career_child_nodes_bloc.dart';
-import '../../bloc/career_child_nodes/career_child_nodes_event.dart';
-import '../../bloc/career_child_nodes/career_child_nodes_state.dart';
+import '../../bloc/newgen_courses/newgen_courses_bloc.dart';
+import '../../bloc/newgen_courses/newgen_courses_event.dart';
+import '../../bloc/newgen_courses/newgen_courses_state.dart';
 import 'widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
-import 'package:lottie/lottie.dart';
 
-class CareerChildNodesPage extends StatefulWidget {
-  final String parentId;
-  final String parentTitle;
-
-  const CareerChildNodesPage({
-    super.key,
-    required this.parentId,
-    required this.parentTitle,
-  });
+class NewgenCoursesPage extends StatefulWidget {
+  const NewgenCoursesPage({super.key});
 
   @override
-  State<CareerChildNodesPage> createState() => _CareerChildNodesPageState();
+  State<NewgenCoursesPage> createState() => _NewgenCoursesPageState();
 }
 
-class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
-
+class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CareerChildNodesBloc>()
-        .add(FetchCareerChildNodes(widget.parentId));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    context.read<NewgenCoursesBloc>().add(FetchNewgenCourses());
   }
 
   @override
@@ -55,7 +40,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.parentTitle,
+              'NewGen Courses',
               style: TextStyle(
                 color: AppColors.white,
                 fontSize: Responsive.sp(18),
@@ -63,7 +48,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
               ),
             ),
             Text(
-              'Career Paths',
+              'Future-ready career paths',
               style: TextStyle(
                 color: AppColors.white.withOpacity(0.8),
                 fontSize: Responsive.sp(12),
@@ -73,31 +58,27 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
           ],
         ),
       ),
-
-      body: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
+      body: BlocBuilder<NewgenCoursesBloc, NewgenCoursesState>(
         builder: (context, state) {
-          if (state is CareerChildNodesLoading) {
+          if (state is NewgenCoursesLoading) {
             return CustomScrollView(
               physics: const NeverScrollableScrollPhysics(),
-              slivers: [CareerSearchGridShimmer(itemCount: 4)],
+              slivers: [CareerSearchGridShimmer(itemCount: 6)],
             );
           }
 
-          if (state is CareerChildNodesError) {
+          if (state is NewgenCoursesError) {
             return Center(
               child: Padding(
                 padding: EdgeInsets.all(Responsive.w(6)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: Responsive.sp(64),
-                      color: AppColors.error,
-                    ),
+                    Icon(Icons.error_outline,
+                        size: Responsive.sp(64), color: AppColors.error),
                     SizedBox(height: Responsive.h(2)),
                     Text(
-                      'Failed to load career paths',
+                      'Failed to load NewGen courses',
                       style: TextStyle(
                         fontSize: Responsive.sp(18),
                         fontWeight: FontWeight.w600,
@@ -109,18 +90,15 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                     Text(
                       state.message,
                       style: TextStyle(
-                        fontSize: Responsive.sp(14),
-                        color: AppColors.textSecondary,
-                      ),
+                          fontSize: Responsive.sp(14),
+                          color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: Responsive.h(3)),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        context.read<CareerChildNodesBloc>().add(
-                          FetchCareerChildNodes(widget.parentId),
-                        );
-                      },
+                      onPressed: () => context
+                          .read<NewgenCoursesBloc>()
+                          .add(FetchNewgenCourses()),
                       icon: const Icon(Icons.refresh),
                       label: const Text('Retry'),
                       style: ElevatedButton.styleFrom(
@@ -134,28 +112,14 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
             );
           }
 
-          if (state is CareerChildNodesLoaded) {
-            if (state.nodes.isEmpty) {
+          if (state is NewgenCoursesLoaded) {
+            if (state.courses.isEmpty) {
               return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Lottie.asset(
-                      'assets/animations/search_sad.json',
-                      width: Responsive.w(60),
-                      height: Responsive.h(25),
-                      fit: BoxFit.contain,
-                    ),
-                    SizedBox(height: Responsive.h(1.5)),
-                    Text(
-                      'No career paths available',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(15),
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'No NewGen courses available',
+                  style: TextStyle(
+                      fontSize: Responsive.sp(14),
+                      color: AppColors.textSecondary),
                 ),
               );
             }
@@ -167,16 +131,14 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                     !state.hasReachedMax &&
                     !state.isFetchingMore) {
                   context
-                      .read<CareerChildNodesBloc>()
-                      .add(FetchMoreCareerChildNodes());
+                      .read<NewgenCoursesBloc>()
+                      .add(FetchMoreNewgenCourses());
                 }
                 return false;
               },
-              child: CustomScrollView(               // ← same pattern as search page
+              child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-
-                  // Section header
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
@@ -185,21 +147,48 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                         Responsive.w(5),
                         Responsive.h(1),
                       ),
-                      child: Text(
-                        'Choose your path',
-                        style: TextStyle(
-                          fontSize: Responsive.sp(16),
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Responsive.w(2.5),
+                              vertical: Responsive.h(0.5),
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFF6C3BF5),
+                                  Color(0xFF9B59F5),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                  Responsive.w(2)),
+                            ),
+                            child: Text(
+                              'NEWGEN',
+                              style: TextStyle(
+                                fontSize: Responsive.sp(11),
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: Responsive.w(2)),
+                          Text(
+                            'Future-ready courses',
+                            style: TextStyle(
+                              fontSize: Responsive.sp(16),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-
-                  // Grid — same SliverMainAxisGroup pattern as CareerSearchResultsPage
                   SliverMainAxisGroup(
                     slivers: [
-
                       SliverPadding(
                         padding: EdgeInsets.fromLTRB(
                           Responsive.w(4),
@@ -217,43 +206,41 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                           ),
                           delegate: SliverChildBuilderDelegate(
                                 (context, index) {
-                              final node = state.nodes[index];
+                              final course = state.courses[index];
                               return CareerSearchResultCard(
-                                title: node.title,
-                                thumbnail: node.thumbnail,
-                                isNewgen: node.isNewgenCourse,   // ADD THIS LINE
+                                title: course.title,
+                                thumbnail: course.thumbnail,
+                                isNewgen: true,
                                 onTap: () {
                                   context.push('/course-detail',
                                       extra: <String, dynamic>{
-                                        'id': node.id,
-                                        'title': node.title,
-                                        'thumbnail': node.thumbnail,
+                                        'id': course.id,
+                                        'title': course.title,
+                                        'thumbnail': course.thumbnail,
                                       });
                                 },
                               );
                             },
-                            childCount: state.nodes.length,
+                            childCount: state.courses.length,
                           ),
                         ),
                       ),
-
-                      // ✅ Spinner sliver — renders AFTER grid, never overlaps
                       if (state.isFetchingMore)
                         const SliverToBoxAdapter(
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(child: CircularProgressIndicator()),
+                            child:
+                            Center(child: CircularProgressIndicator()),
                           ),
                         ),
-
-                      // End of results
-                      if (state.hasReachedMax && state.nodes.isNotEmpty)
+                      if (state.hasReachedMax && state.courses.isNotEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding:
+                            const EdgeInsets.symmetric(vertical: 16),
                             child: Center(
                               child: Text(
-                                'No more results',
+                                'No more courses',
                                 style: TextStyle(
                                   fontSize: Responsive.sp(13),
                                   color: AppColors.textSecondary,

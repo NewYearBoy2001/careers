@@ -366,6 +366,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                               return CareerSearchResultCard(
                                 title: career.title,
                                 thumbnail: career.thumbnail,
+                                isNewgen: career.isNewgenCourse,
                                 onTap: () {
                                   context.push('/course-detail', extra: <String, dynamic>{
                                     'id': career.id,
