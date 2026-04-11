@@ -20,6 +20,7 @@ import '../../bloc/newgen_courses/newgen_courses_bloc.dart';
 import '../../bloc/newgen_courses/newgen_courses_event.dart';
 import '../../bloc/newgen_courses/newgen_courses_state.dart';
 import 'package:lottie/lottie.dart';
+import '/shimmer/newgen_course_card_shimmer.dart';
 
 class CareersPage extends StatefulWidget {
   final String currentEducation;
@@ -374,7 +375,10 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
             builder: (context, state) {
               if (state is NewgenCoursesLoading) {
                 return SliverToBoxAdapter(
-                  child: _buildNewgenSectionShimmer(),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(0, Responsive.h(1.5), 0, 0),
+                    child: const NewgenCourseCardShimmer(),
+                  ),
                 );
               }
               if (state is NewgenCoursesLoaded && state.courses.isNotEmpty) {

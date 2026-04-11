@@ -15,6 +15,8 @@ import 'package:careers/widgets/network_aware_widget.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_bloc.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_state.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_event.dart';
+import 'package:new_version_plus/new_version_plus.dart';
+import 'package:careers/widgets/update_dialog.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -106,6 +108,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       } else {
         bannerBloc.add(RefreshCareerGuidanceBanners());
       }
+      AppUpdateChecker.check(context);
     });
   }
 
