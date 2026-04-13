@@ -69,25 +69,4 @@ class AppColors {
   static const Color tealGreen = Color(0xFF10B981); // Green Teal
   static const Color tealnetwork = Color(0xFF1A9C86);
 
-  static const Color profileBgStart     = Color(0xFFEEF6F5);
-  static const Color profileBgMid       = Color(0xFFF0F9F7);
-  static const Color profileBgEnd       = Color(0xFFE8F4F2);
-  static const Color profileOrb1        = Color(0x1A306060); // primary 10%
-  static const Color profileOrb2        = Color(0x1F14B8A6); // teal2 12%
-  static const Color profileOrb3        = Color(0x215EEAD4); // teal4 13%
-  static const Color profileOrb4        = Color(0x174A7A7A); // primaryLight 9%
-  static const Color profileDotGrid     = Color(0x17306060); // primary 9%
-  static const Color profileRing        = Color(0x14306060); // primary 8%
-  static const Color profileCardBg      = Color(0xBFFFFFFF); // white 75%
-  static const Color profileCardBorder  = Color(0x12306060); // primary 7%
-  static const Color profileCardShadow  = Color(0x0D306060); // primary 5%
-  static const Color profileSectionTeal = Color(0xFF4A7A7A); // reuse primaryLight
-  static const Color profileNavBg       = Color(0xE0FFFFFF); // white 88%
-  static const Color profileNavBorder   = Color(0x12306060);
-  static const Color profileIconBgTeal  = Color(0xFFE0F2F1); // teal icon wrap start
-  static const Color profileIconBgTeal2 = Color(0xFFB2DFDB); // teal icon wrap end
-  static const Color profileIconBgRed   = Color(0xFFFDE8E8); // logout icon wrap start
-  static const Color profileIconBgRed2  = Color(0xFFFBD0D0); // logout icon wrap end
-  static const Color profileArrow       = Color(0xFFB0CCCC);
-  static const Color profileStatLabel   = Color(0x99FFFFFF);
 }
