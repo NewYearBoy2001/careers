@@ -42,6 +42,7 @@ class CareerNodeDetails {
   final String videoUrl;
   final String? thumbnail;
   final bool isNewgenCourse;
+  final bool hasFuturePath;
 
 
   CareerNodeDetails({
@@ -54,6 +55,7 @@ class CareerNodeDetails {
     required this.videoUrl,
     this.thumbnail,
     required this.isNewgenCourse,
+    required this.hasFuturePath,
   });
 
   factory CareerNodeDetails.fromJson(Map<String, dynamic> json) {
@@ -73,6 +75,9 @@ class CareerNodeDetails {
       isNewgenCourse: json['is_newgen_course'] == 1 ||
           json['is_newgen_course'] == '1' ||
           json['is_newgen_course'] == true,
+      hasFuturePath: json['has_future_path'] == 1 ||
+          json['has_future_path'] == '1' ||
+          json['has_future_path'] == true,
     );
   }
 
@@ -141,6 +146,7 @@ class CareerNodeDetails {
       'video_url': videoUrl,
       'thumbnail': thumbnail,
       'is_newgen_course': isNewgenCourse ? 1 : 0,
+      'has_future_path': hasFuturePath ? 1 : 0,
     };
   }
 

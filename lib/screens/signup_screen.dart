@@ -208,6 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       inputFormatters: [
                         FilteringTextInputFormatter.deny(RegExp(r'[0-9]')), // ✅ Block digits
+                        LengthLimitingTextInputFormatter(50),
                       ],
                       validator: (v) => FormValidators.minLength(v, 3, 'Full name'),
                       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -218,6 +219,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       hint: 'Enter your email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(50),
+                      ],
                       prefixIcon: Icon(
                         Icons.email_outlined,
                         color: AppColors.iconPrimary,
@@ -313,6 +317,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         label: 'Current Education',
                         hint: 'Enter your current education level',
                         controller: _currentEducationController,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(50),
+                        ],
                         prefixIcon: Icon(
                           Icons.school_outlined,
                           color: AppColors.iconPrimary,
@@ -425,6 +432,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   controller: _children[index]['nameController'],
                                   inputFormatters: [
                                     FilteringTextInputFormatter.deny(RegExp(r'[0-9]')), // ✅ Block digits
+                                    LengthLimitingTextInputFormatter(50),
                                   ],
                                   validator: (v) => FormValidators.required(v, field: "Child's name"),
                                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -434,6 +442,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                   label: "Child's Education Level",
                                   hint: 'Enter education level',
                                   controller: _children[index]['educationController'],
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(50),
+                                  ],
                                   prefixIcon: Icon(
                                     Icons.school_outlined,
                                     color: AppColors.iconPrimary,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:careers/utils/network/network_service.dart';
 
 class NetworkAwareWidget extends StatefulWidget {
@@ -21,7 +22,6 @@ class _NetworkAwareWidgetState extends State<NetworkAwareWidget> {
   @override
   void initState() {
     super.initState();
-    // Track the initial state
     _wasDisconnected = !NetworkService.isConnected.value;
     NetworkService.isConnected.addListener(_onConnectivityChanged);
   }
@@ -34,12 +34,9 @@ class _NetworkAwareWidgetState extends State<NetworkAwareWidget> {
 
   void _onConnectivityChanged() {
     final isConnected = NetworkService.isConnected.value;
-
     if (isConnected && _wasDisconnected) {
-      // Network just restored — trigger refresh
       widget.onNetworkRestored?.call();
     }
-
     _wasDisconnected = !isConnected;
   }
 
@@ -60,28 +57,47 @@ class _NoInternetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF1A9C86),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.wifi_off_rounded, size: 80, color: Colors.white),
-            SizedBox(height: 16),
-            Text(
-              "No Internet Connection",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  'assets/animations/No_internet_connection.json',
+                  width: 260,
+                  height: 260,
+                  fit: BoxFit.contain,
+                  repeat: true,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'No Internet Connection',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A3C34),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Oops! Looks like you're floating\nin space without a signal.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF6B8F84),
+                    height: 1.6,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text(
-              "Please check your network and try again.",
-              style: TextStyle(color: Colors.white70),
-            ),
-          ],
+          ),
         ),
       ),
     );

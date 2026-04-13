@@ -18,7 +18,10 @@ class FormValidators {
     if (required(value, field: 'Email') != null) {
       return 'Email is required';
     }
-    if (!_emailRegex.hasMatch(value!.trim())) {
+    if (value!.trim().length > 50) { // ✅ ADD
+      return 'Email must not exceed 50 characters';
+    }
+    if (!_emailRegex.hasMatch(value.trim())) {
       return 'Enter a valid email address';
     }
     return null;
@@ -82,8 +85,11 @@ class FormValidators {
     if (required(value, field: field) != null) {
       return '$field is required';
     }
-    if (value!.length < length) {
+    if (value!.trim().length < length) {
       return '$field must be at least $length characters';
+    }
+    if (value.trim().length > 50) { // ✅ ADD: max 50 chars
+      return '$field must not exceed 50 characters';
     }
     return null;
   }

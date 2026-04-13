@@ -95,6 +95,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         'description': details.description,
         'videoId': details.videoId.trim().isEmpty ? '' : details.videoId,
         'videoUrl': details.videoUrl.trim().isEmpty ? '' : details.videoUrl,
+        'hasFuturePath': details.hasFuturePath,
       };
 
       setState(() {
@@ -834,7 +835,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         ],
 
         // Explore CTA
-        if (_data['id'] != null)
+        if (_data['id'] != null && (_data['hasFuturePath'] == true || _data['hasFuturePath'] == 1))
           Padding(
             padding: EdgeInsets.fromLTRB(
                 Responsive.w(6), Responsive.h(4), Responsive.w(6), 0),

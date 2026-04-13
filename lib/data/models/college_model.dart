@@ -1,13 +1,15 @@
 class CourseItem {
   final String courseId;
   final String courseName;
+  final bool hasFeeStructure;
 
-  CourseItem({required this.courseId, required this.courseName});
+  CourseItem({required this.courseId, required this.courseName,this.hasFeeStructure = false,});
 
   factory CourseItem.fromJson(Map<String, dynamic> json) {
     return CourseItem(
       courseId: json['course_id']?.toString() ?? '',
       courseName: json['course_name']?.toString() ?? '',
+      hasFeeStructure: (json['has_fee_structure'] ?? 0) == 1,
     );
   }
 }

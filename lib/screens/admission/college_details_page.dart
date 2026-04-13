@@ -340,7 +340,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     );
   }
 
-  Widget _buildCollegeHeader(college) {
+  Widget _buildCollegeHeader(CollegeModel college) {
     return Container(
       margin: EdgeInsets.fromLTRB(
         Responsive.w(4),
@@ -473,7 +473,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     );
   }
 
-  Widget _buildCollegeInfo(college) {
+  Widget _buildCollegeInfo(CollegeModel college) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
       padding: EdgeInsets.all(Responsive.w(5)),
@@ -501,25 +501,27 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(width: Responsive.w(2)),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Responsive.w(2),
-                  vertical: Responsive.h(0.3),
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(Responsive.w(3)),
-                ),
-                child: Text(
-                  'Tap for fees',
-                  style: TextStyle(
-                    fontSize: Responsive.sp(11),
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
+              if (college.courseList.any((c) => c.hasFeeStructure)) ...[ // ADD CONDITION
+                SizedBox(width: Responsive.w(2)),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(2),
+                    vertical: Responsive.h(0.3),
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(Responsive.w(3)),
+                  ),
+                  child: Text(
+                    'Tap for fees',
+                    style: TextStyle(
+                      fontSize: Responsive.sp(11),
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
           SizedBox(height: Responsive.h(1.5)),
@@ -557,14 +559,16 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
+          onTap: course.hasFeeStructure
+              ? () {
             CourseFeeSheet.show(
               context,
               courseId: course.courseId,
               courseName: course.courseName,
               repository: context.read<CourseFeeRepository>(),
             );
-          },
+          }
+              : null,
           borderRadius: BorderRadius.circular(Responsive.w(3)),
           child: Container(
             padding: EdgeInsets.symmetric(
@@ -604,30 +608,31 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.account_balance_wallet_outlined,
-                      size: Responsive.w(3.5),
-                      color: AppColors.primary,
-                    ),
-                    SizedBox(width: Responsive.w(1)),
-                    Text(
-                      'View Fees',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(12),
+                if (course.hasFeeStructure) // ADD THIS CONDITION
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: Responsive.w(3.5),
                         color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
                       ),
-                    ),
-                    SizedBox(width: Responsive.w(1)),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: Responsive.w(3),
-                      color: AppColors.primary,
-                    ),
-                  ],
-                ),
+                      SizedBox(width: Responsive.w(1)),
+                      Text(
+                        'View Fees',
+                        style: TextStyle(
+                          fontSize: Responsive.sp(12),
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: Responsive.w(1)),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: Responsive.w(3),
+                        color: AppColors.primary,
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -636,7 +641,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     );
   }
 
-  Widget _buildContactSection(college) {
+  Widget _buildContactSection(CollegeModel college) {
     return Container(
       margin: EdgeInsets.all(Responsive.w(4)),
       padding: EdgeInsets.all(Responsive.w(5)),
