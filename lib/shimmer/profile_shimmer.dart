@@ -11,7 +11,7 @@ class ProfileShimmer extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       child: Column(
         children: [
-          _buildHeaderShimmer(),
+          _buildHeaderShimmer(context),
           Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -26,10 +26,10 @@ class ProfileShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderShimmer() {
+  Widget _buildHeaderShimmer(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(32, 40, 32, 36),
+      padding: EdgeInsets.fromLTRB(32, MediaQuery.of(context).padding.top + 40, 32, 36),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColors.primary, AppColors.primaryLight],

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 import 'package:careers/constants/app_colors.dart';
+import 'package:careers/utils/responsive/responsive.dart';
+import 'package:careers/utils/app_notifier.dart';
+import 'package:careers/utils/validators/form_validators.dart';
+import 'package:careers/widgets/custom_textfields.dart';
+import 'package:careers/widgets/custom_button.dart';
+import 'package:careers/widgets/auth_form_card.dart';
 import 'package:careers/bloc/change_password/change_password_bloc.dart';
 import 'package:careers/bloc/change_password/change_password_event.dart';
 import 'package:careers/bloc/change_password/change_password_state.dart';
-import 'package:careers/utils/app_notifier.dart';
-import 'package:careers/utils/validators/form_validators.dart';
-import 'package:flutter/services.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -64,162 +68,220 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Responsive.init(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.textPrimary,
+            size: Responsive.w(5),
+          ),
           onPressed: () => context.pop(),
         ),
         title: Text(
           'Change Password',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 20,
             fontWeight: FontWeight.w600,
+            fontSize: Responsive.sp(18),
           ),
         ),
       ),
-      body: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
-        listener: (context, state) {
-          if (state is ChangePasswordSuccess) {
-            AppNotifier.show(context, state.message);
-            // Clear form
-            _currentPasswordController.clear();
-            _newPasswordController.clear();
-            _confirmPasswordController.clear();
-            // Navigate back
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) context.pop(true);
-            });
-          } else if (state is ChangePasswordError) {
-            AppNotifier.show(context, state.message);
-          }
-        },
-        builder: (context, state) {
-          final isLoading = state is ChangePasswordLoading;
+      body: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height,
+        ),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFDFEAE8),
+              Color(0xFFE8EEEE),
+              Color(0xFFEDE8E4),
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
+            listener: (context, state) {
+              if (state is ChangePasswordSuccess) {
+                AppNotifier.show(context, state.message);
+                _currentPasswordController.clear();
+                _newPasswordController.clear();
+                _confirmPasswordController.clear();
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (mounted) context.pop(true);
+                });
+              } else if (state is ChangePasswordError) {
+                AppNotifier.show(context, state.message);
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is ChangePasswordLoading;
 
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      'Please enter your current password and choose a new password.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: Responsive.h(2)),
 
-                    // Current Password
-                    _buildPasswordField(
-                      controller: _currentPasswordController,
-                      label: 'Current Password',
-                      hint: 'Enter current password',
-                      isVisible: _currentPasswordVisible,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _currentPasswordVisible = !_currentPasswordVisible;
-                        });
-                      },
-                      validator: _validateCurrentPassword,
-                      enabled: !isLoading,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // New Password
-                    _buildPasswordField(
-                      controller: _newPasswordController,
-                      label: 'New Password',
-                      hint: 'Enter new password',
-                      isVisible: _newPasswordVisible,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _newPasswordVisible = !_newPasswordVisible;
-                        });
-                      },
-                      validator: _validateNewPassword,
-                      enabled: !isLoading,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                        LengthLimitingTextInputFormatter(16),
-                      ],
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Confirm Password
-                    _buildPasswordField(
-                      controller: _confirmPasswordController,
-                      label: 'Confirm New Password',
-                      hint: 'Re-enter new password',
-                      isVisible: _confirmPasswordVisible,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _confirmPasswordVisible = !_confirmPasswordVisible;
-                        });
-                      },
-                      validator: _validateConfirmPassword,
-                      enabled: !isLoading,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                        LengthLimitingTextInputFormatter(16),
-                      ],
-                      autovalidateMode: AutovalidateMode.onUnfocus,
-                    ),
-                    const SizedBox(height: 40),
-
-                    // Submit Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : _handleSubmit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
+                      Text(
+                        'Update your password',
+                        style: TextStyle(
+                          fontSize: Responsive.sp(24),
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
                         ),
-                        child: isLoading
-                            ? SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.white,
+                      ),
+
+                      SizedBox(height: Responsive.h(0.7)),
+
+                      Text(
+                        'Enter your current password and choose a new one.',
+                        style: TextStyle(
+                          fontSize: Responsive.sp(13),
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+
+                      SizedBox(height: Responsive.h(3)),
+
+                      AuthFormCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomTextField(
+                              label: 'Current Password',
+                              hint: 'Enter current password',
+                              isPassword: !_currentPasswordVisible,
+                              controller: _currentPasswordController,
+                              prefixIcon: Icon(
+                                Icons.lock_outline,
+                                color: AppColors.primary,
+                                size: Responsive.w(5.5),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _currentPasswordVisible
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: AppColors.primary,
+                                  size: Responsive.w(5.5),
+                                ),
+                                onPressed: isLoading
+                                    ? null
+                                    : () => setState(() =>
+                                _currentPasswordVisible =
+                                !_currentPasswordVisible),
+                              ),
+                              validator: _validateCurrentPassword,
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
                             ),
-                          ),
-                        )
-                            : Text(
-                          'Change Password',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.white,
-                          ),
+
+                            SizedBox(height: Responsive.h(2)),
+
+                            CustomTextField(
+                              label: 'New Password',
+                              hint: 'Enter new password',
+                              isPassword: !_newPasswordVisible,
+                              controller: _newPasswordController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                                LengthLimitingTextInputFormatter(16),
+                              ],
+                              prefixIcon: Icon(
+                                Icons.lock_outline,
+                                color: AppColors.primary,
+                                size: Responsive.w(5.5),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _newPasswordVisible
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: AppColors.primary,
+                                  size: Responsive.w(5.5),
+                                ),
+                                onPressed: isLoading
+                                    ? null
+                                    : () => setState(() =>
+                                _newPasswordVisible =
+                                !_newPasswordVisible),
+                              ),
+                              validator: _validateNewPassword,
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                            ),
+
+                            SizedBox(height: Responsive.h(2)),
+
+                            CustomTextField(
+                              label: 'Confirm New Password',
+                              hint: 'Re-enter new password',
+                              isPassword: !_confirmPasswordVisible,
+                              controller: _confirmPasswordController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                                LengthLimitingTextInputFormatter(16),
+                              ],
+                              prefixIcon: Icon(
+                                Icons.lock_outline,
+                                color: AppColors.primary,
+                                size: Responsive.w(5.5),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _confirmPasswordVisible
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: AppColors.primary,
+                                  size: Responsive.w(5.5),
+                                ),
+                                onPressed: isLoading
+                                    ? null
+                                    : () => setState(() =>
+                                _confirmPasswordVisible =
+                                !_confirmPasswordVisible),
+                              ),
+                              validator: _validateConfirmPassword,
+                              autovalidateMode: AutovalidateMode.onUnfocus,
+                            ),
+
+                            SizedBox(height: Responsive.h(3)),
+
+                            CustomButton(
+                              text: 'Change Password',
+                              isLoading: isLoading,
+                              onPressed: isLoading ? null : _handleSubmit,
+                            ),
+
+                            SizedBox(height: Responsive.h(2)),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+
+                      SizedBox(height: Responsive.h(4)),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }

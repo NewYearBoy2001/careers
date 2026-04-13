@@ -12,6 +12,8 @@ import 'package:careers/bloc/profile/profile_bloc.dart';
 import 'package:careers/bloc/profile/profile_event.dart';
 import 'package:careers/bloc/profile/profile_state.dart';
 import 'package:flutter/services.dart';
+import 'package:careers/widgets/auth_form_card.dart';
+import 'package:careers/widgets/child_entry_card.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final ProfileModel profile;
@@ -144,331 +146,245 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         AppNotifier.show(context, state.message);
       }
     },
-    child: Scaffold(
-    backgroundColor: AppColors.backgroundTealGray,
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: AppColors.textPrimary,
-            size: Responsive.w(5),
+        resizeToAvoidBottomInset: true,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: AppColors.textPrimary,
+              size: Responsive.w(5),
+            ),
+            onPressed: () => context.pop(),
           ),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: Responsive.sp(18),
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
-          child: Form(
-            key: _formKey,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: Responsive.h(1.5)),
-                  Text(
-                    'Update your information',
-                    style: TextStyle(
-                      fontSize: Responsive.sp(24),
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: Responsive.h(1)),
-                  Text(
-                    'Keep your profile information up to date',
-                    style: TextStyle(
-                      fontSize: Responsive.sp(14),
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: Responsive.h(3)),
-
-                  // Role Badge (Read-only)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: Responsive.w(4),
-                      vertical: Responsive.h(1),
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(Responsive.w(2)),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          widget.profile.isStudent()
-                              ? Icons.school_rounded
-                              : Icons.family_restroom_rounded,
-                          size: Responsive.w(5),
-                          color: AppColors.primary,
-                        ),
-                        SizedBox(width: Responsive.w(2)),
-                        Text(
-                          widget.profile.role,
-                          style: TextStyle(
-                            fontSize: Responsive.sp(14),
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: Responsive.h(3)),
-
-                  CustomTextField(
-                    label: 'Full Name',
-                    hint: 'Enter your full name',
-                    controller: _nameController,
-                    prefixIcon: Icon(
-                      Icons.person_outline,
-                      color: AppColors.iconPrimary,
-                      size: Responsive.w(6),
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.deny(RegExp(r'[0-9]')), // ✅ Block digits
-                      LengthLimitingTextInputFormatter(50),
-                    ],
-                    validator: (v) => FormValidators.minLength(v, 3, 'Full name'),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-
-                  SizedBox(height: Responsive.h(1)),
-
-                  CustomTextField(
-                    label: 'Email',
-                    hint: 'Enter your email address',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(50),
-                    ],
-                    prefixIcon: Icon(
-                      Icons.email_outlined,
-                      color: AppColors.iconPrimary,
-                      size: Responsive.w(6),
-                    ),
-                    validator: FormValidators.email,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-
-                  SizedBox(height: Responsive.h(1)),
-
-                  CustomTextField(
-                    label: 'Phone',
-                    hint: 'Enter your phone number',
-                    controller: _phoneController,
-                    keyboardType: TextInputType.number, // ✅ CHANGE: Use number keyboard
-                    inputFormatters: [ // ✅ ADD: Restrict to digits only
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10), // ✅ ADD: Max 10 digits
-                    ],
-                    prefixIcon: Icon(
-                      Icons.phone_outlined,
-                      color: AppColors.iconPrimary,
-                      size: Responsive.w(6),
-                    ),
-                    validator: FormValidators.phone,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-
-                  SizedBox(height: Responsive.h(1.5)),
-
-                  if (widget.profile.isStudent()) ...[
-                    CustomTextField(
-                      label: 'Current Education',
-                      hint: 'Enter your current education level',
-                      controller: _currentEducationController,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(50),
-                      ],
-                      prefixIcon: Icon(
-                        Icons.school_outlined,
-                        color: AppColors.iconPrimary,
-                        size: Responsive.w(6),
-                      ),
-                      validator: (v) => FormValidators.required(v, field: 'Education'),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                  ] else ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Children's Details",
-                          style: TextStyle(
-                            fontSize: Responsive.sp(16),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        TextButton.icon(
-                          onPressed: _addChild,
-                          icon: Icon(Icons.add, size: Responsive.w(5)),
-                          label: Text(
-                            'Add Child',
-                            style: TextStyle(fontSize: Responsive.sp(14)),
-                          ),
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: Responsive.h(1.5)),
-
-                    if (_children.isEmpty)
-                      Container(
-                        padding: EdgeInsets.all(Responsive.w(5)),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundTealGray,
-                          borderRadius: BorderRadius.circular(Responsive.w(3)),
-                          border: Border.all(color: AppColors.error, width: 1.5),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Please add at least one child',
-                            style: TextStyle(
-                              color: AppColors.error,
-                              fontSize: Responsive.sp(14),
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      )
-                    else
-                      ..._children.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        final child = entry.value;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: EdgeInsets.only(bottom: Responsive.h(2)),
-                          padding: EdgeInsets.all(Responsive.w(4)),
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundTealGray,
-                            borderRadius: BorderRadius.circular(Responsive.w(3)),
-                            border: Border.all(color: AppColors.border),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.shadow,
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Child ${index + 1}',
-                                        style: TextStyle(
-                                          fontSize: Responsive.sp(14),
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      if (child.containsKey('id')) ...[
-                                        SizedBox(width: Responsive.w(2)),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: Responsive.w(2),
-                                            vertical: Responsive.h(0.3),
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(Responsive.w(1)),
-                                          ),
-                                          child: Text(
-                                            'Existing',
-                                            style: TextStyle(
-                                              fontSize: Responsive.sp(10),
-                                              color: AppColors.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.close, size: Responsive.w(5)),
-                                    onPressed: () => _removeChild(index),
-                                    color: AppColors.error,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: Responsive.h(1)),
-                              CustomTextField(
-                                label: "Child's Name",
-                                hint: 'Enter child name',
-                                controller: child['nameController'],
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.deny(RegExp(r'[0-9]')), // ✅ Block digits
-                                  LengthLimitingTextInputFormatter(50),
-                                ],
-                                validator: (v) => FormValidators.required(v, field: "Child's name"),
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                              ),
-                              SizedBox(height: Responsive.h(1)),
-                              CustomTextField(
-                                label: "Child's Education Level",
-                                hint: 'Enter education level',
-                                controller: child['educationController'],
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(50),
-                                ],
-                                prefixIcon: Icon(
-                                  Icons.school_outlined,
-                                  color: AppColors.iconPrimary,
-                                  size: Responsive.w(6),
-                                ),
-                                validator: (v) => FormValidators.required(v, field: "Education"),
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                  ],
-
-                  SizedBox(height: Responsive.h(3)),
-
-                  CustomButton(
-                    text: 'Update Profile',
-                    onPressed: _handleUpdate,
-                    isLoading: _isLoading,
-                  ),
-
-                  SizedBox(height: Responsive.h(2)),
-                ],
+          title: Text(
+            'Edit Profile',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: Responsive.sp(18),
             ),
           ),
         ),
-      ),),
+        body: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+          ),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFDFEAE8),
+                Color(0xFFE8EEEE),
+                Color(0xFFEDE8E4),
+              ],
+              stops: [0.0, 0.5, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: Responsive.h(2)),
+                    Text(
+                      'Update your information',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(24),
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: Responsive.h(0.7)),
+                    Text(
+                      'Keep your profile information up to date',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(13),
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    SizedBox(height: Responsive.h(2.5)),
+
+                    // Role badge (unchanged)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Responsive.w(4),
+                        vertical: Responsive.h(1),
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(Responsive.w(2)),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            widget.profile.isStudent()
+                                ? Icons.school_rounded
+                                : Icons.family_restroom_rounded,
+                            size: Responsive.w(5),
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(width: Responsive.w(2)),
+                          Text(
+                            widget.profile.role,
+                            style: TextStyle(
+                              fontSize: Responsive.sp(14),
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: Responsive.h(3)),
+
+                    // ── CARD wrapping all form fields ──
+                    AuthFormCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomTextField(
+                            label: 'Full Name',
+                            hint: 'Enter your full name',
+                            controller: _nameController,
+                            prefixIcon: Icon(Icons.person_outline, color: AppColors.primary, size: Responsive.w(5.5)),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.deny(RegExp(r'[0-9]')),
+                              LengthLimitingTextInputFormatter(50),
+                            ],
+                            validator: (v) => FormValidators.minLength(v, 3, 'Full name'),
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          SizedBox(height: Responsive.h(2)),
+                          CustomTextField(
+                            label: 'Email',
+                            hint: 'Enter your email address',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            inputFormatters: [LengthLimitingTextInputFormatter(50)],
+                            prefixIcon: Icon(Icons.email_outlined, color: AppColors.primary, size: Responsive.w(5.5)),
+                            validator: FormValidators.email,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          SizedBox(height: Responsive.h(2)),
+                          CustomTextField(
+                            label: 'Phone',
+                            hint: 'Enter your phone number',
+                            controller: _phoneController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                            prefixIcon: Icon(Icons.phone_outlined, color: AppColors.primary, size: Responsive.w(5.5)),
+                            validator: FormValidators.phone,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          SizedBox(height: Responsive.h(2)),
+
+                          if (widget.profile.isStudent()) ...[
+                            CustomTextField(
+                              label: 'Current Education',
+                              hint: 'Enter your current education level',
+                              controller: _currentEducationController,
+                              inputFormatters: [LengthLimitingTextInputFormatter(50)],
+                              prefixIcon: Icon(Icons.school_outlined, color: AppColors.primary, size: Responsive.w(5.5)),
+                              validator: (v) => FormValidators.required(v, field: 'Education'),
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                            ),
+                            SizedBox(height: Responsive.h(2)),
+                          ] else ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Children's Details",
+                                  style: TextStyle(
+                                    fontSize: Responsive.sp(15),
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: _addChild,
+                                  icon: Icon(Icons.add, size: Responsive.w(4.5)),
+                                  label: Text('Add Child', style: TextStyle(fontSize: Responsive.sp(13))),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    padding: EdgeInsets.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: Responsive.h(1)),
+                            if (_children.isEmpty)
+                              Container(
+                                padding: EdgeInsets.all(Responsive.w(5)),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.error, width: 1.5),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Please add at least one child',
+                                    style: TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: Responsive.sp(13),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              )
+                            else
+                              ..._children.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                return ChildEntryCard(
+                                  index: index,
+                                  nameController: _children[index]['nameController'],
+                                  educationController: _children[index]['educationController'],
+                                  onRemove: () => _removeChild(index),
+                                  isExisting: _children[index].containsKey('id'),
+                                );
+                              }).toList(),
+                            SizedBox(height: Responsive.h(2)),
+                          ],
+
+                          CustomButton(
+                            text: 'Update Profile',
+                            onPressed: _isLoading ? null : _handleUpdate,
+                            isLoading: _isLoading,
+                          ),
+                          SizedBox(height: Responsive.h(2)),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: Responsive.h(4)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

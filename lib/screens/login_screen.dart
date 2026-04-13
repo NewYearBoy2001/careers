@@ -15,6 +15,7 @@ import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:careers/utils/validators/form_validators.dart';
 import 'package:careers/widgets/status_bar_wrapper.dart';
+import 'package:careers/widgets/auth_background_scaffold.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,13 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   bool _showPassword = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -55,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleForgotPassword() {
-    context.push('/forgot-password');  // ← hyphen, not space
+    context.push('/forgot-password');
   }
 
   @override
@@ -64,187 +59,140 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return BlocProvider(
       create: (_) => LoginBloc(
-        repository: AuthRepository(
-          AuthApiService(),
-          AuthLocalStorage(),
-        ),
+        repository: AuthRepository(AuthApiService(), AuthLocalStorage()),
       ),
+      child: AuthBackgroundScaffold(
+        showLogo: true,
+        title: 'Explore what\'s next',
+        subtitle: 'Login to your account to continue',
+        cardChild: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Email
+              CustomTextField(
+                label: 'Email',
+                hint: 'Enter your email address',
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icon(
+                  Icons.person_outline,
+                  color: AppColors.primary,
+                  size: Responsive.w(5.5),
+                ),
+                validator: FormValidators.email,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
 
-      child: StatusBarWrapper(
-        iconBrightness: Brightness.dark,
-        child: Scaffold(
-        backgroundColor: AppColors.backgroundTealGray,
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: Responsive.w(8)),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: Responsive.h(12)),
-                      // Logo
-                      Center(
-                        child: Image.asset(        // ← Remove Hero(), keep Image.asset directly
-                          'assets/images/coloured_logo_for_login.png',
-                          width: Responsive.w(55),
-                          height: Responsive.h(12),
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      SizedBox(height: Responsive.h(1)),
-                      // Welcome Back
-                      Center(
-                        child: Text(
-                          'Explore what’s next',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(28),
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: Responsive.h(0.8)),
-                      // Subtitle
-                      Center(
-                        child: Text(
-                          'Login to your account',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(15),
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: Responsive.h(5)),
-                      // Email Field
-                      CustomTextField(
-                        label: 'Email',
-                        hint: 'Enter your email address',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icon(
-                          Icons.person_outline,
-                          color: AppColors.primary,
-                          size: Responsive.w(6),
-                        ),
-                        validator: FormValidators.email,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                      ),
-                      SizedBox(height: Responsive.h(2.5)),
-                      // Password Field
-                      CustomTextField(
-                        label: 'Password',
-                        hint: 'Enter your password',
-                        isPassword: !_showPassword,
-                        controller: _passwordController,
-                        prefixIcon: Icon(
-                          Icons.lock_outline,
-                          color: AppColors.primary,
-                          size: Responsive.w(6),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                            color: AppColors.primary,
-                            size: Responsive.w(6),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _showPassword = !_showPassword;
-                            });
-                          },
-                        ),
-                        validator: FormValidators.password,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                      ),
-                      SizedBox(height: Responsive.h(1)),
-                      // Forgot Password
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: _handleForgotPassword,
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: Responsive.sp(14),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: Responsive.h(3)),
-                      // Login Button
-                      BlocConsumer<LoginBloc, LoginState>(
-                        listener: (context, state) {
-                          if (state is LoginSuccess) {
-                            context.go('/dashboard');
-                          } else if (state is LoginFailure) {
-                            AppNotifier.show(context, state.message);
-                          }
-                        },
-                        builder: (context, state) {
-                          return CustomButton(
-                            text: 'Login',
-                            isLoading: state is LoginLoading,
-                            onPressed: () {
-                              if (state is! LoginLoading) {
-                                _handleLogin(context);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      SizedBox(height: Responsive.h(3)),
-                      // Sign Up Link
-                      Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Don't have an account?",
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: Responsive.sp(16),
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.push('/signup');
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(horizontal: Responsive.w(2), vertical: Responsive.h(1)),
-                                minimumSize: Size(Responsive.w(20), Responsive.h(5)),
-                                tapTargetSize: MaterialTapTargetSize.padded,
-                              ),
-                              child: Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  color: AppColors.accent,
-                                  fontSize: Responsive.sp(16),
-                                  fontWeight: FontWeight.w700,
-                                  decorationColor: AppColors.accent,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: Responsive.h(5)),
-                    ],
+              SizedBox(height: Responsive.h(2.5)),
+
+              // Password
+              CustomTextField(
+                label: 'Password',
+                hint: 'Enter your password',
+                isPassword: !_showPassword,
+                controller: _passwordController,
+                prefixIcon: Icon(
+                  Icons.lock_outline,
+                  color: AppColors.primary,
+                  size: Responsive.w(5.5),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _showPassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: AppColors.primary,
+                    size: Responsive.w(5.5),
                   ),
-            ),
+                  onPressed: () =>
+                      setState(() => _showPassword = !_showPassword),
+                ),
+                validator: FormValidators.password,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+
+              SizedBox(height: Responsive.h(1)),
+
+              // Forgot password
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _handleForgotPassword,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'Forgot Password?',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: Responsive.sp(13),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: Responsive.h(2.5)),
+
+              // Login button with BLoC
+              BlocConsumer<LoginBloc, LoginState>(
+                listener: (context, state) {
+                  if (state is LoginSuccess) {
+                    context.go('/dashboard');
+                  } else if (state is LoginFailure) {
+                    AppNotifier.show(context, state.message);
+                  }
+                },
+                builder: (context, state) {
+                  return CustomButton(
+                    text: 'Login',
+                    isLoading: state is LoginLoading,
+                    onPressed: () {
+                      if (state is! LoginLoading) {
+                        _handleLogin(context);
+                      }
+                    },
+                  );
+                },
+              ),
+
+              SizedBox(height: Responsive.h(2)),
+            ],
           ),
         ),
-      ),),
+        footerRow: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Don't have an account?",
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: Responsive.sp(14),
+              ),
+            ),
+            TextButton(
+              onPressed: () => context.push('/signup'),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: Responsive.w(1.5)),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'Sign Up',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontSize: Responsive.sp(14),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

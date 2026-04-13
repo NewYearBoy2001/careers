@@ -19,6 +19,10 @@ class CollegeCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(Responsive.w(2.5)),
+        border: Border.all(          // ← ADD THIS
+          color: AppColors.border,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),

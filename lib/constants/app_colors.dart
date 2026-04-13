@@ -69,4 +69,21 @@ class AppColors {
   static const Color tealGreen = Color(0xFF10B981); // Green Teal
   static const Color tealnetwork = Color(0xFF1A9C86);
 
+  static const Color profileHeaderStart = Color(0xFF2E7D6E);
+  static const Color profileHeaderMid = Color(0xFF4A9B8E);
+  static const Color profileHeaderEnd = Color(0xFF6BA89F);
+  static const Color profilePageBg = Color(0xFFEEF4F3);
+  static const Color profileIconBg = Color(0xFFD8EEEB);
+  static const Color profileTextMuted = Color(0xBFFFFFFF);
+  static const Color profileHeaderDark = Color(0xFF0D2B2B);
+  static const Color profileHeaderDeep = Color(0xFF0A1F1F);
+
+  static const Color headerGradientBright = Color(0xFF3D8C80); // bright teal center highlight
+  static const Color headerGradientMid = Color(0xFF1F5C54);    // mid dark teal
+  static const Color headerGradientDark = Color(0xFF0D3330);   // deep dark edge
+  static const Color headerGlowOverlay = Color(0x1F4AADA0);
+
+  static const Color backgroundGradientStart = Color(0xFFE1F5EE);
+  static const Color backgroundGradientMid   = Color(0xFFF0F7F5);
+  static const Color backgroundGradientEnd   = Color(0xFFFFF3EF);
 }
