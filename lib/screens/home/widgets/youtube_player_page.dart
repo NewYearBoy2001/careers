@@ -32,6 +32,10 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ));
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: const YoutubePlayerFlags(
@@ -166,230 +170,225 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
         ),
       ),
       builder: (context, player) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFA),
-          body: Column(
-            children: [
-              // ── Video Player ────────────────────────────────────────
-              SizedBox(
-                height: playerHeight + MediaQuery.of(context).padding.top,
-                child: Stack(
-                  children: [
-                    // Dark background behind player
-                    Positioned.fill(
-                      child: Container(color: Colors.black),
-                    ),
-                    // Player
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top,
-                      left: 0,
-                      right: 0,
-                      child: SizedBox(height: playerHeight, child: player),
-                    ),
-                    // Back button
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 8,
-                      left: 8,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => Navigator.pop(context),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.35),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // ── Content ─────────────────────────────────────────────
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+          ),
+          child: Scaffold(
+            backgroundColor: const Color(0xFFF8FAFA),
+            body: Column(
+              children: [
+                // ── Video Player ────────────────────────────────────────
+                SizedBox(
+                  height: MediaQuery.of(context).padding.top +
+                      MediaQuery.of(context).size.width * 9 / 16,
+                  child: Stack(
                     children: [
-                      // Title
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          height: 1.35,
-                          letterSpacing: -0.3,
+                      // Dark background behind player
+                      Positioned.fill(
+                        child: Container(color: Colors.black),
+                      ),
+                      // Player — placed below status bar
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top,
+                        left: 0,
+                        right: 0,
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.width * 9 / 16,
+                          child: player,
                         ),
                       ),
-
-                      const SizedBox(height: 14),
-
-                      // Meta row — duration + creator
-                      Row(
-                        children: [
-                          _MetaChip(
-                            icon: Icons.access_time_rounded,
-                            label: widget.duration,
-                            color: AppColors.teal1,
-                            bgColor: const Color(0xFFE6FAF8),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _MetaChip(
-                              icon: Icons.person_outline_rounded,
-                              label: widget.creator,
-                              color: AppColors.primary,
-                              bgColor: const Color(0xFFE8F0F0),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 22),
-
-                      // Divider
-                      Container(
-                        height: 1,
-                        color: const Color(0xFFE8EEEE),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // About section
-                      if (widget.about.isNotEmpty) ...[
-                        Row(
-                          children: [
-                            Container(
-                              width: 3.5,
-                              height: 18,
+                      // Back button — placed below status bar
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 8,
+                        left: 8,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => Navigator.pop(context),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppColors.teal1,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'About this class',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: const Color(0xFFE0EFEE),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.teal1.withOpacity(0.06),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            widget.about,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                              height: 1.65,
-                              letterSpacing: 0.1,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
-                      // Instructor card
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.teal1, AppColors.teal2],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.teal1.withOpacity(0.3),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 46,
-                              height: 46,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.black.withOpacity(0.35),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
-                                Icons.school_rounded,
+                                Icons.arrow_back_ios_new_rounded,
                                 color: Colors.white,
-                                size: 24,
+                                size: 18,
                               ),
                             ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Instructor',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    widget.creator,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                // ── Content ─────────────────────────────────────────────
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                            height: 1.35,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            _MetaChip(
+                              icon: Icons.access_time_rounded,
+                              label: widget.duration,
+                              color: AppColors.teal1,
+                              bgColor: const Color(0xFFE6FAF8),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _MetaChip(
+                                icon: Icons.person_outline_rounded,
+                                label: widget.creator,
+                                color: AppColors.primary,
+                                bgColor: const Color(0xFFE8F0F0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 22),
+                        Container(height: 1, color: const Color(0xFFE8EEEE)),
+                        const SizedBox(height: 20),
+                        if (widget.about.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Container(
+                                width: 3.5,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: AppColors.teal1,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'About this class',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFFE0EFEE),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.teal1.withOpacity(0.06),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              widget.about,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                                height: 1.65,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [AppColors.teal1, AppColors.teal2],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.teal1.withOpacity(0.3),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.school_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Instructor',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      widget.creator,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

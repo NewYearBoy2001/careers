@@ -25,12 +25,12 @@ class CareerChildNodesPage extends StatefulWidget {
 }
 
 class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
-
   @override
   void initState() {
     super.initState();
-    context.read<CareerChildNodesBloc>()
-        .add(FetchCareerChildNodes(widget.parentId));
+    context.read<CareerChildNodesBloc>().add(
+      FetchCareerChildNodes(widget.parentId),
+    );
   }
 
   @override
@@ -47,6 +47,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         elevation: 0,
+        centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () => context.pop(),
@@ -163,19 +164,19 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
             return NotificationListener<ScrollNotification>(
               onNotification: (notification) {
                 if (notification.metrics.pixels >=
-                    notification.metrics.maxScrollExtent - 200 &&
+                        notification.metrics.maxScrollExtent - 200 &&
                     !state.hasReachedMax &&
                     !state.isFetchingMore) {
-                  context
-                      .read<CareerChildNodesBloc>()
-                      .add(FetchMoreCareerChildNodes());
+                  context.read<CareerChildNodesBloc>().add(
+                    FetchMoreCareerChildNodes(),
+                  );
                 }
                 return false;
               },
-              child: CustomScrollView(               // ← same pattern as search page
+              child: CustomScrollView(
+                // ← same pattern as search page
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-
                   // Section header
                   SliverToBoxAdapter(
                     child: Padding(
@@ -199,7 +200,6 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                   // Grid — same SliverMainAxisGroup pattern as CareerSearchResultsPage
                   SliverMainAxisGroup(
                     slivers: [
-
                       SliverPadding(
                         padding: EdgeInsets.fromLTRB(
                           Responsive.w(4),
@@ -209,31 +209,33 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                         ),
                         sliver: SliverGrid(
                           gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: Responsive.w(3),
-                            mainAxisSpacing: Responsive.h(2),
-                            childAspectRatio: 0.9,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                              final node = state.nodes[index];
-                              return CareerSearchResultCard(
-                                title: node.title,
-                                thumbnail: node.thumbnail,
-                                isNewgen: node.isNewgenCourse,   // ADD THIS LINE
-                                onTap: () {
-                                  context.push('/course-detail',
-                                      extra: <String, dynamic>{
-                                        'id': node.id,
-                                        'title': node.title,
-                                        'thumbnail': node.thumbnail,
-                                      });
-                                },
-                              );
-                            },
-                            childCount: state.nodes.length,
-                          ),
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: Responsive.w(3),
+                                mainAxisSpacing: Responsive.h(2),
+                                childAspectRatio: 0.9,
+                              ),
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final node = state.nodes[index];
+                            return CareerSearchResultCard(
+                              title: node.title,
+                              thumbnail: node.thumbnail,
+                              isNewgen: node.isNewgenCourse, // ADD THIS LINE
+                              onTap: () {
+                                context.push(
+                                  '/course-detail',
+                                  extra: <String, dynamic>{
+                                    'id': node.id,
+                                    'title': node.title,
+                                    'thumbnail': node.thumbnail,
+                                  },
+                                );
+                              },
+                            );
+                          }, childCount: state.nodes.length),
                         ),
                       ),
 
