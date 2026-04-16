@@ -9,6 +9,7 @@ import '../../utils/responsive/responsive.dart';
 import '../../utils/app_notifier.dart';
 import './widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
+import 'package:lottie/lottie.dart';
 
 class CareerSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;
@@ -321,10 +322,11 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.search_off,
-                              size: Responsive.sp(64),
-                              color: AppColors.textSecondary.withOpacity(0.3),
+                            Lottie.asset(
+                              'assets/animations/search_sad.json',
+                              width: Responsive.w(50),
+                              height: Responsive.h(25),
+                              fit: BoxFit.contain,
                             ),
                             SizedBox(height: Responsive.h(2)),
                             Text(

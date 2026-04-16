@@ -32,7 +32,7 @@ class _LiveCarouselState extends State<LiveCarousel> {
     _timer?.cancel();
     if (count <= 1) return;
     _timer = Timer.periodic(const Duration(seconds: 6), (_) {
-      final next = (_current + 1) % count;
+      final next = _pageController.page!.round() + 1;
       _pageController.animateToPage(
         next,
         duration: const Duration(milliseconds: 500),
@@ -103,9 +103,9 @@ class _LiveCarouselState extends State<LiveCarousel> {
                 aspectRatio: 2.8, // wide card, adjust between 2.5–3.0 to taste
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: banners.length,
-                  onPageChanged: (i) => setState(() => _current = i),
-                  itemBuilder: (_, i) => _buildBannerItem(banners[i]),
+                  itemCount: null, // infinite scroll
+                  onPageChanged: (i) => setState(() => _current = i % banners.length),
+                  itemBuilder: (_, i) => _buildBannerItem(banners[i % banners.length]),
                 ),
               ),
               SizedBox(height: Responsive.h(1)),

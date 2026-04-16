@@ -28,6 +28,9 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
   OverlayEntry? _replayOverlayEntry;
   bool _isPlaying = false;
   bool _isFullScreen = false;
+  bool _isAboutExpanded = false;
+
+  static const int _collapsedMaxLines = 3;
 
   @override
   void initState() {
@@ -95,7 +98,6 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
             ),
           ),
         ),
-
       ),
     );
     Overlay.of(context, rootOverlay: true).insert(_replayOverlayEntry!);
@@ -122,10 +124,6 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final playerHeight = screenWidth * 9 / 16;
-
     return YoutubePlayerBuilder(
       onEnterFullScreen: () {
         setState(() => _isFullScreen = true);
@@ -133,21 +131,18 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
           DeviceOrientation.landscapeLeft,
           DeviceOrientation.landscapeRight,
         ]);
-        // Hide status bar in fullscreen
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       },
       onExitFullScreen: () {
-        setState(() => _isFullScreen = false);  // ADD
+        setState(() => _isFullScreen = false);
         _removeReplayOverlay();
         SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
         ]);
-        // Restore status bar when exiting fullscreen
         SystemChrome.setEnabledSystemUIMode(
           SystemUiMode.manual,
-          overlays: SystemUiOverlay.values, // restores both status & nav bar
+          overlays: SystemUiOverlay.values,
         );
-        // Small delay to ensure UI redraws correctly
         Future.delayed(const Duration(milliseconds: 300), () {
           SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
         });
@@ -179,17 +174,15 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
             backgroundColor: const Color(0xFFF8FAFA),
             body: Column(
               children: [
-                // ── Video Player ────────────────────────────────────────
+                // ── Video Player ──────────────────────────────────────
                 SizedBox(
                   height: MediaQuery.of(context).padding.top +
                       MediaQuery.of(context).size.width * 9 / 16,
                   child: Stack(
                     children: [
-                      // Dark background behind player
                       Positioned.fill(
                         child: Container(color: Colors.black),
                       ),
-                      // Player — placed below status bar
                       Positioned(
                         top: MediaQuery.of(context).padding.top,
                         left: 0,
@@ -199,7 +192,6 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                           child: player,
                         ),
                       ),
-                      // Back button — placed below status bar
                       Positioned(
                         top: MediaQuery.of(context).padding.top + 8,
                         left: 8,
@@ -227,7 +219,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                   ),
                 ),
 
-                // ── Content ─────────────────────────────────────────────
+                // ── Content ───────────────────────────────────────────
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
@@ -267,6 +259,8 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                         const SizedBox(height: 22),
                         Container(height: 1, color: const Color(0xFFE8EEEE)),
                         const SizedBox(height: 20),
+
+                        // ── About this class ──────────────────────────
                         if (widget.about.isNotEmpty) ...[
                           Row(
                             children: [
@@ -309,80 +303,17 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                                 ),
                               ],
                             ),
-                            child: Text(
-                              widget.about,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                                height: 1.65,
-                                letterSpacing: 0.1,
+                            child: _AboutSection(
+                              text: widget.about,
+                              isExpanded: _isAboutExpanded,
+                              collapsedMaxLines: _collapsedMaxLines,
+                              onToggle: () => setState(
+                                    () => _isAboutExpanded = !_isAboutExpanded,
                               ),
                             ),
                           ),
                           const SizedBox(height: 24),
                         ],
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [AppColors.teal1, AppColors.teal2],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.teal1.withOpacity(0.3),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 46,
-                                height: 46,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.school_rounded,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Instructor',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.white70,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      widget.creator,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -392,6 +323,127 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
           ),
         );
       },
+    );
+  }
+}
+
+// ── About section with read more/less ────────────────────────────────────────
+class _AboutSection extends StatefulWidget {
+  final String text;
+  final bool isExpanded;
+  final int collapsedMaxLines;
+  final VoidCallback onToggle;
+
+  const _AboutSection({
+    required this.text,
+    required this.isExpanded,
+    required this.collapsedMaxLines,
+    required this.onToggle,
+  });
+
+  @override
+  State<_AboutSection> createState() => _AboutSectionState();
+}
+
+class _AboutSectionState extends State<_AboutSection> {
+  bool _hasOverflow = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkOverflow();
+  }
+
+  @override
+  void didUpdateWidget(_AboutSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) _checkOverflow();
+  }
+
+  void _checkOverflow() {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: widget.text,
+        style: const TextStyle(
+          fontSize: 14,
+          color: AppColors.textSecondary,
+          height: 1.65,
+          letterSpacing: 0.1,
+        ),
+      ),
+      maxLines: widget.collapsedMaxLines,
+      textDirection: TextDirection.ltr,
+    )..layout(
+      maxWidth: MediaQuery.of(context).size.width - 40 - 32, // screen - padding - container padding
+    );
+
+    final overflows = tp.didExceedMaxLines;
+    if (overflows != _hasOverflow) {
+      setState(() => _hasOverflow = overflows);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedCrossFade(
+          firstChild: Text(
+            widget.text,
+            maxLines: widget.collapsedMaxLines,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+              height: 1.65,
+              letterSpacing: 0.1,
+            ),
+          ),
+          secondChild: Text(
+            widget.text,
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+              height: 1.65,
+              letterSpacing: 0.1,
+            ),
+          ),
+          crossFadeState: widget.isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 250),
+        ),
+        if (_hasOverflow) ...[
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: widget.onToggle,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.isExpanded ? 'Read less' : 'Read more',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.teal1,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 3),
+                AnimatedRotation(
+                  turns: widget.isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 250),
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: AppColors.teal1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

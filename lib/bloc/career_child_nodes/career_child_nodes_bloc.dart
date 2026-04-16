@@ -9,12 +9,13 @@ class CareerChildNodesBloc
 
   static const int _perPage = 10;
 
-  // Remember which parent we're paginating for
   String _currentParentId = '';
+  String? _currentKeyword;       // ADD: track active keyword for pagination
 
   CareerChildNodesBloc(this._repository) : super(CareerChildNodesInitial()) {
     on<FetchCareerChildNodes>(_onFetch);
     on<FetchMoreCareerChildNodes>(_onFetchMore);
+    on<SearchCareerChildNodes>(_onSearch);    // ADD
   }
 
   Future<void> _onFetch(
@@ -22,18 +23,47 @@ class CareerChildNodesBloc
       Emitter<CareerChildNodesState> emit,
       ) async {
     _currentParentId = event.parentId;
+    _currentKeyword = event.keyword;          // ADD
     emit(CareerChildNodesLoading());
     try {
       final result = await _repository.getChildNodes(
         event.parentId,
         page: 1,
         perPage: _perPage,
+        keyword: event.keyword,               // ADD
       );
       emit(CareerChildNodesLoaded(
         nodes: result.childNodes,
         currentPage: result.currentPage,
         lastPage: result.lastPage,
         hasReachedMax: result.currentPage >= result.lastPage,
+        activeKeyword: event.keyword,         // ADD
+      ));
+    } catch (e) {
+      emit(CareerChildNodesError(e.toString()));
+    }
+  }
+
+  // ADD: entire handler
+  Future<void> _onSearch(
+      SearchCareerChildNodes event,
+      Emitter<CareerChildNodesState> emit,
+      ) async {
+    _currentKeyword = event.keyword.trim().isEmpty ? null : event.keyword.trim();
+    emit(CareerChildNodesLoading());
+    try {
+      final result = await _repository.getChildNodes(
+        _currentParentId,
+        page: 1,
+        perPage: _perPage,
+        keyword: _currentKeyword,
+      );
+      emit(CareerChildNodesLoaded(
+        nodes: result.childNodes,
+        currentPage: result.currentPage,
+        lastPage: result.lastPage,
+        hasReachedMax: result.currentPage >= result.lastPage,
+        activeKeyword: _currentKeyword,
       ));
     } catch (e) {
       emit(CareerChildNodesError(e.toString()));
@@ -55,6 +85,7 @@ class CareerChildNodesBloc
         _currentParentId,
         page: nextPage,
         perPage: _perPage,
+        keyword: _currentKeyword,             // ADD: preserve keyword in pagination
       );
       emit(current.copyWith(
         nodes: [...current.nodes, ...result.childNodes],
@@ -64,7 +95,6 @@ class CareerChildNodesBloc
         hasReachedMax: result.currentPage >= result.lastPage,
       ));
     } catch (e) {
-      // Roll back the "loading more" spinner on error, keep existing nodes
       emit(current.copyWith(isFetchingMore: false));
     }
   }

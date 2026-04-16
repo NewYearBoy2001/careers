@@ -8,6 +8,7 @@ import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_state.dart'
 import 'package:careers/screens/admission/widgets/college_card.dart';
 import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class SavedCollegesPage extends StatefulWidget {
   const SavedCollegesPage({super.key});
@@ -127,8 +128,12 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.bookmark_border,
-                        size: Responsive.w(20), color: AppColors.textSecondary),
+                    Lottie.asset(
+                      'assets/animations/search_sad.json',
+                      width: Responsive.w(50),
+                      height: Responsive.h(25),
+                      fit: BoxFit.contain,
+                    ),
                     SizedBox(height: Responsive.h(2)),
                     Text('No Saved Colleges',
                         style: TextStyle(

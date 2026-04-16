@@ -92,18 +92,18 @@ class _SimpleHeaderState extends State<SimpleHeader> {
               ],
             ),
           ),
-          Container(
-            padding: EdgeInsets.all(Responsive.w(2.5)),
-            decoration: BoxDecoration(
-              color: AppColors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(Responsive.w(3)),
-            ),
-            child: Icon(
-              Icons.notifications_outlined,
-              color: AppColors.white,
-              size: Responsive.sp(18),
-            ),
-          ),
+          // Container(
+          //   padding: EdgeInsets.all(Responsive.w(2.5)),
+          //   decoration: BoxDecoration(
+          //     color: AppColors.white.withOpacity(0.2),
+          //     borderRadius: BorderRadius.circular(Responsive.w(3)),
+          //   ),
+          //   child: Icon(
+          //     Icons.notifications_outlined,
+          //     color: AppColors.white,
+          //     size: Responsive.sp(18),
+          //   ),
+          // ),
         ],
       ),
     );

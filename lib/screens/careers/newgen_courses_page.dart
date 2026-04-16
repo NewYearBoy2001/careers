@@ -8,6 +8,7 @@ import '../../bloc/newgen_courses/newgen_courses_event.dart';
 import '../../bloc/newgen_courses/newgen_courses_state.dart';
 import 'widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
+import 'package:lottie/lottie.dart';
 
 class NewgenCoursesPage extends StatefulWidget {
   const NewgenCoursesPage({super.key});
@@ -114,12 +115,35 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
 
           if (state is NewgenCoursesLoaded) {
             if (state.courses.isEmpty) {
+              // ADD:
               return Center(
-                child: Text(
-                  'No NewGen courses available',
-                  style: TextStyle(
-                      fontSize: Responsive.sp(14),
-                      color: AppColors.textSecondary),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset(
+                      'assets/animations/search_sad.json',
+                      width: Responsive.w(50),
+                      height: Responsive.h(25),
+                      fit: BoxFit.contain,
+                    ),
+                    SizedBox(height: Responsive.h(2)),
+                    Text(
+                      'No NewGen courses available',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(16),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: Responsive.h(1)),
+                    Text(
+                      'Check back later for updates',
+                      style: TextStyle(
+                        fontSize: Responsive.sp(14),
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
