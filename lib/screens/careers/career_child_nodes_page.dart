@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:careers/constants/app_colors.dart';
@@ -25,17 +26,46 @@ class CareerChildNodesPage extends StatefulWidget {
 }
 
 class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<CareerChildNodesBloc>()
-        .add(FetchCareerChildNodes(widget.parentId));
+    context.read<CareerChildNodesBloc>().add(
+      FetchCareerChildNodes(widget.parentId),
+    );
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      context.read<CareerChildNodesBloc>().add(
+        SearchCareerChildNodes(value),
+      );
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        _debounce?.cancel();
+        // Reset to full list
+        context.read<CareerChildNodesBloc>().add(
+          FetchCareerChildNodes(widget.parentId),
+        );
+      }
+    });
   }
 
   @override
@@ -47,11 +77,31 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         elevation: 0,
+        centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () => context.pop(),
         ),
-        title: Column(
+        title: _isSearching
+            ? TextField(
+          controller: _searchController,
+          autofocus: true,
+          onChanged: _onSearchChanged,
+          style: TextStyle(
+            color: AppColors.white,
+            fontSize: Responsive.sp(16),
+          ),
+          decoration: InputDecoration(
+            hintText: 'Search in ${widget.parentTitle}...',
+            hintStyle: TextStyle(
+              color: AppColors.white.withOpacity(0.6),
+              fontSize: Responsive.sp(15),
+            ),
+            border: InputBorder.none,
+            isDense: true,
+          ),
+        )
+            : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -72,6 +122,15 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              color: AppColors.white,
+            ),
+            onPressed: _toggleSearch,
+          ),
+        ],
       ),
 
       body: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
@@ -148,7 +207,9 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                     ),
                     SizedBox(height: Responsive.h(1.5)),
                     Text(
-                      'No career paths available',
+                      state.activeKeyword != null
+                          ? 'No results for "${state.activeKeyword}"'
+                          : 'No career paths available',
                       style: TextStyle(
                         fontSize: Responsive.sp(15),
                         fontWeight: FontWeight.w500,
@@ -166,17 +227,15 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                     notification.metrics.maxScrollExtent - 200 &&
                     !state.hasReachedMax &&
                     !state.isFetchingMore) {
-                  context
-                      .read<CareerChildNodesBloc>()
-                      .add(FetchMoreCareerChildNodes());
+                  context.read<CareerChildNodesBloc>().add(
+                    FetchMoreCareerChildNodes(),
+                  );
                 }
                 return false;
               },
-              child: CustomScrollView(               // ← same pattern as search page
+              child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-
-                  // Section header
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
@@ -186,7 +245,9 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                         Responsive.h(1),
                       ),
                       child: Text(
-                        'Choose your path',
+                        state.activeKeyword != null
+                            ? 'Results for "${state.activeKeyword}"'
+                            : 'Choose your path',
                         style: TextStyle(
                           fontSize: Responsive.sp(16),
                           fontWeight: FontWeight.w600,
@@ -196,10 +257,8 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                     ),
                   ),
 
-                  // Grid — same SliverMainAxisGroup pattern as CareerSearchResultsPage
                   SliverMainAxisGroup(
                     slivers: [
-
                       SliverPadding(
                         padding: EdgeInsets.fromLTRB(
                           Responsive.w(4),
@@ -215,29 +274,30 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                             mainAxisSpacing: Responsive.h(2),
                             childAspectRatio: 0.9,
                           ),
-                          delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                              final node = state.nodes[index];
-                              return CareerSearchResultCard(
-                                title: node.title,
-                                thumbnail: node.thumbnail,
-                                isNewgen: node.isNewgenCourse,   // ADD THIS LINE
-                                onTap: () {
-                                  context.push('/course-detail',
-                                      extra: <String, dynamic>{
-                                        'id': node.id,
-                                        'title': node.title,
-                                        'thumbnail': node.thumbnail,
-                                      });
-                                },
-                              );
-                            },
-                            childCount: state.nodes.length,
-                          ),
+                          delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                              ) {
+                            final node = state.nodes[index];
+                            return CareerSearchResultCard(
+                              title: node.title,
+                              thumbnail: node.thumbnail,
+                              isNewgen: node.isNewgenCourse,
+                              onTap: () {
+                                context.push(
+                                  '/course-detail',
+                                  extra: <String, dynamic>{
+                                    'id': node.id,
+                                    'title': node.title,
+                                    'thumbnail': node.thumbnail,
+                                  },
+                                );
+                              },
+                            );
+                          }, childCount: state.nodes.length),
                         ),
                       ),
 
-                      // ✅ Spinner sliver — renders AFTER grid, never overlaps
                       if (state.isFetchingMore)
                         const SliverToBoxAdapter(
                           child: Padding(
@@ -246,7 +306,6 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                           ),
                         ),
 
-                      // End of results
                       if (state.hasReachedMax && state.nodes.isNotEmpty)
                         SliverToBoxAdapter(
                           child: Padding(

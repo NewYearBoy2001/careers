@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
 import 'widgets/location_filter_sheet.dart';
+import 'package:lottie/lottie.dart';
 
 class AdmissionPage extends StatefulWidget {
   const AdmissionPage({super.key});
@@ -421,11 +422,14 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.school_outlined, size: Responsive.w(15), color: AppColors.textSecondary),
+                  Lottie.asset(
+                    'assets/animations/search_sad.json',
+                    width: Responsive.w(50),
+                    height: Responsive.h(25),
+                    fit: BoxFit.contain,
+                  ),
                   SizedBox(height: Responsive.h(2)),
                   Text('No colleges found', style: TextStyle(color: AppColors.textPrimary, fontSize: Responsive.sp(16), fontWeight: FontWeight.w600)),
-                  SizedBox(height: Responsive.h(1)),
-                  Text('Try adjusting your search criteria', style: TextStyle(color: AppColors.textSecondary, fontSize: Responsive.sp(14))),
                 ],
               ),
             ),

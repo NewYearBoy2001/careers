@@ -15,11 +15,19 @@ class CareerChildNodesApiService {
       String parentId, {
         int page = 1,
         int perPage = 5,
+        String? keyword,         // ADD THIS
       }) async {
     try {
+      final Map<String, dynamic> body = {
+        'id': int.tryParse(parentId) ?? parentId,
+      };
+      if (keyword != null && keyword.trim().isNotEmpty) {
+        body['keyword'] = keyword.trim();           // ADD THIS
+      }
+
       final response = await _dio.post(
         '${ApiConstants.careerChildNodes}?page=$page&per_page=$perPage',
-        data: {'id': int.tryParse(parentId) ?? parentId},
+        data: body,
       );
 
       if (response.statusCode == 200 &&

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
+import 'package:careers/utils/app_notifier.dart';
 
 class ProfileOption extends StatefulWidget {
   final IconData icon;
@@ -164,7 +165,11 @@ class _ProfileOptionState extends State<ProfileOption>
       );
       if (confirm == true && context.mounted) {
         await AuthLocalStorage().clearUser();
-        context.go('/login');
+        if (context.mounted) {
+          AppNotifier.show(context, 'Logged out successfully');
+          await Future.delayed(const Duration(milliseconds: 800));
+        }
+        if (context.mounted) context.go('/login');
       }
       return;
     }

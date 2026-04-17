@@ -7,6 +7,7 @@ import 'package:careers/bloc/course_fee/course_fee_event.dart';
 import 'package:careers/bloc/course_fee/course_fee_state.dart';
 import 'package:careers/data/models/course_fee_model.dart';
 import 'package:careers/data/repositories/course_fee_repository.dart';
+import 'package:lottie/lottie.dart';
 
 class CourseFeeSheet extends StatelessWidget {
   final String courseId;
@@ -226,8 +227,12 @@ class CourseFeeSheet extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.info_outline_rounded,
-                size: Responsive.w(15), color: AppColors.textSecondary),
+            Lottie.asset(
+              'assets/animations/search_sad.json',
+              width: Responsive.w(50),
+              height: Responsive.h(25),
+              fit: BoxFit.contain,
+            ),
             SizedBox(height: Responsive.h(2)),
             Text(
               'No fee structure available',

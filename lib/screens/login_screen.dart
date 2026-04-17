@@ -82,7 +82,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   size: Responsive.w(5.5),
                 ),
                 validator: FormValidators.email,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
 
               SizedBox(height: Responsive.h(2.5)),
@@ -110,7 +109,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       setState(() => _showPassword = !_showPassword),
                 ),
                 validator: FormValidators.password,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
 
               SizedBox(height: Responsive.h(1)),

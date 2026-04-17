@@ -3,6 +3,7 @@ import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+
 class CareerSearchResultCard extends StatefulWidget {
   final String title;
   final String? thumbnail;

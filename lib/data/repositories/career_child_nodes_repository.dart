@@ -10,11 +10,13 @@ class CareerChildNodesRepository {
       String parentId, {
         int page = 1,
         int perPage = 10,
+        String? keyword,
       }) async {
     return await _apiService.fetchChildNodes(
       parentId,
       page: page,
       perPage: perPage,
+      keyword: keyword,
     );
   }
 }

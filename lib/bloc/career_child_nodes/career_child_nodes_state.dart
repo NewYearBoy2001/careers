@@ -11,8 +11,9 @@ class CareerChildNodesLoaded extends CareerChildNodesState {
   final List<CareerNode> nodes;
   final int currentPage;
   final int lastPage;
-  final bool isFetchingMore;   // true while loading the next page
-  final bool hasReachedMax;    // true when currentPage == lastPage
+  final bool isFetchingMore;
+  final bool hasReachedMax;
+  final String? activeKeyword;    // ADD THIS
 
   CareerChildNodesLoaded({
     required this.nodes,
@@ -20,6 +21,7 @@ class CareerChildNodesLoaded extends CareerChildNodesState {
     required this.lastPage,
     this.isFetchingMore = false,
     this.hasReachedMax = false,
+    this.activeKeyword,           // ADD THIS
   });
 
   CareerChildNodesLoaded copyWith({
@@ -28,6 +30,8 @@ class CareerChildNodesLoaded extends CareerChildNodesState {
     int? lastPage,
     bool? isFetchingMore,
     bool? hasReachedMax,
+    String? activeKeyword,        // ADD THIS
+    bool clearKeyword = false,    // ADD THIS: to explicitly set null
   }) {
     return CareerChildNodesLoaded(
       nodes: nodes ?? this.nodes,
@@ -35,6 +39,7 @@ class CareerChildNodesLoaded extends CareerChildNodesState {
       lastPage: lastPage ?? this.lastPage,
       isFetchingMore: isFetchingMore ?? this.isFetchingMore,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      activeKeyword: clearKeyword ? null : (activeKeyword ?? this.activeKeyword), // ADD THIS
     );
   }
 }
