@@ -20,6 +20,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late int _currentIndex;
+  DateTime? _lastBackPress;
 
   // Keys force the page to fully rebuild (and re-run initState) on each tap
   final List<GlobalKey> _pageKeys = [
@@ -52,9 +53,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: _getStatusBarStyle(),
-      child: Scaffold(
+    return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+      if (didPop) return;
+
+      final now = DateTime.now();
+      final isWarned = _lastBackPress != null &&
+          now.difference(_lastBackPress!) < const Duration(seconds: 2);
+
+      if (isWarned) {
+        SystemNavigator.pop(); // exits the app
+      } else {
+        _lastBackPress = now;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Press back again to exit',
+              style: TextStyle(color: AppColors.textOnPrimary),
+            ),
+            backgroundColor: AppColors.primary,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    },
+    child: AnnotatedRegion<SystemUiOverlayStyle>(
+    value: _getStatusBarStyle(),
+    child: Scaffold(
         backgroundColor: AppColors.background,
         body: IndexedStack(
           index: _currentIndex,
@@ -68,7 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         bottomNavigationBar: SafeArea(
           child: _buildBottomNav(),
         ),
-      ),
+      ),),
     );
   }
 
@@ -93,7 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             _buildNavItem(0, Icons.home_rounded, 'Home'),
             _buildNavItem(1, Icons.explore_rounded, 'Careers'),
-            _buildNavItem(2, Icons.school_rounded, 'Admissions'),
+            _buildNavItem(2, Icons.account_balance, 'Colleges'),
             _buildNavItem(3, Icons.person_rounded, 'Profile'),
           ],
         ),

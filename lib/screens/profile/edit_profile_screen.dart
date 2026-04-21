@@ -43,7 +43,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     // Initialize controllers with existing data
     _nameController = TextEditingController(text: widget.profile.name);
-    _phoneController = TextEditingController(text: widget.profile.phone);
+    _phoneController = TextEditingController(text: widget.profile.phone ?? '');
     _emailController = TextEditingController(text: widget.profile.email);
     _currentEducationController = TextEditingController(
       text: widget.profile.currentEducation ?? '',
@@ -109,7 +109,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final Map<String, dynamic> requestBody = {
       'name': _nameController.text.trim(),
       'email': _emailController.text.trim(),
-      'phone': _phoneController.text.trim(),
+      'phone': _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
     };
 
     if (widget.profile.isStudent()) {
@@ -285,7 +287,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           SizedBox(height: Responsive.h(2)),
                           CustomTextField(
                             label: 'Phone',
-                            hint: 'Enter your phone number',
+                            hint: 'Enter your phone number (optional)',
                             controller: _phoneController,
                             keyboardType: TextInputType.number,
                             inputFormatters: [

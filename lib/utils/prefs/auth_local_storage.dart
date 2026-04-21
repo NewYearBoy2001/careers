@@ -32,4 +32,14 @@ class AuthLocalStorage {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_nameKey);
   }
+
+  Future<void> updateUserProfile({
+    String? name,
+    String? email,
+    String? phone,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (name != null) await prefs.setString(_nameKey, name);
+    if (email != null) await prefs.setString(_emailKey, email);
+  }
 }

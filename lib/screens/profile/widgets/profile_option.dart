@@ -3,6 +3,7 @@ import 'package:careers/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:careers/utils/app_notifier.dart';
+import 'package:careers/screens/profile/widgets/delete_account_dialog.dart';
 
 class ProfileOption extends StatefulWidget {
   final IconData icon;
@@ -12,6 +13,7 @@ class ProfileOption extends StatefulWidget {
   final String? route;
   final dynamic profileData;
   final VoidCallback? onReturn;
+  final bool isDeleteAccount;
 
   const ProfileOption({
     super.key,
@@ -22,6 +24,7 @@ class ProfileOption extends StatefulWidget {
     this.route,
     this.profileData,
     this.onReturn,
+    this.isDeleteAccount = false,
   });
 
   @override
@@ -171,6 +174,10 @@ class _ProfileOptionState extends State<ProfileOption>
         }
         if (context.mounted) context.go('/login');
       }
+      return;
+    }
+    if (widget.isDeleteAccount) {
+      showDeleteAccountDialog(context);
       return;
     }
 

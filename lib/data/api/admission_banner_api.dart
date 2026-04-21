@@ -4,9 +4,15 @@ import '../../utils/network/api_error_handler.dart';
 import '../../data/models/api_response.dart';
 import '../../utils/network/base_dio_client.dart';
 import '../models/admission_banner.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class AdmissionApiService {
-  final BaseDioClient _dioClient = BaseDioClient();
+  late final BaseDioClient _dioClient;
+
+  // ✅ Accept AuthLocalStorage
+  AdmissionApiService(AuthLocalStorage authStorage) {
+  _dioClient = BaseDioClient(authStorage: authStorage);
+  }
 
   Future<ApiResponse<List<AdmissionBanner>>> getBanners() async {
     try {

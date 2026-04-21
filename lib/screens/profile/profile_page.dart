@@ -9,6 +9,7 @@ import 'widgets/profile_option.dart';
 import 'package:careers/shimmer/profile_shimmer.dart';
 import 'package:careers/data/models/profile_model.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
+import 'package:careers/screens/profile/widgets/delete_account_dialog.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -387,19 +388,26 @@ class _ProfilePageState extends State<ProfilePage>
         'subtitle': 'Manage your security',
         'route': '/change-password',
       },
+      {
+        'icon': Icons.delete_forever_rounded,
+        'title': 'Delete Account',
+        'subtitle': 'Permanently remove your account',
+        'route': null, // handled via dialog
+      },
     ];
 
     return List.generate(options.length, (i) {
       return _buildAnimatedOption(
         index: i,
-        child: ProfileOption(
+        child: options[i]['route'] == null
+            ? _buildDeleteAccountOption(options[i])
+            : ProfileOption(
           icon: options[i]['icon'] as IconData,
           title: options[i]['title'] as String,
           subtitle: options[i]['subtitle'] as String,
           isLogout: false,
           route: options[i]['route'] as String?,
-          profileData:
-          options[i]['route'] == '/edit-profile' ? profile : null,
+          profileData: options[i]['route'] == '/edit-profile' ? profile : null,
           onReturn: () {
             if (options[i]['route'] == '/edit-profile') {
               context.read<ProfileBloc>().add(FetchProfile());
@@ -446,5 +454,17 @@ class _ProfilePageState extends State<ProfilePage>
     final parts = name.trim().split(' ');
     if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+
+  Widget _buildDeleteAccountOption(Map<String, Object?> option) {
+    return ProfileOption(
+      icon: option['icon'] as IconData,
+      title: option['title'] as String,
+      subtitle: option['subtitle'] as String,
+      isLogout: false,
+      isDeleteAccount: true,  // see step 9
+      route: null,
+      onReturn: null,
+    );
   }
 }

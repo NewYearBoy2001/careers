@@ -89,7 +89,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'role': 'Student',
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
-        'phone': _phoneController.text.trim(),
+        if (_phoneController.text.trim().isNotEmpty)
+          'phone': _phoneController.text.trim(),
         'password': _passwordController.text,
         'current_education': _currentEducationController.text.trim(),
       };
@@ -98,7 +99,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'role': 'Parent',
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
-        'phone': _phoneController.text.trim(),
+        if (_phoneController.text.trim().isNotEmpty)
+          'phone': _phoneController.text.trim(),
         'password': _passwordController.text,
         'children': _children
             .map(
@@ -187,7 +189,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 CustomTextField(
                   label: 'Phone',
-                  hint: 'Enter your phone number',
+                  hint: 'Enter your phone number (optional)',
                   controller: _phoneController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [
