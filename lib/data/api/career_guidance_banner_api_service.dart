@@ -3,12 +3,13 @@ import 'package:careers/utils/network/base_dio_client.dart';
 import 'package:careers/constants/api_constants.dart';
 import 'package:careers/utils/network/api_error_handler.dart';
 import 'package:careers/data/models/career_guidance_banner_model.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class CareerGuidanceBannerApiService {
   late final Dio _dio;
 
-  CareerGuidanceBannerApiService() {
-    _dio = BaseDioClient().dio;
+  CareerGuidanceBannerApiService(AuthLocalStorage authStorage) {
+    _dio = BaseDioClient(authStorage: authStorage).dio;
   }
 
   Future<List<CareerGuidanceBannerModel>> fetchBanners() async {

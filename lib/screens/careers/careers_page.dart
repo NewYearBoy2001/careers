@@ -689,49 +689,39 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Thumbnail
-                        Expanded(
+                        // Thumbnail - fixed height
+                        SizedBox(
+                          height: Responsive.h(13.0), // fixed thumbnail height
                           child: ClipRRect(
                             borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(
-                                  Responsive.w(3)),
-                              topRight: Radius.circular(
-                                  Responsive.w(3)),
+                              topLeft: Radius.circular(Responsive.w(3)),
+                              topRight: Radius.circular(Responsive.w(3)),
                             ),
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
                                 course.thumbnail != null
                                     ? CachedNetworkImage(
-                                  imageUrl:
-                                  course.thumbnail!,
+                                  imageUrl: course.thumbnail!,
                                   fit: BoxFit.cover,
                                   placeholder: (_, __) =>
-                                      Container(
-                                          color: AppColors
-                                              .background),
-                                  errorWidget:
-                                      (_, __, ___) =>
-                                      Container(
-                                        color:
-                                        AppColors.background,
-                                        child: Icon(
-                                          Icons.school,
-                                          color: AppColors.primary
-                                              .withOpacity(0.3),
-                                          size: Responsive.sp(32),
-                                        ),
-                                      ),
+                                      Container(color: AppColors.background),
+                                  errorWidget: (_, __, ___) => Container(
+                                    color: AppColors.background,
+                                    child: Icon(
+                                      Icons.school,
+                                      color: AppColors.primary.withOpacity(0.3),
+                                      size: Responsive.sp(32),
+                                    ),
+                                  ),
                                 )
                                     : Container(
                                   color: AppColors.background,
                                   child: Icon(
                                     Icons.school,
-                                    color: AppColors.primary
-                                        .withOpacity(0.3),
+                                    color: AppColors.primary.withOpacity(0.3),
                                     size: Responsive.sp(32),
                                   ),
                                 ),
@@ -745,23 +735,16 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                                       vertical: Responsive.h(0.3),
                                     ),
                                     decoration: BoxDecoration(
-                                      gradient:
-                                      const LinearGradient(
-                                        colors: [
-                                          Color(0xFF6C3BF5),
-                                          Color(0xFF9B59F5),
-                                        ],
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF6C3BF5), Color(0xFF9B59F5)],
                                       ),
-                                      borderRadius:
-                                      BorderRadius.circular(
-                                          Responsive.w(1.5)),
+                                      borderRadius: BorderRadius.circular(Responsive.w(1.5)),
                                     ),
                                     child: Text(
                                       'NEWGEN',
                                       style: TextStyle(
                                         fontSize: Responsive.sp(8),
-                                        fontWeight:
-                                        FontWeight.w800,
+                                        fontWeight: FontWeight.w800,
                                         color: Colors.white,
                                         letterSpacing: 0.5,
                                       ),
@@ -772,18 +755,24 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                             ),
                           ),
                         ),
-                        // Title
-                        Padding(
-                          padding: EdgeInsets.all(Responsive.w(2)),
-                          child: Text(
-                            course.title,
-                            style: TextStyle(
-                              fontSize: Responsive.sp(11),
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                        // Title - fixed height
+                        SizedBox(
+                          height: Responsive.h(6.5),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Responsive.w(2),
+                              vertical: Responsive.h(0.5),   // reduced vertical padding
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            child: Text(
+                              course.title,
+                              style: TextStyle(
+                                fontSize: Responsive.sp(11),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                       ],

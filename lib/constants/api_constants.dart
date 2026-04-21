@@ -1,7 +1,7 @@
 class ApiConstants {
 
   // static const String baseUrl = "https://rajasree.astradevelops.in/CareerApp/public/api/";
-  static const String baseUrl = "http://careerss.in/api/";
+  static const String baseUrl = "https://careerss.in/api/";
 
   static const String login = "login";
   static const String signup = "signup";
@@ -29,5 +29,6 @@ class ApiConstants {
   static const String districts = 'districts';
   static const String courseFeeStructure = 'course-fee-structure';
   static const String newgenCourses = 'newgen-courses';
+  static const String deleteAccount = 'delete-account';
 
 }

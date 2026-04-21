@@ -5,7 +5,7 @@ class SignupResponseModel {
   final String authToken;
   final String name;
   final String email;
-  final String phone;
+  final String? phone;
   final String role;
 
   SignupResponseModel({
@@ -13,7 +13,7 @@ class SignupResponseModel {
     required this.authToken,
     required this.name,
     required this.email,
-    required this.phone,
+    this.phone,
     required this.role,
   });
 

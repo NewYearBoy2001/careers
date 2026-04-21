@@ -17,6 +17,8 @@ import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/screens/admission/course_fee_sheet.dart';
 import 'package:careers/data/repositories/course_fee_repository.dart';
 import 'package:careers/data/models/college_model.dart'; // for CourseItem
+import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
+import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_event.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
@@ -111,6 +113,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                   _hasUserInteracted = true;
                 });
                 AppNotifier.show(context, state.message);
+                context.read<SavedCollegesListBloc>().add(RemoveCollegeFromSavedList(widget.collegeId));
               } else if (state is SavedCollegeError) {
                 AppNotifier.show(context, state.message);
               }

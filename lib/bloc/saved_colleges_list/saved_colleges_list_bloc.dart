@@ -10,6 +10,7 @@ class SavedCollegesListBloc extends Bloc<SavedCollegesListEvent, SavedCollegesLi
     on<FetchSavedCollegesList>(_onFetch);
     on<FetchNextSavedCollegesPage>(_onFetchNext);
     on<RefreshSavedCollegesList>(_onRefresh);
+    on<RemoveCollegeFromSavedList>(_onRemoveCollege);
   }
 
   Future<void> _onFetch(
@@ -73,6 +74,24 @@ class SavedCollegesListBloc extends Bloc<SavedCollegesListEvent, SavedCollegesLi
       }
     } catch (e) {
       emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+
+  Future<void> _onRemoveCollege(
+      RemoveCollegeFromSavedList event,
+      Emitter<SavedCollegesListState> emit,
+      ) async {
+    final current = state;
+    if (current is! SavedCollegesListLoaded) return;
+
+    final updated = current.colleges
+        .where((c) => c.id != event.collegeId)
+        .toList();
+
+    if (updated.isEmpty) {
+      emit(SavedCollegesListEmpty('No saved colleges found'));
+    } else {
+      emit(current.copyWith(colleges: updated));
     }
   }
 }

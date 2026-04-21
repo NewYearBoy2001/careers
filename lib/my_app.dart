@@ -54,7 +54,9 @@ import 'data/repositories/course_fee_repository.dart';
 import 'data/api/newgen_courses_api_service.dart';
 import 'data/repositories/newgen_courses_repository.dart';
 import 'bloc/newgen_courses/newgen_courses_bloc.dart';
-import 'bloc/newgen_courses/newgen_courses_event.dart';
+import 'data/api/delete_account_api_service.dart';
+import 'data/repositories/delete_account_repository.dart';
+import 'bloc/delete_account/delete_account_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -79,7 +81,9 @@ class MyApp extends StatelessWidget {
         ),
 
         RepositoryProvider<AdmissionApiService>(
-          create: (_) => AdmissionApiService(),
+          create: (context) => AdmissionApiService(
+            context.read<AuthLocalStorage>(),
+          ),
         ),
 
         RepositoryProvider<CollegeApiService>(
@@ -125,7 +129,9 @@ class MyApp extends StatelessWidget {
         ),
 
         RepositoryProvider<CareerHomeApiService>(
-          create: (context) => CareerHomeApiService(),
+          create: (context) => CareerHomeApiService(
+            context.read<AuthLocalStorage>(), // ✅ add this
+          ),
         ),
 
         RepositoryProvider<CareerChildNodesApiService>(
@@ -141,11 +147,15 @@ class MyApp extends StatelessWidget {
         ),
 
         RepositoryProvider<CareerGuidanceBannerApiService>(
-          create: (_) => CareerGuidanceBannerApiService(),
+          create: (context) => CareerGuidanceBannerApiService(
+            context.read<AuthLocalStorage>(),
+          ),
         ),
 
         RepositoryProvider<CareerGuidanceRegisterApiService>(
-          create: (_) => CareerGuidanceRegisterApiService(),
+          create: (context) => CareerGuidanceRegisterApiService(
+            context.read<AuthLocalStorage>(),
+          ),
         ),
 
         RepositoryProvider<LocationApiService>(
@@ -160,6 +170,12 @@ class MyApp extends StatelessWidget {
 
         RepositoryProvider<NewgenCoursesApiService>(
           create: (context) => NewgenCoursesApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
+
+        RepositoryProvider<DeleteAccountApiService>(
+          create: (context) => DeleteAccountApiService(
             context.read<AuthLocalStorage>(),
           ),
         ),
@@ -195,6 +211,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<ProfileRepository>(
           create: (context) => ProfileRepository(
             context.read<ProfileApiService>(),
+            context.read<AuthLocalStorage>(), // ADD
           ),
         ),
 
@@ -267,6 +284,12 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<NewgenCoursesRepository>(
           create: (context) => NewgenCoursesRepository(
             context.read<NewgenCoursesApiService>(),
+          ),
+        ),
+
+        RepositoryProvider<DeleteAccountRepository>(
+          create: (context) => DeleteAccountRepository(
+            context.read<DeleteAccountApiService>(),
           ),
         ),
 
@@ -362,6 +385,12 @@ class MyApp extends StatelessWidget {
           BlocProvider<NewgenCoursesBloc>(
             create: (context) => NewgenCoursesBloc(
               context.read<NewgenCoursesRepository>(),
+            ),
+          ),
+
+          BlocProvider<DeleteAccountBloc>(
+            create: (context) => DeleteAccountBloc(
+              context.read<DeleteAccountRepository>(),
             ),
           ),
         ],

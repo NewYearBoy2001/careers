@@ -3,13 +3,13 @@ import '../../constants/api_constants.dart';
 import '../models/career_node_home_model.dart';
 import 'package:careers/utils/network/base_dio_client.dart';
 import 'package:careers/utils/network/api_error_handler.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class CareerHomeApiService {
   final Dio _dio;
 
-  // ✅ CHANGE: Remove AuthLocalStorage parameter
-  CareerHomeApiService()
-      : _dio = BaseDioClient().dio; // ✅ CHANGE: Don't pass authStorage
+  CareerHomeApiService(AuthLocalStorage authStorage)
+      : _dio = BaseDioClient(authStorage: authStorage).dio;
 
   Future<List<CareerNodeHomeModel>> fetchCareerNodes() async {
     try {

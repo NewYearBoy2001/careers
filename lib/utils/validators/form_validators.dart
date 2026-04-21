@@ -28,15 +28,10 @@ class FormValidators {
   }
 
   static String? phone(String? value) {
-    if (required(value, field: 'Phone number') != null) {
-      return 'Phone number is required';
-    }
-
-    // ✅ CHANGE: Simple validation for 10 digits only
-    if (!_phoneRegex.hasMatch(value!.trim())) {
+    if (value == null || value.trim().isEmpty) return null; // optional
+    if (!_phoneRegex.hasMatch(value.trim())) {
       return 'Phone number must be 10 digits';
     }
-
     return null;
   }
 

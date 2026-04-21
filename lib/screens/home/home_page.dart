@@ -47,7 +47,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       'pageIndex': 1,
     },
     {
-      'title': 'Admissions',
+      'title': 'Colleges',
       'subtitle': 'College applications',
       'icon': Icons.school_rounded,
       'color': AppColors.tealGreen,

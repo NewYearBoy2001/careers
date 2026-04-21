@@ -7,8 +7,8 @@ import 'package:careers/utils/prefs/auth_local_storage.dart';
 class CareerGuidanceRegisterApiService {
   late final Dio _dio;
 
-  CareerGuidanceRegisterApiService() {
-    _dio = BaseDioClient().dio;
+  CareerGuidanceRegisterApiService(AuthLocalStorage authStorage) {
+    _dio = BaseDioClient(authStorage: authStorage).dio;
   }
 
   Future<String> register({

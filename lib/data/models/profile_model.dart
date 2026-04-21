@@ -3,7 +3,7 @@ class ProfileModel {
   final String role;
   final String name;
   final String email;
-  final String phone;
+  final String? phone;
   final String? currentEducation; // For Student
   final List<ChildModel>? children; // For Parent
 
@@ -12,7 +12,7 @@ class ProfileModel {
     required this.role,
     required this.name,
     required this.email,
-    required this.phone,
+    this.phone,
     this.currentEducation,
     this.children,
   });
@@ -23,7 +23,7 @@ class ProfileModel {
       role: json['role'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
+      phone: json['phone'],
       currentEducation: json['current_education'],
       children: json['children'] != null
           ? (json['children'] as List)
@@ -39,7 +39,7 @@ class ProfileModel {
       'role': role,
       'name': name,
       'email': email,
-      'phone': phone,
+      if (phone != null && phone!.isNotEmpty) 'phone': phone,
       if (currentEducation != null) 'current_education': currentEducation,
       if (children != null)
         'children': children!.map((child) => child.toJson()).toList(),
