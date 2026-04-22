@@ -419,32 +419,32 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                                 child: Container(
                                   color: Colors.black87,
                                   child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.white, width: 1.2),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Colors.white, width: 1.2),
+                                          ),
+                                          child: const Icon(
+                                            Icons.replay_rounded,
+                                            color: Colors.white,
+                                            size: 40,
+                                          ),
                                         ),
-                                        child: const Icon(
-                                          Icons.replay_rounded,
-                                          color: Colors.white,
-                                          size: 40,
+                                        const SizedBox(height: 12),
+                                        const Text(
+                                          'Tap to replay',
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 14,
+                                            letterSpacing: 0.5,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      const Text(
-                                        'Tap to replay',
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),),
+                                      ],
+                                    ),),
                                 ),
                               ),
                           ],
