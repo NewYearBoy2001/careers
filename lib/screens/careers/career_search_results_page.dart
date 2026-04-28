@@ -10,6 +10,7 @@ import '../../utils/app_notifier.dart';
 import './widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
 import 'package:lottie/lottie.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareerSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;
@@ -109,11 +110,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
               ),
               title: Text(
                 'Search Careers',
-                style: TextStyle(
-                  fontSize: Responsive.sp(18),
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.screenTitle(fontSize: Responsive.sp(18)),
               ),
             ),
 
@@ -233,11 +230,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                           SizedBox(height: Responsive.h(2)),
                           Text(
                             'Search for careers',
-                            style: TextStyle(
-                              fontSize: Responsive.sp(16),
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
                           ),
                           SizedBox(height: Responsive.h(1)),
                           Text(
@@ -271,11 +264,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                           SizedBox(height: Responsive.h(2)),
                           Text(
                             'Search failed',
-                            style: TextStyle(
-                              fontSize: Responsive.sp(16),
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
                           ),
                           SizedBox(height: Responsive.h(1)),
                           Padding(
@@ -331,11 +320,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                             SizedBox(height: Responsive.h(2)),
                             Text(
                               'No careers found',
-                              style: TextStyle(
-                                fontSize: Responsive.sp(16),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
                             ),
                             SizedBox(height: Responsive.h(1)),
                             Text(

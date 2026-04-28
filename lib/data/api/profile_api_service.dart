@@ -7,13 +7,24 @@ import '../../utils/prefs/auth_local_storage.dart';
 
 class ProfileApiService {
   final BaseDioClient _dioClient;
+  final AuthLocalStorage _authStorage;
 
-  ProfileApiService(AuthLocalStorage authStorage)
-      : _dioClient = BaseDioClient(authStorage: authStorage);
+  ProfileApiService(this._authStorage)
+      : _dioClient = BaseDioClient();
 
   Future<ProfileModel> getProfile() async {
     try {
-      final response = await _dioClient.dio.get(ApiConstants.profile);
+      final phone = await _authStorage.getPhone();
+
+      // If no phone stored yet, return empty profile
+      if (phone == null || phone.isEmpty) {
+        return ProfileModel(userId: '', name: '', email: null, phone: null);
+      }
+
+      final response = await _dioClient.dio.post(
+        ApiConstants.profile,
+        data: {'phone': phone},
+      );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {
         return ProfileModel.fromJson(response.data['data']);
@@ -23,7 +34,7 @@ class ProfileApiService {
     } on DioException catch (e) {
       throw Exception(ApiErrorHandler.handleDioError(e));
     } catch (e) {
-      throw Exception('Unexpected error: $e');
+      rethrow;
     }
   }
 
@@ -32,6 +43,9 @@ class ProfileApiService {
       final response = await _dioClient.dio.post(
         ApiConstants.updateProfile,
         data: profileData,
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
       );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {
@@ -45,7 +59,4 @@ class ProfileApiService {
       throw Exception('Unexpected error: $e');
     }
   }
-
-
-
 }

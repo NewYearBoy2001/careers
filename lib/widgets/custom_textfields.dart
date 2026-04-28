@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final AutovalidateMode? autovalidateMode;
   final Widget? suffixIcon;
   final List<TextInputFormatter>? inputFormatters;
+  final TextCapitalization textCapitalization;
 
   const CustomTextField({
     super.key,
@@ -27,6 +28,7 @@ class CustomTextField extends StatelessWidget {
     this.autovalidateMode,
     this.suffixIcon,
     this.inputFormatters,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -77,6 +79,7 @@ class CustomTextField extends StatelessWidget {
                 validator: validator,
                 autovalidateMode: autovalidateMode ?? AutovalidateMode.onUserInteraction,
                 inputFormatters: inputFormatters,
+                textCapitalization: textCapitalization,
                 style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14,

@@ -91,12 +91,15 @@ class CollegeApiService {
     }
   }
 
-  Future<ApiResponse<CollegeModel>> getCollegeDetails(String id) async {
-    try {
-      final response = await _dio.post(
-        ApiConstants.collegeDetails,
-        data: {'id': id},
-      );
+  Future<ApiResponse<CollegeModel>> getCollegeDetails(String id, String phone) async {
+      try {
+        final response = await _dio.post(
+          ApiConstants.collegeDetails,
+          data: {
+            'id': id,
+            'phone': phone,
+          },
+        );
 
       if (response.statusCode == 200) {
         final data = response.data;

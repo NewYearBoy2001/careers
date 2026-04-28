@@ -21,6 +21,7 @@ import '../../bloc/newgen_courses/newgen_courses_event.dart';
 import '../../bloc/newgen_courses/newgen_courses_state.dart';
 import 'package:lottie/lottie.dart';
 import '/shimmer/newgen_course_card_shimmer.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareersPage extends StatefulWidget {
   final String currentEducation;
@@ -407,12 +408,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                   SizedBox(width: Responsive.w(2.5)),
                   Text(
                     'Career Paths',
-                    style: TextStyle(
-                      fontSize: Responsive.sp(18),
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.3,
-                    ),
+                    style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
                   ),
                 ],
               ),
@@ -453,11 +449,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                         SizedBox(height: Responsive.h(1)),
                         Text(
                           'Failed to load career paths',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(16),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                          style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(16)),
                         ),
                         SizedBox(height: Responsive.h(0.5)),
                         Text(
@@ -624,12 +616,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                     SizedBox(width: Responsive.w(2)),
                     Text(
                       'Courses',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(18),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.3,
-                      ),
+                      style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
                     ),
                   ],
                 ),

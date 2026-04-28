@@ -9,6 +9,7 @@ import 'package:careers/screens/admission/widgets/college_card.dart';
 import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class SavedCollegesPage extends StatefulWidget {
   const SavedCollegesPage({super.key});
@@ -53,9 +54,9 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title:Text(
           'Saved Colleges',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: AppTextStyles.pageTitle(fontSize: 18),
         ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -136,10 +137,7 @@ class _SavedCollegesPageState extends State<SavedCollegesPage> {
                     ),
                     SizedBox(height: Responsive.h(2)),
                     Text('No Saved Colleges',
-                        style: TextStyle(
-                            fontSize: Responsive.sp(18),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary)),
+                      style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),),
                     SizedBox(height: Responsive.h(1)),
                     Text('Start saving colleges to view them here',
                         style: TextStyle(

@@ -5,20 +5,18 @@ class SavedCollegeRepository {
 
   SavedCollegeRepository(this._apiService);
 
-  /// Save a college
-  Future<String> saveCollege(String collegeId) async {
+  Future<String> saveCollege(String collegeId, String phone) async {
     try {
-      final response = await _apiService.saveCollege(collegeId);
+      final response = await _apiService.saveCollege(collegeId, phone);
       return response['message'] ?? 'College saved successfully';
     } catch (e) {
       throw e.toString();
     }
   }
 
-  /// Remove a saved college
-  Future<String> removeSavedCollege(String collegeId) async {
+  Future<String> removeSavedCollege(String collegeId, String phone) async {
     try {
-      final response = await _apiService.removeSavedCollege(collegeId);
+      final response = await _apiService.removeSavedCollege(collegeId, phone);
       return response['message'] ?? 'College removed from saved list';
     } catch (e) {
       throw e.toString();

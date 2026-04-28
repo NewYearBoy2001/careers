@@ -58,23 +58,23 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
       FetchCollegeDetails event,
       Emitter<CollegeState> emit,
       ) async {
-    emit(CollegeDetailsLoading(_lastSearchResults)); // ✅ CHANGE: Pass preserved results
+    emit(CollegeDetailsLoading(_lastSearchResults));
 
     try {
-      final response = await _repository.getCollegeDetails(event.collegeId);
+      final response = await _repository.getCollegeDetails(event.collegeId, event.phone);
 
       if (response.success && response.data != null) {
-        emit(CollegeDetailsLoaded(response.data!, _lastSearchResults)); // ✅ CHANGE: Pass preserved results
+        emit(CollegeDetailsLoaded(response.data!, _lastSearchResults));
       } else {
         emit(CollegeError(
           response.message ?? 'Failed to fetch college details',
-          colleges: _lastSearchResults, // ✅ CHANGE: Pass preserved results on error
+          colleges: _lastSearchResults,
         ));
       }
     } catch (e) {
       emit(CollegeError(
         'An error occurred: ${e.toString()}',
-        colleges: _lastSearchResults, // ✅ CHANGE: Pass preserved results on error
+        colleges: _lastSearchResults,
       ));
     }
   }

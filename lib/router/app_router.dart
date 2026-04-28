@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careers/screens/splash_screen.dart';
-import 'package:careers/screens/login_screen.dart';
-import 'package:careers/screens/signup_screen.dart';
+// import 'package:careers/screens/login_screen.dart';
+// import 'package:careers/screens/signup_screen.dart';
 import 'package:careers/screens/dashboard_screen.dart';
 import 'package:careers/screens/home/aptitude_test_page.dart';
 import 'package:careers/screens/home/aptitude_result_page.dart';
@@ -10,8 +10,8 @@ import 'package:careers/screens/careers/course_detail_screen.dart';
 import 'package:careers/screens/admission/college_details_page.dart';
 import 'package:careers/screens/admission/college_search_results_page.dart'; // ✅ ADD
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:careers/bloc/signup/signup_bloc.dart';
-import 'package:careers/data/repositories/auth_repository.dart';
+// import 'package:careers/bloc/signup/signup_bloc.dart';
+// import 'package:careers/data/repositories/auth_repository.dart';
 import 'package:careers/screens/profile/saved_colleges_page.dart';
 import 'package:careers/screens/profile/edit_profile_screen.dart';
 import 'package:careers/data/models/profile_model.dart';
@@ -24,10 +24,10 @@ import 'package:careers/screens/careers/career_search_results_page.dart';
 import 'package:careers/screens/careers/career_child_nodes_page.dart';
 import 'package:careers/bloc/career_child_nodes/career_child_nodes_bloc.dart';
 import 'package:careers/data/repositories/career_child_nodes_repository.dart';
-import 'package:careers/screens/forgot_password_screen.dart';
-import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
-import 'package:careers/data/repositories/forgot_password_repository.dart';
-import 'package:careers/data/api/forgot_password_api_service.dart';
+// import 'package:careers/screens/forgot_password_screen.dart';
+// import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
+// import 'package:careers/data/repositories/forgot_password_repository.dart';
+// import 'package:careers/data/api/forgot_password_api_service.dart';
 import 'package:careers/screens/home/career_record_videos_page.dart';
 // import 'package:careers/data/repositories/career_record_video_repository.dart';
 // import 'package:careers/bloc/career_record_video/career_record_video_bloc.dart';
@@ -57,46 +57,46 @@ class AppRouter {
       ),
 
       // Login Screen
-      GoRoute(
-        path: '/login',
-        name: 'login',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const LoginScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-        ),
-      ),
+      // GoRoute(
+      //   path: '/login',
+      //   name: 'login',
+      //   pageBuilder: (context, state) => CustomTransitionPage(
+      //     key: state.pageKey,
+      //     child: const LoginScreen(),
+      //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //       return FadeTransition(
+      //         opacity: animation,
+      //         child: child,
+      //       );
+      //     },
+      //   ),
+      // ),
 
-      GoRoute(
-        path: '/signup',
-        name: 'signup',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: BlocProvider(
-            create: (context) => SignupBloc(
-              repository: context.read<AuthRepository>(),
-            ),
-            child: const SignupScreen(),
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              ),
-            );
-          },
-        ),
-      ),
+      // GoRoute(
+      //   path: '/signup',
+      //   name: 'signup',
+      //   pageBuilder: (context, state) => CustomTransitionPage(
+      //     key: state.pageKey,
+      //     child: BlocProvider(
+      //       create: (context) => SignupBloc(
+      //         repository: context.read<AuthRepository>(),
+      //       ),
+      //       child: const SignupScreen(),
+      //     ),
+      //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //       return FadeTransition(
+      //         opacity: animation,
+      //         child: SlideTransition(
+      //           position: Tween<Offset>(
+      //             begin: const Offset(0.1, 0),
+      //             end: Offset.zero,
+      //           ).animate(animation),
+      //           child: child,
+      //         ),
+      //       );
+      //     },
+      //   ),
+      // ),
 
       // Dashboard Screen with tab parameter
       GoRoute(
@@ -217,15 +217,17 @@ class AppRouter {
         },
       ),
 
-      // College Details Screen
       GoRoute(
         path: '/college-details',
         name: 'college-details',
         pageBuilder: (context, state) {
-          final collegeId = state.extra as String;
+          final extra = state.extra as Map<String, String>;  // CHANGE
           return CustomTransitionPage(
             key: state.pageKey,
-            child: CollegeDetailsPage(collegeId: collegeId),
+            child: CollegeDetailsPage(
+              collegeId: extra['id']!,     // CHANGE
+              phone: extra['phone']!,       // ADD
+            ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: animation,
@@ -289,33 +291,33 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: '/change-password',
-        name: 'change-password',
-        pageBuilder: (context, state) {
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: BlocProvider(
-              create: (context) => ChangePasswordBloc(
-                context.read<ChangePasswordRepository>(),
-              ),
-              child: const ChangePasswordScreen(),
-            ),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.1, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              );
-            },
-          );
-        },
-      ),
+      // GoRoute(
+      //   path: '/change-password',
+      //   name: 'change-password',
+      //   pageBuilder: (context, state) {
+      //     return CustomTransitionPage(
+      //       key: state.pageKey,
+      //       child: BlocProvider(
+      //         create: (context) => ChangePasswordBloc(
+      //           context.read<ChangePasswordRepository>(),
+      //         ),
+      //         child: const ChangePasswordScreen(),
+      //       ),
+      //       transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //         return FadeTransition(
+      //           opacity: animation,
+      //           child: SlideTransition(
+      //             position: Tween<Offset>(
+      //               begin: const Offset(0.1, 0),
+      //               end: Offset.zero,
+      //             ).animate(animation),
+      //             child: child,
+      //           ),
+      //         );
+      //       },
+      //     );
+      //   },
+      // ),
 
       GoRoute(
         path: '/career-search',
@@ -391,31 +393,31 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: '/forgot-password',  // ← must be exactly this, with hyphen
-        name: 'forgot-password',
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: BlocProvider(
-            create: (_) => ForgotPasswordBloc(
-              ForgotPasswordRepository(ForgotPasswordApiService()),
-            ),
-            child: const ForgotPasswordScreen(),
-          ),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.1, 0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              ),
-            );
-          },
-        ),
-      ),
+      // GoRoute(
+      //   path: '/forgot-password',  // ← must be exactly this, with hyphen
+      //   name: 'forgot-password',
+      //   pageBuilder: (context, state) => CustomTransitionPage(
+      //     key: state.pageKey,
+      //     child: BlocProvider(
+      //       create: (_) => ForgotPasswordBloc(
+      //         ForgotPasswordRepository(ForgotPasswordApiService()),
+      //       ),
+      //       child: const ForgotPasswordScreen(),
+      //     ),
+      //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //       return FadeTransition(
+      //         opacity: animation,
+      //         child: SlideTransition(
+      //           position: Tween<Offset>(
+      //             begin: const Offset(0.1, 0),
+      //             end: Offset.zero,
+      //           ).animate(animation),
+      //           child: child,
+      //         ),
+      //       );
+      //     },
+      //   ),
+      // ),
 
       GoRoute(
         path: '/career-record-videos',

@@ -76,9 +76,9 @@ class MyApp extends StatelessWidget {
         // ========================================
         // API SERVICES (Network Layer)
         // ========================================
-        RepositoryProvider<AuthApiService>(
-          create: (_) => AuthApiService(),
-        ),
+        // RepositoryProvider<AuthApiService>(
+        //   create: (_) => AuthApiService(),
+        // ),
 
         RepositoryProvider<AdmissionApiService>(
           create: (context) => AdmissionApiService(
@@ -183,12 +183,12 @@ class MyApp extends StatelessWidget {
         // ========================================
         // REPOSITORIES (Business Logic Layer)
         // ========================================
-        RepositoryProvider<AuthRepository>(
-          create: (context) => AuthRepository(
-            context.read<AuthApiService>(),
-            context.read<AuthLocalStorage>(),
-          ),
-        ),
+        // RepositoryProvider<AuthRepository>(
+        //   create: (context) => AuthRepository(
+        //     context.read<AuthApiService>(),
+        //     context.read<AuthLocalStorage>(),
+        //   ),
+        // ),
 
         RepositoryProvider<AdmissionRepository>(
           create: (context) => AdmissionRepository(
