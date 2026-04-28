@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/screens/home/widgets/youtube_player_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 // ── CHANGE 1: StatelessWidget → StatefulWidget + SingleTickerProviderStateMixin
 class ClassCard extends StatefulWidget {
@@ -164,12 +165,7 @@ class _ClassCardState extends State<ClassCard>
                       children: [
                         Text(
                           widget.classData['title'] as String,
-                          style: const TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            height: 1.3,
-                          ),
+                          style: AppTextStyles.cardTitle(fontSize: 11.5).copyWith(height: 1.3),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),

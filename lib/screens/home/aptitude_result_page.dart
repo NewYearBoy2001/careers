@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:go_router/go_router.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class AptitudeResultPage extends StatefulWidget {
   final Map<String, int> scores;
@@ -129,12 +130,9 @@ class _AptitudeResultPageState extends State<AptitudeResultPage> with TickerProv
           color: AppColors.textOnPrimary,
           onPressed: () => context.go('/dashboard?tab=0'),
         ),
-        title: const Text(
+        title: Text(
           "Your Results",
-          style: TextStyle(
-            color: AppColors.textOnPrimary,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.pageTitle(fontSize: 18),
         ),
       ),
       body: SingleChildScrollView(
@@ -442,11 +440,7 @@ class _AptitudeResultPageState extends State<AptitudeResultPage> with TickerProv
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: Responsive.sp(18),
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+          style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
         ),
         SizedBox(height: Responsive.h(1.5)),
         child,
@@ -470,11 +464,7 @@ class _AptitudeResultPageState extends State<AptitudeResultPage> with TickerProv
                   SizedBox(width: Responsive.w(2)),
                   Text(
                     career,
-                    style: TextStyle(
-                      fontSize: Responsive.sp(15),
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: AppTextStyles.cardTitle(fontSize: Responsive.sp(15)),
                   ),
                   const Spacer(),
                   Text(
@@ -565,11 +555,7 @@ class _AptitudeResultPageState extends State<AptitudeResultPage> with TickerProv
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: Responsive.sp(15),
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: AppTextStyles.cardTitle(fontSize: Responsive.sp(15)),
                   ),
                   SizedBox(height: Responsive.h(0.3)),
                   Text(

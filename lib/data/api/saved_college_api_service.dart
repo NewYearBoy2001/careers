@@ -13,12 +13,14 @@ class SavedCollegeApiService {
   }
 
 
-  /// Save a college
-  Future<Map<String, dynamic>> saveCollege(String collegeId) async {
+  Future<Map<String, dynamic>> saveCollege(String collegeId, String phone) async {
     try {
       final response = await dio.post(
         ApiConstants.saveCollege,
-        data: {'college_id': collegeId},
+        data: {
+          'college_id': collegeId,
+          'phone': phone,
+        },
       );
       return response.data;
     } on DioException catch (e) {
@@ -26,12 +28,14 @@ class SavedCollegeApiService {
     }
   }
 
-  /// Remove a saved college
-  Future<Map<String, dynamic>> removeSavedCollege(String collegeId) async {
+  Future<Map<String, dynamic>> removeSavedCollege(String collegeId, String phone) async {
     try {
       final response = await dio.delete(
         ApiConstants.removeSavedCollege,
-        data: {'college_id': collegeId},
+        data: {
+          'college_id': collegeId,
+          'phone': phone, // ADD
+        },
       );
       return response.data;
     } on DioException catch (e) {

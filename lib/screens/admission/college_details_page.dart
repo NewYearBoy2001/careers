@@ -19,13 +19,16 @@ import 'package:careers/data/repositories/course_fee_repository.dart';
 import 'package:careers/data/models/college_model.dart'; // for CourseItem
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_event.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
+  final String phone;
 
   const CollegeDetailsPage({
     super.key,
     required this.collegeId,
+    required this.phone,
   });
 
   @override
@@ -41,10 +44,11 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   @override
   void initState() {
     super.initState();
-    // Reset the saved state on init
     _isSaved = false;
-    _hasUserInteracted = false; // ✅ ADD: Reset user interaction flag
-    context.read<CollegeBloc>().add(FetchCollegeDetails(widget.collegeId));
+    _hasUserInteracted = false;
+    context.read<CollegeBloc>().add(
+      FetchCollegeDetails(widget.collegeId, widget.phone),  // ADD phone
+    );
   }
 
   @override
@@ -84,9 +88,13 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
 
   void _toggleSaveCollege() {
     if (_isSaved) {
-      context.read<SavedCollegeBloc>().add(RemoveSavedCollege(widget.collegeId));
+      context.read<SavedCollegeBloc>().add(
+        RemoveSavedCollege(widget.collegeId, widget.phone), // ADD phone
+      );
     } else {
-      context.read<SavedCollegeBloc>().add(SaveCollege(widget.collegeId));
+      context.read<SavedCollegeBloc>().add(
+        SaveCollege(widget.collegeId, widget.phone), // ADD phone
+      );
     }
   }
 
@@ -373,12 +381,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
               Expanded(
                 child: Text(
                   college.name,
-                  style: TextStyle(
-                    fontSize: Responsive.sp(20),
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    height: 1.3,
-                  ),
+                  style: AppTextStyles.cardTitle(fontSize: Responsive.sp(20)).copyWith(height: 1.3),
                 ),
               ),
               SizedBox(width: Responsive.w(3)),
@@ -498,11 +501,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
             children: [
               Text(
                 'Courses Offered',
-                style: TextStyle(
-                  fontSize: Responsive.sp(16),
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
               ),
               if (college.courseList.any((c) => c.hasFeeStructure)) ...[ // ADD CONDITION
                 SizedBox(width: Responsive.w(2)),
@@ -535,11 +534,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
             SizedBox(height: Responsive.h(2.5)),
             Text(
               'About',
-              style: TextStyle(
-                fontSize: Responsive.sp(16),
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+              style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
             ),
             SizedBox(height: Responsive.h(1)),
             Text(
@@ -664,11 +659,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
         children: [
           Text(
             'Contact Information',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
           ),
           SizedBox(height: Responsive.h(2)),
           if (college.email != null)
@@ -771,11 +762,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
         children: [
           Text(
             'Facilities',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
           ),
           SizedBox(height: Responsive.h(1.5)),
           ...facilities.map((facility) => Padding(

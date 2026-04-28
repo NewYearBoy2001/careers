@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import '/utils/prefs/auth_local_storage.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class SimpleHeader extends StatefulWidget {
   const SimpleHeader({super.key});
@@ -83,11 +84,7 @@ class _SimpleHeaderState extends State<SimpleHeader> {
                 SizedBox(height: Responsive.h(0.5)),
                 Text(
                   _userName.isEmpty ? 'User' : _userName,
-                  style: TextStyle(
-                    fontSize: Responsive.sp(18),
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.white,
-                  ),
+                  style: AppTextStyles.pageTitle(fontSize: Responsive.sp(18)),
                 ),
               ],
             ),

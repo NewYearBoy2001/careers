@@ -9,6 +9,7 @@ import '../../bloc/newgen_courses/newgen_courses_state.dart';
 import 'widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
 import 'package:lottie/lottie.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class NewgenCoursesPage extends StatefulWidget {
   const NewgenCoursesPage({super.key});
@@ -42,11 +43,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
           children: [
             Text(
               'NewGen Courses',
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: Responsive.sp(18),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.pageTitle(fontSize: Responsive.sp(18)),
             ),
             Text(
               'Future-ready career paths',
@@ -80,11 +77,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
                     SizedBox(height: Responsive.h(2)),
                     Text(
                       'Failed to load NewGen courses',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(18),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: Responsive.h(1)),
@@ -129,11 +122,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
                     SizedBox(height: Responsive.h(2)),
                     Text(
                       'No NewGen courses available',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(16),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(16)),
                     ),
                     SizedBox(height: Responsive.h(1)),
                     Text(
@@ -201,11 +190,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
                           SizedBox(width: Responsive.w(2)),
                           Text(
                             'Future-ready courses',
-                            style: TextStyle(
-                              fontSize: Responsive.sp(16),
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
+                            style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(16)),
                           ),
                         ],
                       ),

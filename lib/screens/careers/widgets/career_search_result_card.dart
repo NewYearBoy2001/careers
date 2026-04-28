@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareerSearchResultCard extends StatefulWidget {
   final String title;
@@ -198,12 +198,7 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                       children: [
                         Text(
                           widget.title,
-                          style: TextStyle(
-                            fontSize: Responsive.sp(14),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                            letterSpacing: -0.3,
-                          ),
+                          style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(14)),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),

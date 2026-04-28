@@ -3,6 +3,9 @@ import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:careers/data/models/college_model.dart';
 import 'package:go_router/go_router.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
+import 'user_info_dialog.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CollegeCard extends StatelessWidget {
   final CollegeModel college;
@@ -34,8 +37,34 @@ class CollegeCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            context.push('/college-details', extra: college.id);
+          onTap: () async {
+            final storage = AuthLocalStorage();
+            final phone = await storage.getPhone();
+            final name = await storage.getUserName();
+
+            final hasData = phone != null && phone.isNotEmpty &&
+                name != null && name.isNotEmpty;
+
+            if (!context.mounted) return;
+
+            if (!hasData) {
+              final result = await showDialog<bool>(
+                context: context,
+                barrierDismissible: true,   // CHANGE: was false
+                barrierColor: Colors.black.withOpacity(0.45),
+                builder: (_) => const UserInfoDialog(),
+              );
+              if (result != true || !context.mounted) return;
+            }
+
+            // Re-read phone after possible dialog save
+            final updatedPhone = await storage.getPhone();
+            if (!context.mounted) return;
+
+            context.push('/college-details', extra: {
+              'id': college.id,
+              'phone': updatedPhone ?? '',
+            });
           },
           borderRadius: BorderRadius.circular(Responsive.w(3.5)),
           child: Padding(
@@ -48,12 +77,7 @@ class CollegeCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         college.name,
-                        style: TextStyle(
-                          fontSize: Responsive.sp(15),
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.3,
-                        ),
+                        style: AppTextStyles.cardTitle(fontSize: Responsive.sp(15)),
                       ),
                     ),
                     Container(

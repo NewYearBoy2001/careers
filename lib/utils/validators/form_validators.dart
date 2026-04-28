@@ -28,7 +28,9 @@ class FormValidators {
   }
 
   static String? phone(String? value) {
-    if (value == null || value.trim().isEmpty) return null; // optional
+    if (value == null || value.trim().isEmpty) {
+      return 'Phone number is required';
+    }
     if (!_phoneRegex.hasMatch(value.trim())) {
       return 'Phone number must be 10 digits';
     }

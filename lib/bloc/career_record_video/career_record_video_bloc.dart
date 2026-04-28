@@ -25,12 +25,12 @@ class CareerRecordVideoBloc
       RefreshHomeVideos event,
       Emitter<CareerRecordVideoState> emit,
       ) async {
-    // No loading state emitted — current data stays visible
     try {
       final videos = await _repository.fetchHomeVideos();
       emit(HomeVideosLoaded(videos));
     } catch (_) {
-      // Silently fail — don't replace existing data with an error
+      // Silently fail — existing data stays visible
+      // No state change needed, _onRefresh in HomePage handles UX
     }
   }
 

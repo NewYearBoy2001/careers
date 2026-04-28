@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'widgets/location_filter_sheet.dart';
 import 'package:lottie/lottie.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CollegeSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;
@@ -203,21 +204,7 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
               SizedBox(width: Responsive.w(1)),
               Text(
                 'Search Colleges',
-                style: TextStyle(
-                  fontSize: Responsive.sp(22),
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
-                  height: 1.1,
-                  fontFamily: 'SF Pro Display',
-                  shadows: [
-                    Shadow(
-                      color: const Color(0x40000000),
-                      offset: Offset(0, Responsive.h(0.2)),
-                      blurRadius: Responsive.w(0.75),
-                    ),
-                  ],
-                ),
+                style: AppTextStyles.pageTitle(fontSize: Responsive.sp(22)),
               ),
             ],
           ),

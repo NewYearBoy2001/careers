@@ -8,6 +8,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../data/repositories/career_search_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
+import 'package:careers/constants/app_text_styles.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final Map<String, dynamic> courseData;
@@ -44,6 +46,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(        // ADD
+      SystemUiMode.manual,                       // ADD
+      overlays: SystemUiOverlay.values,          // ADD
+    );                                           // ADD
 
     _animController = AnimationController(
       vsync: this,
@@ -130,7 +136,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     _ytController = YoutubePlayerController(
       initialVideoId: videoId,
       flags: const YoutubePlayerFlags(
-        autoPlay: false,
+        autoPlay: true,
         mute: false,
         enableCaption: false,
         loop: false,
@@ -335,7 +341,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     if (_isYoutubeReady && _ytController != null) {
       return YoutubePlayerBuilder(
         onEnterFullScreen: () {
-          setState(() => _isFullScreen = true);  // ← Add this
+          setState(() => _isFullScreen = true);
           SystemChrome.setPreferredOrientations([
             DeviceOrientation.landscapeLeft,
             DeviceOrientation.landscapeRight,
@@ -343,19 +349,17 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
         },
         onExitFullScreen: () {
-          setState(() => _isFullScreen = false);  // ← Add this
-          // Also remove any fullscreen overlay if it exists
-          _removeFullScreenOverlay();             // ← Add this
+          setState(() => _isFullScreen = false);
+          _removeFullScreenOverlay();
           SystemChrome.setPreferredOrientations([
             DeviceOrientation.portraitUp,
           ]);
-          SystemChrome.setEnabledSystemUIMode(
-            SystemUiMode.manual,
-            overlays: SystemUiOverlay.values,
-          );
           Future.delayed(const Duration(milliseconds: 300), () {
             if (mounted) {
-              SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+              SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.manual,
+                overlays: SystemUiOverlay.values,
+              );
             }
           });
         },
@@ -369,107 +373,90 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           ),
         ),
         builder: (context, player) {
-          return Scaffold(
+          return Scaffold(                              // REMOVE FadeTransition/SlideTransition
             backgroundColor: AppColors.background,
-            body: FadeTransition(
-              opacity: _fadeAnim,
-              child: SlideTransition(
-                position: _slideAnim,
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    SliverAppBar(
-                      expandedHeight: Responsive.h(30),
-                      pinned: true,
-                      backgroundColor: _getStreamColor(),
-                      leading: IconButton(
-                        icon: Container(
-                          padding: EdgeInsets.all(Responsive.w(2)),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(Responsive.w(3)),
-                          ),
-                          child: Icon(Icons.arrow_back,
-                              color: Colors.white, size: Responsive.sp(20)),
-                        ),
-                        onPressed: () => context.pop(),
+            body: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: MediaQuery.of(context).size.width * 9 / 16, // FIXED height
+                  pinned: true,
+                  backgroundColor: _getStreamColor(),
+                  leading: IconButton(
+                    icon: Container(
+                      padding: EdgeInsets.all(Responsive.w(2)),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(Responsive.w(3)),
                       ),
-                      flexibleSpace: FlexibleSpaceBar(
-                        background: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    _getStreamColor(),
-                                    _getStreamColor().withOpacity(0.7),
+                      child: Icon(Icons.arrow_back,
+                          color: Colors.white, size: Responsive.sp(20)),
+                    ),
+                    onPressed: () => context.pop(),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        player,                        // player first, no gradient on top
+                        if (_showReplay)
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _replay,
+                            child: Container(
+                              color: Colors.black87,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: Colors.white, width: 1.2),
+                                      ),
+                                      child: const Icon(
+                                        Icons.replay_rounded,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      'Tap to replay',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-                            player,
-                            // ← Add replay overlay here, scoped to video area only
-                            if (_showReplay)
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: _replay,
-                                child: Container(
-                                  color: Colors.black87,
-                                  child: Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(color: Colors.white, width: 1.2),
-                                        ),
-                                        child: const Icon(
-                                          Icons.replay_rounded,
-                                          color: Colors.white,
-                                          size: 40,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      const Text(
-                                        'Tap to replay',
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 14,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(Responsive.w(7.5)),
-                            topRight: Radius.circular(Responsive.w(7.5)),
                           ),
-                        ),
-                        child: _isLoadingDetails
-                            ? _buildShimmer()
-                            : _detailsError != null
-                            ? _buildError()
-                            : _buildContent(),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(Responsive.w(7.5)),
+                        topRight: Radius.circular(Responsive.w(7.5)),
                       ),
                     ),
-                  ],
+                    child: _isLoadingDetails
+                        ? _buildShimmer()
+                        : _detailsError != null
+                        ? _buildError()
+                        : _buildContent(),
+                  ),
                 ),
-              ),
+              ],
             ),
           );
         },
@@ -637,10 +624,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               size: Responsive.sp(56), color: AppColors.error.withOpacity(0.6)),
           SizedBox(height: Responsive.h(2)),
           Text('Failed to load details',
-              style: TextStyle(
-                  fontSize: Responsive.sp(16),
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary)),
+            style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(16)),),
           SizedBox(height: Responsive.h(1)),
           Text(_detailsError ?? '',
               textAlign: TextAlign.center,
@@ -672,44 +656,66 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(Responsive.w(3)),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(Responsive.w(3)),
-                    ),
-                    child: Icon(
-                      _data['icon'] as IconData? ?? Icons.school,
-                      color: color,
-                      size: Responsive.sp(28),
+                  // Icon + Stream Details pill
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(Responsive.w(2.5)),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(Responsive.w(2.5)),
+                        ),
+                        child: Icon(
+                          _data['icon'] as IconData? ?? Icons.school,
+                          color: color,
+                          size: Responsive.sp(18),
+                        ),
+                      ),
+                      SizedBox(width: Responsive.w(2)),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Responsive.w(3),
+                          vertical: Responsive.h(0.4),
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(Responsive.w(4)),
+                        ),
+                        child: Text(
+                          'Stream Details',
+                          style: GoogleFonts.inter(
+                            fontSize: Responsive.sp(12),
+                            color: color,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: Responsive.h(1.5)),
+                  // Large title
+                  Text(
+                    (_data['title'] ?? '') as String,
+                    style: GoogleFonts.inter(
+                      fontSize: Responsive.sp(26),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.5,
+                      height: 1.25,
                     ),
                   ),
-                  SizedBox(width: Responsive.w(4)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          (_data['title'] ?? '') as String,
-                          style: TextStyle(
-                            fontSize: Responsive.sp(24),
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        SizedBox(height: Responsive.h(0.5)),
-                        Text(
-                          'Stream Details',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(14),
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                  SizedBox(height: Responsive.h(0.75)),
+                  // Thin accent underline
+                  Container(
+                    width: Responsive.w(12),
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ],
@@ -717,11 +723,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               SizedBox(height: Responsive.h(3)),
               Text(
                 'About This Stream',
-                style: TextStyle(
-                  fontSize: Responsive.sp(18),
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
               ),
               SizedBox(height: Responsive.h(1.5)),
               Text(
@@ -755,11 +757,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                     SizedBox(width: Responsive.w(2)),
                     Text(
                       'Core Subjects / Specializations',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(16),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
                     ),
                   ],
                 ),
@@ -787,11 +785,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 SizedBox(width: Responsive.w(2)),
                 Text(
                   'Career Opportunities',
-                  style: TextStyle(
-                    fontSize: Responsive.sp(18),
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
                 ),
               ],
             ),
