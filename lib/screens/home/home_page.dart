@@ -538,12 +538,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         Expanded(
                           child: Text(
                             'Take Career Assessment Test',
-                            style: TextStyle(
-                              fontSize: Responsive.sp(14),
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                              letterSpacing: 0.3,
-                            ),
+                            style: AppTextStyles.cardTitle(fontSize: Responsive.sp(14)),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
                           ),

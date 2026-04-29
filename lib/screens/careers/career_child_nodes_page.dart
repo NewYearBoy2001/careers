@@ -130,7 +130,9 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
         ],
       ),
 
-      body: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
+        body: SafeArea(
+          top: false,
+          child: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
         builder: (context, state) {
           if (state is CareerChildNodesLoading) {
             return CustomScrollView(
@@ -261,7 +263,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                             crossAxisCount: 2,
                             crossAxisSpacing: Responsive.w(3),
                             mainAxisSpacing: Responsive.h(2),
-                            childAspectRatio: 0.9,
+                            childAspectRatio: 0.78,
                           ),
                           delegate: SliverChildBuilderDelegate((
                               context,
@@ -319,7 +321,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
 
           return const SizedBox.shrink();
         },
-      ),
+      ),),
     );
   }
 }

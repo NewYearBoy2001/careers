@@ -331,6 +331,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                       : _buildContent(),
                 ),
               ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom,
+                ),
+              ),
             ],
           ),
         ),
@@ -454,6 +459,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                         : _detailsError != null
                         ? _buildError()
                         : _buildContent(),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom,
                   ),
                 ),
               ],
@@ -796,32 +806,40 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               spacing: Responsive.w(2),
               runSpacing: Responsive.h(1),
               children: _getCareerOptions()
-                  .map((career) => Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Responsive.w(4),
-                    vertical: Responsive.h(1.25)),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(Responsive.w(3)),
-                  border: Border.all(
-                      color: color.withOpacity(0.2), width: 1),
+                  .map((career) => ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: Responsive.w(85),
                 ),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Responsive.w(4),
+                      vertical: Responsive.h(1.25)),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(Responsive.w(3)),
+                    border: Border.all(
+                        color: color.withOpacity(0.2), width: 1),
+                  ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.check_circle_outline,
                         size: Responsive.sp(16), color: color),
                     SizedBox(width: Responsive.w(1.5)),
-                    Text(
-                      career,
-                      style: TextStyle(
-                        fontSize: Responsive.sp(13),
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                    Flexible(
+                      child: Text(
+                        career,
+                        style: TextStyle(
+                          fontSize: Responsive.sp(13),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ),
                   ],
-                ),
+                ),),
               ))
                   .toList(),
             ),
@@ -832,7 +850,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         if (_data['id'] != null && (_data['hasFuturePath'] == true || _data['hasFuturePath'] == 1))
           Padding(
             padding: EdgeInsets.fromLTRB(
-                Responsive.w(6), Responsive.h(4), Responsive.w(6), 0),
+                Responsive.w(6), Responsive.h(4), Responsive.w(6), Responsive.h(2)),
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -887,7 +905,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
               ),
             ),
           ),
-        SizedBox(height: Responsive.h(4)),
+        SizedBox(height: MediaQuery.of(context).padding.bottom + Responsive.h(1)),
       ],
     );
   }

@@ -136,6 +136,7 @@ class _AptitudeResultPageState extends State<AptitudeResultPage> with TickerProv
         ),
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         child: Column(
           children: [
             // Header Section

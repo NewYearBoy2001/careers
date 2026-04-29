@@ -4,8 +4,8 @@ class ApiConstants {
   static const String baseUrl = "https://careerss.in/api/";
   // static const String baseUrl = "https://rajasree.astradevelops.in/New_career/public/api/";
 
-  static const String login = "login";
-  static const String signup = "signup";
+  // static const String login = "login";
+  // static const String signup = "signup";
   static const String admissionBanners = "admision-banners";
   static const String searchColleges = "search-colleges"; 
   static const String collegeDetails = "college-details";
@@ -14,14 +14,14 @@ class ApiConstants {
   static const String profile = 'profile';
   static const String savedColleges = 'saved-colleges';
   static const String updateProfile = 'update-profile';
-  static const String changePassword = 'change-password';
+  // static const String changePassword = 'change-password';
   static const String careerBanners = "career-banners";
   static const String searchCareers = "search-careernodes";
   static const String careerNodeDetails = "careernode-details";
   static const String careerHomeNodes = "career-home-nodes";
   static const String careerChildNodes = "career-child-basic";
-  static const String forgotPassword = 'forgot-password';
-  static const String resetPassword = 'reset-password';
+  // static const String forgotPassword = 'forgot-password';
+  // static const String resetPassword = 'reset-password';
   static const String careerRecordVideosHome = "career-record-videos/home";
   static const String careerRecordVideos = "career-record-videos";
   static const String careerGuidanceBanners = "career-guidance-banners";
@@ -30,7 +30,7 @@ class ApiConstants {
   static const String districts = 'districts';
   static const String courseFeeStructure = 'course-fee-structure';
   static const String newgenCourses = 'newgen-courses';
-  static const String deleteAccount = 'delete-account';
+  // static const String deleteAccount = 'delete-account';
   static const String collegeViewUser = 'collegeview-user';
 
 }

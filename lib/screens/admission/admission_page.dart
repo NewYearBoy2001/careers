@@ -44,8 +44,6 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     _loadInitialData();
     _scrollController.addListener(_onScroll);
 
-    _searchFocusNode.addListener(_onSearchFocusChange);
-
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -125,12 +123,12 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     }
   }
 
-  void _onSearchFocusChange() {
-    if (_searchFocusNode.hasFocus) {
-      _searchFocusNode.unfocus();
-      _navigateToSearchResults(focusField: 'keyword'); // ✅ Pass which field
-    }
-  }
+  // void _onSearchFocusChange() {
+  //   if (_searchFocusNode.hasFocus) {
+  //     _searchFocusNode.unfocus();
+  //     _navigateToSearchResults(focusField: 'keyword'); // ✅ Pass which field
+  //   }
+  // }
 
   // ✅ MODIFY: Accept which field to focus
   void _navigateToSearchResults({String? focusField}) async {
@@ -246,6 +244,8 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
             icon: Icons.search_rounded,
             controller: _searchController,
             focusNode: _searchFocusNode,
+            interceptTap: true,
+            onTap: () => _navigateToSearchResults(focusField: 'keyword'),
           ),
           SizedBox(height: Responsive.h(0.75)),
           _buildLocationFilterButton(),

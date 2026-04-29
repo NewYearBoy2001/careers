@@ -231,7 +231,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   style: GoogleFonts.inter(
                     fontSize: Responsive.sp(16),
                     color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 SizedBox(width: Responsive.w(1)),
@@ -374,8 +374,8 @@ class _OnboardingPage extends StatelessWidget {
           TextSpan(
             text: '${data.title}\n',
             style: GoogleFonts.inter(
-              fontSize: Responsive.sp(28),
-              fontWeight: FontWeight.w800,
+              fontSize: Responsive.sp(30),
+              fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
               height: 1.25,
             ),
@@ -383,8 +383,8 @@ class _OnboardingPage extends StatelessWidget {
           TextSpan(
             text: data.titleHighlight,
             style: GoogleFonts.inter(
-              fontSize: Responsive.sp(28),
-              fontWeight: FontWeight.w800,
+              fontSize: Responsive.sp(30),
+              fontWeight: FontWeight.w600,
               color: AppColors.primary,
               height: 1.25,
             ),
