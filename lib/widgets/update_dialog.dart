@@ -18,6 +18,7 @@ class AppUpdateChecker {
   //   _showUpdateDialog(context, '', '2.0.0');
   // }
 
+
   static void _showUpdateDialog(
       BuildContext context,
       String appStoreLink,

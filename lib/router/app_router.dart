@@ -10,23 +10,32 @@ import 'package:careers/screens/careers/course_detail_screen.dart';
 import 'package:careers/screens/admission/college_details_page.dart';
 import 'package:careers/screens/admission/college_search_results_page.dart'; // ✅ ADD
 import 'package:flutter_bloc/flutter_bloc.dart';
+<<<<<<< HEAD
+=======
+import 'package:careers/bloc/college/college_bloc.dart';
+import 'package:careers/data/repositories/college_repository.dart';
+>>>>>>> origin/careersguest
 // import 'package:careers/bloc/signup/signup_bloc.dart';
 // import 'package:careers/data/repositories/auth_repository.dart';
 import 'package:careers/screens/profile/saved_colleges_page.dart';
 import 'package:careers/screens/profile/edit_profile_screen.dart';
 import 'package:careers/data/models/profile_model.dart';
-import 'package:careers/screens/profile/change_password_screen.dart';
-import 'package:careers/bloc/change_password/change_password_bloc.dart';
-import 'package:careers/data/repositories/change_password_repository.dart';
+// import 'package:careers/screens/profile/change_password_screen.dart';
+// import 'package:careers/bloc/change_password/change_password_bloc.dart';
+// import 'package:careers/data/repositories/change_password_repository.dart';
 import 'package:careers/bloc/career_search/career_search_bloc.dart';
 import 'package:careers/data/repositories/career_search_repository.dart';
 import 'package:careers/screens/careers/career_search_results_page.dart';
 import 'package:careers/screens/careers/career_child_nodes_page.dart';
 import 'package:careers/bloc/career_child_nodes/career_child_nodes_bloc.dart';
 import 'package:careers/data/repositories/career_child_nodes_repository.dart';
+<<<<<<< HEAD
 // import 'package:careers/screens/forgot_password_screen.dart';
 // import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
 // import 'package:careers/data/repositories/forgot_password_repository.dart';
+=======
+// import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
+>>>>>>> origin/careersguest
 // import 'package:careers/data/api/forgot_password_api_service.dart';
 import 'package:careers/screens/home/career_record_videos_page.dart';
 // import 'package:careers/data/repositories/career_record_video_repository.dart';
@@ -36,6 +45,7 @@ import 'package:careers/screens/home/career_record_videos_page.dart';
 import 'package:careers/screens/careers/newgen_courses_page.dart';
 import 'package:careers/bloc/newgen_courses/newgen_courses_bloc.dart';
 import 'package:careers/data/repositories/newgen_courses_repository.dart';
+import 'package:careers/screens/onboarding/onboarding_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -188,7 +198,7 @@ class AppRouter {
         },
       ),
 
-      /// ✅ UPDATE: College Search Results Screen
+
       GoRoute(
         path: '/college-search',
         name: 'college-search',
@@ -196,10 +206,15 @@ class AppRouter {
           final extra = state.extra as Map<String, String?>?;
           return CustomTransitionPage(
             key: state.pageKey,
-            child: CollegeSearchResultsPage(
-              initialKeyword: extra?['keyword'],
-              initialLocation: extra?['location'],
-              focusField: extra?['focusField'], // ✅ ADD: Pass focus field
+            child: BlocProvider(  // ← fresh instance, not the global one
+              create: (context) => CollegeBloc(
+                context.read<CollegeRepository>(),
+              ),
+              child: CollegeSearchResultsPage(
+                initialKeyword: extra?['keyword'],
+                initialLocation: extra?['location'],
+                focusField: extra?['focusField'],
+              ),
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
@@ -463,6 +478,21 @@ class AppRouter {
                   child: child,
                 ),
               ),
+        ),
+      ),
+
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const OnboardingScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
         ),
       ),
     ],

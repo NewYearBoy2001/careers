@@ -86,4 +86,9 @@ class AppColors {
   static const Color backgroundGradientStart = Color(0xFFE1F5EE);
   static const Color backgroundGradientMid   = Color(0xFFF0F7F5);
   static const Color backgroundGradientEnd   = Color(0xFFFFF3EF);
+
+  static const Color onboardingBackground  = Color(0xFFF7FAFA); // near-white teal tint
+  static const Color onboardingCircleBg    = Color(0xFFDDEEEB); // soft teal circle behind illustration
+  static const Color onboardingIconBg      = Color(0xFFE6F2F0); // very light teal for icon bubbles
+  static const Color onboardingDotInactive = Color(0xFFCCDDDB);
 }

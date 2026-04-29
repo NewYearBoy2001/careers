@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'router/app_router.dart';
-import 'data/api/auth_api_service.dart';
-import 'data/repositories/auth_repository.dart';
 import 'utils/prefs/auth_local_storage.dart';
 import 'data/repositories/admission_banner_repository.dart';
 import 'data/api/admission_banner_api.dart';
@@ -20,9 +18,9 @@ import 'bloc/profile/profile_bloc.dart';
 import 'data/api/saved_colleges_list_api_service.dart';
 import 'data/repositories/saved_colleges_list_repository.dart';
 import 'bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
-import 'data/api/change_password_api_service.dart';
-import 'data/repositories/change_password_repository.dart';
-import 'bloc/change_password/change_password_bloc.dart';
+// import 'data/api/change_password_api_service.dart';
+// import 'data/repositories/change_password_repository.dart';
+// import 'bloc/change_password/change_password_bloc.dart';
 import 'data/api/career_banner_api_service.dart';
 import 'data/repositories/career_banner_repository.dart';
 import 'bloc/career_banner/career_banner_bloc.dart';
@@ -110,11 +108,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<ChangePasswordApiService>(
-          create: (context) => ChangePasswordApiService(
-            context.read<AuthLocalStorage>(),
-          ),
-        ),
+        // RepositoryProvider<ChangePasswordApiService>(
+        //   create: (context) => ChangePasswordApiService(
+        //     context.read<AuthLocalStorage>(),
+        //   ),
+        // ),
 
         RepositoryProvider<CareerBannerApiService>(
           create: (context) => CareerBannerApiService(
@@ -174,11 +172,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<DeleteAccountApiService>(
-          create: (context) => DeleteAccountApiService(
-            context.read<AuthLocalStorage>(),
-          ),
-        ),
+        // RepositoryProvider<DeleteAccountApiService>(
+        //   create: (context) => DeleteAccountApiService(
+        //     context.read<AuthLocalStorage>(),
+        //   ),
+        // ),
 
         // ========================================
         // REPOSITORIES (Business Logic Layer)
@@ -221,11 +219,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<ChangePasswordRepository>(
-          create: (context) => ChangePasswordRepository(
-            context.read<ChangePasswordApiService>(),
-          ),
-        ),
+        // RepositoryProvider<ChangePasswordRepository>(
+        //   create: (context) => ChangePasswordRepository(
+        //     context.read<ChangePasswordApiService>(),
+        //   ),
+        // ),
 
         RepositoryProvider<CareerBannerRepository>(
           create: (context) => CareerBannerRepository(
@@ -287,11 +285,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<DeleteAccountRepository>(
-          create: (context) => DeleteAccountRepository(
-            context.read<DeleteAccountApiService>(),
-          ),
-        ),
+        // RepositoryProvider<DeleteAccountRepository>(
+        //   create: (context) => DeleteAccountRepository(
+        //     context.read<DeleteAccountApiService>(),
+        //   ),
+        // ),
 
 
       ],
@@ -327,11 +325,11 @@ class MyApp extends StatelessWidget {
             ),
           ),
 
-          BlocProvider<ChangePasswordBloc>(
-            create: (context) => ChangePasswordBloc(
-              context.read<ChangePasswordRepository>(),
-            ),
-          ),
+          // BlocProvider<ChangePasswordBloc>(
+          //   create: (context) => ChangePasswordBloc(
+          //     context.read<ChangePasswordRepository>(),
+          //   ),
+          // ),
 
           BlocProvider<CareerBannerBloc>(
             create: (context) => CareerBannerBloc(
@@ -388,11 +386,11 @@ class MyApp extends StatelessWidget {
             ),
           ),
 
-          BlocProvider<DeleteAccountBloc>(
-            create: (context) => DeleteAccountBloc(
-              context.read<DeleteAccountRepository>(),
-            ),
-          ),
+          // BlocProvider<DeleteAccountBloc>(
+          //   create: (context) => DeleteAccountBloc(
+          //     context.read<DeleteAccountRepository>(),
+          //   ),
+          // ),
         ],
         child: MaterialApp.router(
           title: 'Careers',

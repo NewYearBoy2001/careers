@@ -52,6 +52,10 @@ class CollegeCard extends StatelessWidget {
                 context: context,
                 barrierDismissible: true,   // CHANGE: was false
                 barrierColor: Colors.black.withOpacity(0.45),
+<<<<<<< HEAD
+=======
+                useSafeArea: false,
+>>>>>>> origin/careersguest
                 builder: (_) => const UserInfoDialog(),
               );
               if (result != true || !context.mounted) return;

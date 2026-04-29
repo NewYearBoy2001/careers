@@ -56,7 +56,9 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
           ],
         ),
       ),
-      body: BlocBuilder<NewgenCoursesBloc, NewgenCoursesState>(
+        body: SafeArea(
+          top: false,
+          child: BlocBuilder<NewgenCoursesBloc, NewgenCoursesState>(
         builder: (context, state) {
           if (state is NewgenCoursesLoading) {
             return CustomScrollView(
@@ -211,7 +213,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
                             crossAxisCount: 2,
                             crossAxisSpacing: Responsive.w(3),
                             mainAxisSpacing: Responsive.h(2),
-                            childAspectRatio: 0.9,
+                            childAspectRatio: 0.78,
                           ),
                           delegate: SliverChildBuilderDelegate(
                                 (context, index) {
@@ -267,7 +269,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
 
           return const SizedBox.shrink();
         },
-      ),
+      ),),
     );
   }
 }

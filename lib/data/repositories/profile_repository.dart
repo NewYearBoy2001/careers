@@ -32,4 +32,17 @@ class ProfileRepository {
 
     return updatedProfile;
   }
+
+  Future<ProfileModel> createGuestUser(Map<String, dynamic> data) async {
+    final profile = await _apiService.createGuestUser(data);
+
+    await _localStorage.saveUser(
+      userId: profile.userId,
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+    );
+
+    return profile;
+  }
 }

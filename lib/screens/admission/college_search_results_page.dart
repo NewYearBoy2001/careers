@@ -13,6 +13,10 @@ import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'widgets/location_filter_sheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:careers/constants/app_text_styles.dart';
+<<<<<<< HEAD
+=======
+import 'dart:async';
+>>>>>>> origin/careersguest
 
 class CollegeSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;
@@ -43,6 +47,7 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
   String? _selectedStateName;
   int? _selectedDistrictId;
   String? _selectedDistrictName;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -71,7 +76,9 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
     _searchFocusNode.dispose();
     _locationFocusNode.dispose();
     _scrollController.dispose(); // ADD
+    _debounceTimer?.cancel();
     super.dispose();
+
   }
 
   // ADD
@@ -123,17 +130,21 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
     ));
   }
 
+  // REPLACE _performSearch with:
   void _performSearch() {
-    _currentPage = 1;
-    _isLoadingMore = false;
-    _hasMore = false;
-    context.read<CollegeBloc>().add(SearchColleges(
-      keyword: _searchController.text.trim().isEmpty
-          ? null
-          : _searchController.text.trim(),
-      location: _selectedDistrictName ?? _selectedStateName,
-      page: 1,
-    ));
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      _currentPage = 1;
+      _isLoadingMore = false;
+      _hasMore = false;
+      context.read<CollegeBloc>().add(SearchColleges(
+        keyword: _searchController.text.trim().isEmpty
+            ? null
+            : _searchController.text.trim(),
+        location: _selectedDistrictName ?? _selectedStateName,
+        page: 1,
+      ));
+    });
   }
 
   @override
@@ -265,6 +276,9 @@ class _CollegeSearchResultsPageState extends State<CollegeSearchResultsPage> {
           List<CollegeModel>? colleges;
           bool isLoading = false;
           String? errorMessage;
+          if (state is CollegeInitial) {
+            return const SizedBox.shrink();
+          }
 
           if (state is CollegeSearchLoading) {
             isLoading = true;
