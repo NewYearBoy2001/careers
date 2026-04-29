@@ -36,6 +36,7 @@ import 'package:careers/screens/home/career_record_videos_page.dart';
 import 'package:careers/screens/careers/newgen_courses_page.dart';
 import 'package:careers/bloc/newgen_courses/newgen_courses_bloc.dart';
 import 'package:careers/data/repositories/newgen_courses_repository.dart';
+import 'package:careers/screens/onboarding/onboarding_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -463,6 +464,21 @@ class AppRouter {
                   child: child,
                 ),
               ),
+        ),
+      ),
+
+      GoRoute(
+        path: '/onboarding',
+        name: 'onboarding',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const OnboardingScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
         ),
       ),
     ],

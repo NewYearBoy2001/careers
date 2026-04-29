@@ -40,18 +40,46 @@ class ProfileApiService {
 
   Future<ProfileModel> updateProfile(Map<String, dynamic> profileData) async {
     try {
+      final cached = await _authStorage.getCachedProfile();
+      final userId = cached['user_id'];
+
+      if (userId == null || userId.isEmpty) {
+        throw Exception('User ID not found. Please restart the app.');
+      }
+
       final response = await _dioClient.dio.post(
         ApiConstants.updateProfile,
-        data: profileData,
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-        ),
+        data: {
+          ...profileData,
+          'id': userId,           // ← inject id from storage
+        },
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {
         return ProfileModel.fromJson(response.data['data']);
       } else {
         throw Exception(response.data['message'] ?? 'Failed to update profile');
+      }
+    } on DioException catch (e) {
+      throw Exception(ApiErrorHandler.handleDioError(e));
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
+    }
+  }
+
+  Future<ProfileModel> createGuestUser(Map<String, dynamic> data) async {
+    try {
+      final response = await _dioClient.dio.post(
+        ApiConstants.collegeViewUser,
+        data: data,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200 && response.data['status'] == "1") {
+        return ProfileModel.fromJson(response.data['data']);
+      } else {
+        throw Exception(response.data['message'] ?? 'Failed to create user');
       }
     } on DioException catch (e) {
       throw Exception(ApiErrorHandler.handleDioError(e));

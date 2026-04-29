@@ -5,6 +5,7 @@ class AuthLocalStorage {
   static const _nameKey = 'name';
   static const _emailKey = 'email';
   static const _phoneKey = 'phone';
+  static const _onboardingKey = 'onboarding_complete';
 
   Future<void> saveUser({
     required String userId,
@@ -56,5 +57,15 @@ class AuthLocalStorage {
       'email': prefs.getString(_emailKey),
       'phone': prefs.getString(_phoneKey),
     };
+  }
+
+  Future<void> setOnboardingComplete() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingKey, true);
+  }
+
+  Future<bool> isOnboardingComplete() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_onboardingKey) ?? false;
   }
 }

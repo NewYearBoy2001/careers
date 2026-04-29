@@ -40,14 +40,13 @@ class _UserInfoDialogState extends State<UserInfoDialog> {
     final phone = _phoneController.text.trim();
 
     try {
-      // Call update profile API
       final repository = context.read<ProfileRepository>();
-      await repository.updateProfile({
+      await repository.createGuestUser({   // ← changed from updateProfile
         'name': name,
         'phone': phone,
       });
 
-      if (mounted) Navigator.of(context).pop(true); // success
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       setState(() {
         _isLoading = false;
