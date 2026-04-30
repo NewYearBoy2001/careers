@@ -14,16 +14,17 @@ class ProfileApiService {
 
   Future<ProfileModel> getProfile() async {
     try {
-      final phone = await _authStorage.getPhone();
+      final cached = await _authStorage.getCachedProfile();
+      final userId = cached['user_id'];
 
-      // If no phone stored yet, return empty profile
-      if (phone == null || phone.isEmpty) {
+      // If no user_id stored yet, return empty profile
+      if (userId == null || userId.isEmpty) {
         return ProfileModel(userId: '', name: '', email: null, phone: null);
       }
 
       final response = await _dioClient.dio.post(
         ApiConstants.profile,
-        data: {'phone': phone},
+        data: {'user_id': userId},
       );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {

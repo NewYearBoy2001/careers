@@ -23,12 +23,12 @@ import 'package:careers/constants/app_text_styles.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
-  final String phone;
+  final String userId;
 
   const CollegeDetailsPage({
     super.key,
     required this.collegeId,
-    required this.phone,
+    required this.userId,
   });
 
   @override
@@ -47,7 +47,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     _isSaved = false;
     _hasUserInteracted = false;
     context.read<CollegeBloc>().add(
-      FetchCollegeDetails(widget.collegeId, widget.phone),  // ADD phone
+      FetchCollegeDetails(widget.collegeId, widget.userId),  // ADD phone
     );
   }
 
@@ -89,11 +89,11 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   void _toggleSaveCollege() {
     if (_isSaved) {
       context.read<SavedCollegeBloc>().add(
-        RemoveSavedCollege(widget.collegeId, widget.phone), // ADD phone
+        RemoveSavedCollege(widget.collegeId, widget.userId), // ADD phone
       );
     } else {
       context.read<SavedCollegeBloc>().add(
-        SaveCollege(widget.collegeId, widget.phone), // ADD phone
+        SaveCollege(widget.collegeId, widget.userId), // ADD phone
       );
     }
   }

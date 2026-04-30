@@ -17,7 +17,7 @@ class SavedCollegeBloc extends Bloc<SavedCollegeEvent, SavedCollegeState> {
       ) async {
     emit(SavedCollegeActionLoading());
     try {
-      final message = await repository.saveCollege(event.collegeId, event.phone); // ADD phone
+      final message = await repository.saveCollege(event.collegeId, event.userId); // ADD phone
       emit(CollegeSaved(message: message, collegeId: event.collegeId));
     } catch (e) {
       emit(SavedCollegeError(e.toString()));
@@ -30,7 +30,7 @@ class SavedCollegeBloc extends Bloc<SavedCollegeEvent, SavedCollegeState> {
       ) async {
     emit(SavedCollegeActionLoading());
     try {
-      final message = await repository.removeSavedCollege(event.collegeId, event.phone); // ADD phone
+      final message = await repository.removeSavedCollege(event.collegeId, event.userId);// ADD phone
       emit(CollegeUnsaved(message: message, collegeId: event.collegeId));
     } catch (e) {
       emit(SavedCollegeError(e.toString()));

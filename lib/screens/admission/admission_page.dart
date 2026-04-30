@@ -177,7 +177,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
                         padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
                         child: Text(
                           'Featured Colleges',
-                          style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
+                          style: AppTextStyles.cardTitle(fontSize: Responsive.sp(18)),
                         ),
                       ),
                       SizedBox(height: Responsive.h(1.5)),
@@ -449,7 +449,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     if (_selectedStateName == null) {
       return Text(
         'All Colleges',
-        style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
+        style: AppTextStyles.cardTitle(fontSize: Responsive.sp(18)),
       );
     }
 

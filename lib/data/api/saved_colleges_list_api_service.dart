@@ -28,15 +28,16 @@ class SavedCollegesListApiService {
 
   Future<SavedCollegesPageResult> getSavedColleges({int page = 1}) async {
     try {
-      final phone = await _authStorage.getPhone(); // ADD
+      final cached = await _authStorage.getCachedProfile();
+      final userId = cached['user_id'] ?? '';
 
-      final response = await _dioClient.dio.post( // CHANGE: GET -> POST
+      final response = await _dioClient.dio.post(
         ApiConstants.savedColleges,
         queryParameters: {
           'page': page,
           'per_page': _perPage,
         },
-        data: {'phone': phone ?? ''}, // ADD
+        data: {'user_id': userId},
       );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {

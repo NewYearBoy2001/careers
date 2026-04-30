@@ -53,7 +53,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _handleUpdate() {
     FocusScope.of(context).unfocus();
-
     if (!_formKey.currentState!.validate()) return;
 
     final name = _nameController.text.trim();
@@ -63,10 +62,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final Map<String, dynamic> requestBody = {
       'name': name,
       'phone': phone,
-      'email': email.isEmpty ? null : email, // send null to clear it
+      'email': email.isEmpty ? null : email,
     };
 
-    context.read<ProfileBloc>().add(UpdateProfile(requestBody));
+    // If profile is empty (no existing data), create user; otherwise update
+    if (widget.profile.isEmpty) {
+      context.read<ProfileBloc>().add(CreateGuestUser(requestBody));
+    } else {
+      context.read<ProfileBloc>().add(UpdateProfile(requestBody));
+    }
   }
 
   @override

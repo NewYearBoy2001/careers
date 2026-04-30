@@ -91,13 +91,13 @@ class CollegeApiService {
     }
   }
 
-  Future<ApiResponse<CollegeModel>> getCollegeDetails(String id, String phone) async {
+  Future<ApiResponse<CollegeModel>> getCollegeDetails(String id, String userId) async {
       try {
         final response = await _dio.post(
           ApiConstants.collegeDetails,
           data: {
             'id': id,
-            'phone': phone,
+            'user_id': userId,
           },
         );
 
