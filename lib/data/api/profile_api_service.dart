@@ -50,18 +50,11 @@ class ProfileApiService {
 
       final response = await _dioClient.dio.post(
         ApiConstants.updateProfile,
-<<<<<<< HEAD
-        data: profileData,
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-        ),
-=======
         data: {
           ...profileData,
           'id': userId,           // ← inject id from storage
         },
         options: Options(headers: {'Content-Type': 'application/json'}),
->>>>>>> origin/careersguest
       );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {
@@ -75,8 +68,6 @@ class ProfileApiService {
       throw Exception('Unexpected error: $e');
     }
   }
-<<<<<<< HEAD
-=======
 
   Future<ProfileModel> createGuestUser(Map<String, dynamic> data) async {
     try {
@@ -97,5 +88,4 @@ class ProfileApiService {
       throw Exception('Unexpected error: $e');
     }
   }
->>>>>>> origin/careersguest
 }

@@ -10,11 +10,8 @@ import 'package:careers/screens/careers/course_detail_screen.dart';
 import 'package:careers/screens/admission/college_details_page.dart';
 import 'package:careers/screens/admission/college_search_results_page.dart'; // ✅ ADD
 import 'package:flutter_bloc/flutter_bloc.dart';
-<<<<<<< HEAD
-=======
 import 'package:careers/bloc/college/college_bloc.dart';
 import 'package:careers/data/repositories/college_repository.dart';
->>>>>>> origin/careersguest
 // import 'package:careers/bloc/signup/signup_bloc.dart';
 // import 'package:careers/data/repositories/auth_repository.dart';
 import 'package:careers/screens/profile/saved_colleges_page.dart';
@@ -29,13 +26,7 @@ import 'package:careers/screens/careers/career_search_results_page.dart';
 import 'package:careers/screens/careers/career_child_nodes_page.dart';
 import 'package:careers/bloc/career_child_nodes/career_child_nodes_bloc.dart';
 import 'package:careers/data/repositories/career_child_nodes_repository.dart';
-<<<<<<< HEAD
-// import 'package:careers/screens/forgot_password_screen.dart';
 // import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
-// import 'package:careers/data/repositories/forgot_password_repository.dart';
-=======
-// import 'package:careers/bloc/forgot_password/forgot_password_bloc.dart';
->>>>>>> origin/careersguest
 // import 'package:careers/data/api/forgot_password_api_service.dart';
 import 'package:careers/screens/home/career_record_videos_page.dart';
 // import 'package:careers/data/repositories/career_record_video_repository.dart';

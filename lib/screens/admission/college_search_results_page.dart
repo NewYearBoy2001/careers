@@ -13,10 +13,7 @@ import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'widgets/location_filter_sheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:careers/constants/app_text_styles.dart';
-<<<<<<< HEAD
-=======
 import 'dart:async';
->>>>>>> origin/careersguest
 
 class CollegeSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;

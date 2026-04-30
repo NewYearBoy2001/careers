@@ -1,13 +1,8 @@
 class ApiConstants {
 
   // static const String baseUrl = "https://rajasree.astradevelops.in/CareerApp/public/api/";
-<<<<<<< HEAD
-  // static const String baseUrl = "https://careerss.in/api/";
-  static const String baseUrl = "https://rajasree.astradevelops.in/New_career/public/api/";
-=======
   static const String baseUrl = "https://careerss.in/api/";
   // static const String baseUrl = "https://rajasree.astradevelops.in/New_career/public/api/";
->>>>>>> origin/careersguest
 
   // static const String login = "login";
   // static const String signup = "signup";

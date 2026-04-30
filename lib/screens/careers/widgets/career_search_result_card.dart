@@ -190,40 +190,6 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                   ),
 
                   // Title + badge row
-<<<<<<< HEAD
-                  Padding(
-                    padding: EdgeInsets.all(Responsive.w(3)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(14)),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: Responsive.h(0.75)),
-                        Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: Responsive.w(2),
-                                vertical: Responsive.h(0.4),
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.teal2.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(
-                                    Responsive.w(1.5)),
-                              ),
-                              child: Text(
-                                'Explore',
-                                style: TextStyle(
-                                  fontSize: Responsive.sp(12),
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primary,
-                                ),
-=======
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
@@ -255,7 +221,6 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                                 fontSize: Responsive.sp(11),
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
->>>>>>> origin/careersguest
                               ),
                             ),
                           ),

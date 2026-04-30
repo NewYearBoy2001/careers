@@ -49,12 +49,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _navigateToLogin() async {
     await Future.delayed(const Duration(milliseconds: 2500));
     if (mounted) {
-<<<<<<< HEAD
-      context.go('/dashboard');
-=======
       final onboarded = await AuthLocalStorage().isOnboardingComplete();
       context.go(onboarded ? '/dashboard' : '/onboarding');
->>>>>>> origin/careersguest
     }
   }
 
