@@ -10,7 +10,7 @@ import 'package:careers/shimmer/profile_shimmer.dart';
 import 'package:careers/data/models/profile_model.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
 import 'package:careers/constants/app_text_styles.dart';
-
+   
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
