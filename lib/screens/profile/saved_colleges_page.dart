@@ -10,6 +10,7 @@ import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:careers/constants/app_text_styles.dart';
+import 'package:careers/router/app_router.dart';
 
 class SavedCollegesPage extends StatefulWidget {
   const SavedCollegesPage({super.key});
@@ -18,20 +19,33 @@ class SavedCollegesPage extends StatefulWidget {
   State<SavedCollegesPage> createState() => _SavedCollegesPageState();
 }
 
-class _SavedCollegesPageState extends State<SavedCollegesPage> {
+class _SavedCollegesPageState extends State<SavedCollegesPage>
+    with RouteAware { // ← add RouteAware mixin
   final ScrollController _scrollController = ScrollController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    context.read<SavedCollegesListBloc>().add(FetchSavedCollegesList());
+  }
 
   @override
   void initState() {
     super.initState();
     context.read<SavedCollegesListBloc>().add(FetchSavedCollegesList());
     _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   void _onScroll() {

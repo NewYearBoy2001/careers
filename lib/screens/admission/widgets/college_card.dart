@@ -50,7 +50,7 @@ class CollegeCard extends StatelessWidget {
             if (!hasData) {
               final result = await showDialog<bool>(
                 context: context,
-                barrierDismissible: true,   // CHANGE: was false
+                barrierDismissible: true,
                 barrierColor: Colors.black.withOpacity(0.45),
                 useSafeArea: false,
                 builder: (_) => const UserInfoDialog(),
@@ -58,13 +58,14 @@ class CollegeCard extends StatelessWidget {
               if (result != true || !context.mounted) return;
             }
 
-            // Re-read phone after possible dialog save
-            final updatedPhone = await storage.getPhone();
+            // Re-read userId after possible dialog save
+            final profile = await storage.getCachedProfile();
+            final userId = profile['user_id'] ?? '';
             if (!context.mounted) return;
 
             context.push('/college-details', extra: {
               'id': college.id,
-              'phone': updatedPhone ?? '',
+              'user_id': userId,
             });
           },
           borderRadius: BorderRadius.circular(Responsive.w(3.5)),

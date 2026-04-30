@@ -9,8 +9,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc(this._repository) : super(ProfileInitial()) {
     on<FetchProfile>(_onFetchProfile);
     on<UpdateProfile>(_onUpdateProfile);
+    on<CreateGuestUser>(_onCreateGuestUser);   // ADD
   }
-
   Future<void> _onFetchProfile(
       FetchProfile event,
       Emitter<ProfileState> emit,
@@ -32,6 +32,18 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     try {
       final updatedProfile = await _repository.updateProfile(event.profileData);
       emit(ProfileLoaded(updatedProfile));
+    } catch (e) {
+      emit(ProfileError(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
+  Future<void> _onCreateGuestUser(
+      CreateGuestUser event,
+      Emitter<ProfileState> emit,
+      ) async {
+    emit(ProfileLoading());
+    try {
+      final profile = await _repository.createGuestUser(event.profileData);
+      emit(ProfileLoaded(profile));
     } catch (e) {
       emit(ProfileError(e.toString().replaceAll('Exception: ', '')));
     }

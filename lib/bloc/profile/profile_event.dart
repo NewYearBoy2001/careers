@@ -7,3 +7,8 @@ class UpdateProfile extends ProfileEvent {
 
   UpdateProfile(this.profileData);
 }
+
+class CreateGuestUser extends ProfileEvent {
+  final Map<String, dynamic> profileData;
+  CreateGuestUser(this.profileData);
+}

@@ -10,21 +10,21 @@ abstract class SavedCollegeEvent extends Equatable {
 /// Event to save a college
 class SaveCollege extends SavedCollegeEvent {
   final String collegeId;
-  final String phone;
+  final String userId;
 
-  const SaveCollege(this.collegeId, this.phone);
+  const SaveCollege(this.collegeId, this.userId);
 
   @override
-  List<Object?> get props => [collegeId, phone];
+  List<Object?> get props => [collegeId, userId];
 }
 
-/// Event to remove a saved college
 class RemoveSavedCollege extends SavedCollegeEvent {
   final String collegeId;
-  final String phone;
+  final String userId;
 
-  const RemoveSavedCollege(this.collegeId, this.phone);
+  const RemoveSavedCollege(this.collegeId, this.userId);
 
   @override
-  List<Object?> get props => [collegeId, phone];
+  List<Object?> get props => [collegeId, userId];
 }
+

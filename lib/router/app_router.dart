@@ -38,9 +38,12 @@ import 'package:careers/bloc/newgen_courses/newgen_courses_bloc.dart';
 import 'package:careers/data/repositories/newgen_courses_repository.dart';
 import 'package:careers/screens/onboarding/onboarding_screen.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
+    observers: [routeObserver],
     routes: [
       GoRoute(
         path: '/',
@@ -232,7 +235,7 @@ class AppRouter {
             key: state.pageKey,
             child: CollegeDetailsPage(
               collegeId: extra['id']!,     // CHANGE
-              phone: extra['phone']!,       // ADD
+              userId: extra['user_id']!,       // ADD
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
