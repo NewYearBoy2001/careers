@@ -529,6 +529,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
                       validator: (v) =>
                           FormValidators.required(v, field: 'Name'),
                       enabled: !isLoading,
+                      textCapitalization: TextCapitalization.words,
                     ),
                     SizedBox(height: Responsive.h(1.8)),
 
@@ -640,6 +641,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
     String? Function(String?)? validator,
     bool enabled = true,
     List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return TextFormField(
       controller: controller,
@@ -647,6 +649,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
       enabled: enabled,
       validator: validator,
       inputFormatters: inputFormatters,
+      textCapitalization: textCapitalization,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

@@ -10,7 +10,10 @@ import 'package:careers/shimmer/profile_shimmer.dart';
 import 'package:careers/data/models/profile_model.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
 import 'package:careers/constants/app_text_styles.dart';
-   
+import 'package:careers/widgets/ios_store_guard.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -23,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage>
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
+  bool _isIosStoredMode = false;
 
   @override
   void initState() {
@@ -39,6 +43,7 @@ class _ProfilePageState extends State<ProfilePage>
         parent: _animController, curve: Curves.easeOutCubic));
     _animController.forward();
     context.read<ProfileBloc>().add(FetchProfile());
+    _checkIosStoredMode();
   }
 
   @override
@@ -49,6 +54,11 @@ class _ProfilePageState extends State<ProfilePage>
 
   void _onNetworkRestored() {
     context.read<ProfileBloc>().add(FetchProfile());
+  }
+
+  Future<void> _checkIosStoredMode() async {
+    final result = await IosStoreGuard.isIosStoredMode(AuthLocalStorage());
+    if (mounted) setState(() => _isIosStoredMode = result);
   }
 
   @override
@@ -98,6 +108,7 @@ class _ProfilePageState extends State<ProfilePage>
           }
 
           if (state is ProfileLoaded) {
+            if (_isIosStoredMode) return _buildIosHelpPage();
             return Scaffold(
               backgroundColor: AppColors.profilePageBg,
               body: FadeTransition(
@@ -124,6 +135,166 @@ class _ProfilePageState extends State<ProfilePage>
       ),
     );
   }
+
+  Widget _buildIosHelpPage() {
+    return Scaffold(
+      backgroundColor: AppColors.profilePageBg,
+      body: FadeTransition(
+        opacity: _fadeAnim,
+        child: SlideTransition(
+          position: _slideAnim,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                // Header
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(
+                        32, MediaQuery.of(context).padding.top + 40, 32, 36),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryLight],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(right: -40, bottom: -30,
+                            child: _decorCircle(160, AppColors.white.withOpacity(0.07))),
+                        Positioned(right: -10, top: -20,
+                            child: _decorCircle(100, AppColors.white.withOpacity(0.06))),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Help & Support',
+                                style: AppTextStyles.pageTitle(fontSize: 28)),
+                            const SizedBox(height: 6),
+                            Text(
+                              'We\'re here to help you',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.white.withOpacity(0.75),
+                                  height: 1.4),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Help cards
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.black.withOpacity(0.05)),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4)),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _helpTile(
+                          icon: Icons.business_rounded,
+                          title: 'Company Name',         // TODO: replace
+                          subtitle: 'Your Company Pvt. Ltd.', // TODO: replace
+                          onTap: null,
+                        ),
+                        _helpDivider(),
+                        _helpTile(
+                          icon: Icons.privacy_tip_outlined,
+                          title: 'Privacy Policy',
+                          subtitle: 'Read our privacy policy',
+                          onTap: () async {
+                            final uri = Uri.parse('https://yourcompany.com/privacy'); // TODO: replace
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            }
+                          },
+                        ),
+                        _helpDivider(),
+                        _helpTile(
+                          icon: Icons.phone_rounded,
+                          title: 'Contact Us',
+                          subtitle: '+91 00000 00000', // TODO: replace
+                          onTap: () async {
+                            final uri = Uri(scheme: 'tel', path: '+910000000000'); // TODO: replace
+                            if (await canLaunchUrl(uri)) await launchUrl(uri);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _helpTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 42, height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, size: 20, color: AppColors.primary),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTextStyles.cardTitle(fontSize: 15)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: AppTextStyles.subSectionTitle(fontSize: 12)),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.iconSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _helpDivider() => Divider(
+    height: 1, indent: 16, endIndent: 16,
+    color: Colors.black.withOpacity(0.05),
+  );
 
   Widget _buildHeader(ProfileModel profile) {
     final bool isEmpty = profile.isEmpty;

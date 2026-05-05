@@ -252,6 +252,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<CareerRecordVideoRepository>(
           create: (context) => CareerRecordVideoRepository(
             context.read<CareerRecordVideoApiService>(),
+            context.read<AuthLocalStorage>(), // ADD
           ),
         ),
 

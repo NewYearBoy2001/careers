@@ -65,7 +65,6 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
       Emitter<CollegeState> emit,
       ) async {
     emit(CollegeDetailsLoading(_lastSearchResults));
-
     try {
       final response = await _repository.getCollegeDetails(event.collegeId, event.userId);
 

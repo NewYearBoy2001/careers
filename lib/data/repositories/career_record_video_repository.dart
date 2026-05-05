@@ -1,18 +1,25 @@
 import '../models/career_record_video_model.dart';
 import '../api/career_record_video_api_service.dart';
 import '../../utils/network/api_error_handler.dart';
+import '../../utils/prefs/auth_local_storage.dart';
 
 class CareerRecordVideoRepository {
   final CareerRecordVideoApiService _apiService;
+  final AuthLocalStorage _authStorage;
 
-  CareerRecordVideoRepository(this._apiService);
+  CareerRecordVideoRepository(this._apiService, this._authStorage);
 
-  /// Returns the short home list (no pagination).
   Future<List<CareerRecordVideoModel>> fetchHomeVideos() async {
     try {
       final response = await _apiService.fetchHomeVideos();
       final data = response.data as Map<String, dynamic>;
-      final videos = data['data']['videos'] as List<dynamic>;
+      final inner = data['data'] as Map<String, dynamic>;
+
+      // ADD: save stored flag from response
+      final stored = inner['stored']?.toString() ?? '0';
+      await _authStorage.saveStoredFlag(stored);
+
+      final videos = inner['videos'] as List<dynamic>;
       return videos
           .map((v) => CareerRecordVideoModel.fromJson(v as Map<String, dynamic>))
           .toList();
