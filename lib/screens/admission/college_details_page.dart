@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:careers/constants/app_colors.dart';
@@ -20,17 +23,15 @@ import 'package:careers/data/models/college_model.dart'; // for CourseItem
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_event.dart';
 import 'package:careers/constants/app_text_styles.dart';
-import 'package:careers/widgets/ios_store_guard.dart';
-import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
-  final String? userId;
+  final String userId;
 
   const CollegeDetailsPage({
     super.key,
     required this.collegeId,
-    this.userId,
+    required this.userId,
   });
 
   @override
@@ -42,23 +43,38 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   final PageController _pageController = PageController();
   bool _isSaved = false;
   bool _hasUserInteracted = false;
-  bool _isIosStoredMode = false;
+  bool _hideSaveForIos = false;
 
   @override
   void initState() {
     super.initState();
+
     _isSaved = false;
     _hasUserInteracted = false;
-    context.read<CollegeBloc>().add(
-      FetchCollegeDetails(widget.collegeId, widget.userId), // userId is now nullable, already optional
-    );
-    _loadIosFlag();
-  }
 
+    _checkIosStoredFlag(); // 👈 ADD THIS
+
+    context.read<CollegeBloc>().add(
+      FetchCollegeDetails(widget.collegeId, widget.userId),
+    );
+  }
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkIosStoredFlag() async {
+    if (!Platform.isIOS) return; // ✅ Only for iOS
+
+    final storage = AuthLocalStorage();
+    final flag = await storage.getStoredFlag();
+
+    if (mounted && flag == '1') {
+      setState(() {
+        _hideSaveForIos = true;
+      });
+    }
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -66,10 +82,6 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
-  }
-  Future<void> _loadIosFlag() async {
-    final result = await IosStoreGuard.isIosStoredMode(AuthLocalStorage());
-    if (mounted) setState(() => _isIosStoredMode = result);
   }
 
   Future<void> _launchEmail(String email) async {
@@ -95,14 +107,13 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   }
 
   void _toggleSaveCollege() {
-    final userId = widget.userId ?? '';
     if (_isSaved) {
       context.read<SavedCollegeBloc>().add(
-        RemoveSavedCollege(widget.collegeId, userId),
+        RemoveSavedCollege(widget.collegeId, widget.userId), // ADD phone
       );
     } else {
       context.read<SavedCollegeBloc>().add(
-        SaveCollege(widget.collegeId, userId),
+        SaveCollege(widget.collegeId, widget.userId), // ADD phone
       );
     }
   }
@@ -395,41 +406,41 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
               ),
               SizedBox(width: Responsive.w(3)),
               // Save Button
-              if (!_isIosStoredMode)
+// Save Button
+              if (!_hideSaveForIos) // ✅ HIDE ONLY IN IOS WHEN FLAG = 1
                 BlocBuilder<SavedCollegeBloc, SavedCollegeState>(
                   builder: (context, state) {
-                  final bool isLoading = state is SavedCollegeActionLoading;
+                    final bool isLoading = state is SavedCollegeActionLoading;
 
-                  return InkWell(
-                    onTap: isLoading ? null : _toggleSaveCollege,
-                    borderRadius: BorderRadius.circular(Responsive.w(2)),
-                    child: Container(
-                      padding: EdgeInsets.all(Responsive.w(2)),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(Responsive.w(2)),
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                        width: Responsive.w(5),
-                        height: Responsive.w(5),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primary,
-                          ),
+                    return InkWell(
+                      onTap: isLoading ? null : _toggleSaveCollege,
+                      borderRadius: BorderRadius.circular(Responsive.w(2)),
+                      child: Container(
+                        padding: EdgeInsets.all(Responsive.w(2)),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(Responsive.w(2)),
                         ),
-                      )
-                          : Icon(
-                        _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: AppColors.primary,
-                        size: Responsive.w(6),
+                        child: isLoading
+                            ? SizedBox(
+                          width: Responsive.w(5),
+                          height: Responsive.w(5),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
+                        )
+                            : Icon(
+                          _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          color: AppColors.primary,
+                          size: Responsive.w(6),
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    );
+                  },
+                ),            ],
           ),
           SizedBox(height: Responsive.h(1.5)),
           // Location and Rating Row

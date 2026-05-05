@@ -19,6 +19,7 @@ class CareerRecordVideoRepository {
       final stored = inner['stored']?.toString() ?? '0';
       await _authStorage.saveStoredFlag(stored);
 
+
       final videos = inner['videos'] as List<dynamic>;
       return videos
           .map((v) => CareerRecordVideoModel.fromJson(v as Map<String, dynamic>))
