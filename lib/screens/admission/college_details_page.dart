@@ -52,7 +52,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     _isSaved = false;
     _hasUserInteracted = false;
 
-    _checkIosStoredFlag(); // 👈 ADD THIS
+    _checkIosStoredFlag();
 
     context.read<CollegeBloc>().add(
       FetchCollegeDetails(widget.collegeId, widget.userId),
@@ -65,7 +65,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   }
 
   Future<void> _checkIosStoredFlag() async {
-    if (!Platform.isIOS) return; // ✅ Only for iOS
+    if (!Platform.isIOS) return;
 
     final storage = AuthLocalStorage();
     final flag = await storage.getStoredFlag();
