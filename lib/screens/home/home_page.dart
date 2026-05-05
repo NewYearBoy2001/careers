@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Career Guidance Classes',
+                  'Career Guidance Classes Videos',
                   style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(17)),
                 ),
                 GestureDetector(
