@@ -10,7 +10,7 @@ import 'package:careers/shimmer/profile_shimmer.dart';
 import 'package:careers/data/models/profile_model.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
 import 'package:careers/constants/app_text_styles.dart';
-import 'package:careers/widgets/ios_store_guard.dart';
+import 'dart:io';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,8 +57,12 @@ class _ProfilePageState extends State<ProfilePage>
   }
 
   Future<void> _checkIosStoredMode() async {
-    final result = await IosStoreGuard.isIosStoredMode(AuthLocalStorage());
-    if (mounted) setState(() => _isIosStoredMode = result);
+    if (!Platform.isIOS) return;
+    final storage = AuthLocalStorage();
+    final flag = await storage.getStoredFlag();
+    if (mounted && flag == '1') {
+      setState(() => _isIosStoredMode = true);
+    }
   }
 
   @override
@@ -212,8 +216,8 @@ class _ProfilePageState extends State<ProfilePage>
                       children: [
                         _helpTile(
                           icon: Icons.business_rounded,
-                          title: 'Company Name',         // TODO: replace
-                          subtitle: 'Your Company Pvt. Ltd.', // TODO: replace
+                          title: 'Company Name',
+                          subtitle: 'Astraz Software Solutions LLP',
                           onTap: null,
                         ),
                         _helpDivider(),
@@ -222,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage>
                           title: 'Privacy Policy',
                           subtitle: 'Read our privacy policy',
                           onTap: () async {
-                            final uri = Uri.parse('https://yourcompany.com/privacy'); // TODO: replace
+                            final uri = Uri.parse('https://careerss.in/privacy-policy'); // TODO: replace
                             if (await canLaunchUrl(uri)) {
                               await launchUrl(uri, mode: LaunchMode.externalApplication);
                             }
@@ -232,9 +236,9 @@ class _ProfilePageState extends State<ProfilePage>
                         _helpTile(
                           icon: Icons.phone_rounded,
                           title: 'Contact Us',
-                          subtitle: '+91 00000 00000', // TODO: replace
+                          subtitle: '+91 92072 55558',
                           onTap: () async {
-                            final uri = Uri(scheme: 'tel', path: '+910000000000'); // TODO: replace
+                            final uri = Uri(scheme: 'tel', path: '+919207255558'); // TODO: replace
                             if (await canLaunchUrl(uri)) await launchUrl(uri);
                           },
                         ),
