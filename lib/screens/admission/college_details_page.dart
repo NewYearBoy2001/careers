@@ -20,15 +20,17 @@ import 'package:careers/data/models/college_model.dart'; // for CourseItem
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_event.dart';
 import 'package:careers/constants/app_text_styles.dart';
+import 'package:careers/widgets/ios_store_guard.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
-  final String userId;
+  final String? userId;
 
   const CollegeDetailsPage({
     super.key,
     required this.collegeId,
-    required this.userId,
+    this.userId,
   });
 
   @override
@@ -40,6 +42,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   final PageController _pageController = PageController();
   bool _isSaved = false;
   bool _hasUserInteracted = false;
+  bool _isIosStoredMode = false;
 
   @override
   void initState() {
@@ -47,8 +50,9 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     _isSaved = false;
     _hasUserInteracted = false;
     context.read<CollegeBloc>().add(
-      FetchCollegeDetails(widget.collegeId, widget.userId),  // ADD phone
+      FetchCollegeDetails(widget.collegeId, widget.userId), // userId is now nullable, already optional
     );
+    _loadIosFlag();
   }
 
   @override
@@ -62,6 +66,10 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
+  }
+  Future<void> _loadIosFlag() async {
+    final result = await IosStoreGuard.isIosStoredMode(AuthLocalStorage());
+    if (mounted) setState(() => _isIosStoredMode = result);
   }
 
   Future<void> _launchEmail(String email) async {
@@ -87,13 +95,14 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   }
 
   void _toggleSaveCollege() {
+    final userId = widget.userId ?? '';
     if (_isSaved) {
       context.read<SavedCollegeBloc>().add(
-        RemoveSavedCollege(widget.collegeId, widget.userId), // ADD phone
+        RemoveSavedCollege(widget.collegeId, userId),
       );
     } else {
       context.read<SavedCollegeBloc>().add(
-        SaveCollege(widget.collegeId, widget.userId), // ADD phone
+        SaveCollege(widget.collegeId, userId),
       );
     }
   }
@@ -386,8 +395,9 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
               ),
               SizedBox(width: Responsive.w(3)),
               // Save Button
-              BlocBuilder<SavedCollegeBloc, SavedCollegeState>(
-                builder: (context, state) {
+              if (!_isIosStoredMode)
+                BlocBuilder<SavedCollegeBloc, SavedCollegeState>(
+                  builder: (context, state) {
                   final bool isLoading = state is SavedCollegeActionLoading;
 
                   return InkWell(
