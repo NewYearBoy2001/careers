@@ -14,7 +14,7 @@ import 'widgets/location_filter_sheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:careers/constants/app_text_styles.dart';
 import 'dart:async';
- 
+
 class CollegeSearchResultsPage extends StatefulWidget {
   final String? initialKeyword;
   final String? initialLocation;
