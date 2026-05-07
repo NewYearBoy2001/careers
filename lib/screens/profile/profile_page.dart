@@ -13,6 +13,7 @@ import 'package:careers/constants/app_text_styles.dart';
 import 'dart:io';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -240,6 +241,17 @@ class _ProfilePageState extends State<ProfilePage>
                           onTap: () async {
                             final uri = Uri(scheme: 'tel', path: '+919207255558'); // TODO: replace
                             if (await canLaunchUrl(uri)) await launchUrl(uri);
+                          },
+                        ),
+                        _helpDivider(),
+                        _helpTile(
+                          icon: Icons.logout_rounded,
+                          title: 'Logout',
+                          subtitle: 'Sign out of your account',
+                          onTap: () async {
+                            final prefs = AuthLocalStorage();
+                            await prefs.clearUser();
+                            if (context.mounted) context.go('/onboarding');
                           },
                         ),
                       ],
