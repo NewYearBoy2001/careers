@@ -55,6 +55,9 @@ import 'bloc/newgen_courses/newgen_courses_bloc.dart';
 import 'data/api/delete_account_api_service.dart';
 import 'data/repositories/delete_account_repository.dart';
 import 'bloc/delete_account/delete_account_bloc.dart';
+import 'data/repositories/save_fcm_token_repository.dart';
+import 'data/api/save_fcm_token_api_service.dart';
+import 'bloc/save_fcm_token/save_fcm_token_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -172,6 +175,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<SaveFcmTokenApiService>(
+          create: (context) => SaveFcmTokenApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
         // RepositoryProvider<DeleteAccountApiService>(
         //   create: (context) => DeleteAccountApiService(
         //     context.read<AuthLocalStorage>(),
@@ -286,6 +294,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<SaveFcmTokenRepository>(
+          create: (context) => SaveFcmTokenRepository(
+            context.read<SaveFcmTokenApiService>(),
+          ),
+        ),
+
         // RepositoryProvider<DeleteAccountRepository>(
         //   create: (context) => DeleteAccountRepository(
         //     context.read<DeleteAccountApiService>(),
@@ -384,6 +398,12 @@ class MyApp extends StatelessWidget {
           BlocProvider<NewgenCoursesBloc>(
             create: (context) => NewgenCoursesBloc(
               context.read<NewgenCoursesRepository>(),
+            ),
+          ),
+
+          BlocProvider<SaveFcmTokenBloc>(
+            create: (context) => SaveFcmTokenBloc(
+              context.read<SaveFcmTokenRepository>(),
             ),
           ),
 

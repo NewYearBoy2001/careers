@@ -19,6 +19,9 @@ import 'package:new_version_plus/new_version_plus.dart';
 import 'package:careers/widgets/update_dialog.dart';
 import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/constants/app_text_styles.dart';
+import 'package:careers/bloc/save_fcm_token/save_fcm_token_bloc.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
+import 'package:careers/bloc/save_fcm_token/save_fcm_token_event.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -84,7 +87,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _cardsAnimController.forward();
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final bloc = context.read<CareerRecordVideoBloc>();
       final state = bloc.state;
       final hasDisplayableData = state is HomeVideosLoaded ||
@@ -111,6 +114,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         bannerBloc.add(RefreshCareerGuidanceBanners());
       }
       AppUpdateChecker.check(context);
+
+      final fcmToken = await context.read<AuthLocalStorage>().getFcmToken();
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        if (context.mounted) {
+          context.read<SaveFcmTokenBloc>().add(SaveFcmTokenRequested(fcmToken));
+        }
+      }
     });
   }
 

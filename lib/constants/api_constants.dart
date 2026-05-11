@@ -32,5 +32,6 @@ class ApiConstants {
   static const String newgenCourses = 'newgen-courses';
   // static const String deleteAccount = 'delete-account';
   static const String collegeViewUser = 'collegeview-user';
+  static const String saveFcmToken = 'save-fcm-token';
 
 }
