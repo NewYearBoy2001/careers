@@ -108,6 +108,7 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Image with NEWGEN badge overlay
                   AspectRatio(
@@ -190,42 +191,43 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
                   ),
 
                   // Title + badge row
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: Responsive.w(3),
-                        vertical: Responsive.h(0.8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            widget.title,
-                            style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(13)),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      Responsive.w(3),
+                      Responsive.h(0.8),
+                      Responsive.w(3),
+                      Responsive.h(0.8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(13)),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: Responsive.h(0.6)),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Responsive.w(2),
+                            vertical: Responsive.h(0.35),
                           ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: Responsive.w(2),
-                              vertical: Responsive.h(0.35),
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.teal2.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(Responsive.w(1.5)),
-                            ),
-                            child: Text(
-                              'Explore',
-                              style: TextStyle(
-                                fontSize: Responsive.sp(11),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
+                          decoration: BoxDecoration(
+                            color: AppColors.teal2.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(Responsive.w(1.5)),
+                          ),
+                          child: Text(
+                            'Explore',
+                            style: TextStyle(
+                              fontSize: Responsive.sp(11),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

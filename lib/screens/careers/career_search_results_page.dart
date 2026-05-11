@@ -345,7 +345,7 @@ class _CareerSearchResultsPageState extends State<CareerSearchResultsPage> {
                             crossAxisCount: Responsive.deviceWidth > 600 ? 3 : 2,
                             mainAxisSpacing: Responsive.w(4),
                             crossAxisSpacing: Responsive.w(4),
-                            childAspectRatio: 0.75,
+                            mainAxisExtent: (Responsive.deviceWidth / 2) - Responsive.w(6) + 20,
                           ),
                           delegate: SliverChildBuilderDelegate(
                                 (context, index) {
