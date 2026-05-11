@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "264624575934",
+    "project_id": "careers-ee6af",
+    "storage_bucket": "careers-ee6af.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264624575934:android:4f1e5b58135687c72815ef",
+        "android_client_info": {
+          "package_name": "com.astra.careers"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLcQiGeq1wuzJZ8eDX0-qRHDqoQztkrsg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

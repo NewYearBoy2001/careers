@@ -7,6 +7,7 @@ class AuthLocalStorage {
   static const _phoneKey = 'phone';
   static const _onboardingKey = 'onboarding_complete';
   static const _storedKey = 'stored_flag';
+  static const _fcmTokenKey = 'fcm_token';
 
   Future<void> saveUser({
     required String userId,
@@ -27,6 +28,19 @@ class AuthLocalStorage {
   }
 
   Future<String?> getToken() async => null; // No auth token anymore
+
+  Future<void> setFcmToken({required String? fcmToken}) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (fcmToken != null && fcmToken.isNotEmpty) {
+      await prefs.setString(_fcmTokenKey, fcmToken);
+    }
+  }
+
+  Future<String?> getFcmToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_fcmTokenKey);
+  }
 
   Future<String?> getUserName() async {
     final prefs = await SharedPreferences.getInstance();
