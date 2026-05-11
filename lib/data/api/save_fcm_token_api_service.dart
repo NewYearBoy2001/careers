@@ -10,17 +10,21 @@ class SaveFcmTokenApiService extends BaseDioClient {
       : super(authStorage: authStorage);
 
   Future<void> saveFcmToken({
-    required String deviceId,
-    required String fcmKey,
-    required String platform,
+    required String fcmToken,
+    required String appVersion,
+    required String model,
+    required String modelName,
+    required String modelVersion,
   }) async {
     try {
       await dio.post(
         ApiConstants.saveFcmToken,
         data: {
-          'device_id': deviceId,
-          'fcm_key': fcmKey,
-          'platform': platform,
+          'fcm_token': fcmToken,
+          'app_version': appVersion,
+          'model': model,
+          'model_name': modelName,
+          'model_version': modelVersion,
         },
       );
     } on DioException catch (e) {

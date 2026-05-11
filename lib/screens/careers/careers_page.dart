@@ -752,11 +752,7 @@ class _CareersPageState extends State<CareersPage> with TickerProviderStateMixin
                             ),
                             child: Text(
                               course.title,
-                              style: TextStyle(
-                                fontSize: Responsive.sp(11),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
+                              style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(11)),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

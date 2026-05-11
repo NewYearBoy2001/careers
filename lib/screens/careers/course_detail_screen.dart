@@ -1313,7 +1313,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                         Text(
                           'See what comes next in this stream',
                           style: GoogleFonts.dmSans(
-                            fontSize: Responsive.sp(12),
+                            fontSize: Responsive.sp(10),
                             color: Colors.white.withOpacity(0.75),
                           ),
                         ),
