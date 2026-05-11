@@ -706,20 +706,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ],
                     ),
                     SizedBox(height: Responsive.h(1.2)),
-                    Text(
-                      feature['title'] as String,
-                      style: TextStyle(
-                        fontSize: Responsive.sp(14),
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: -0.2,
-                      ),
+                      Text(
+                        feature['title'] as String,
+                        style: AppTextStyles.cardTitle(fontSize: Responsive.sp(14)).copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
                     ),
                     SizedBox(height: Responsive.h(0.3)),
                     Text(
                       feature['subtitle'] as String,
-                      style: TextStyle(
-                        fontSize: Responsive.sp(10.5),
+                      style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(10.5)).copyWith(
                         color: Colors.white.withOpacity(0.88),
                         fontWeight: FontWeight.w400,
                         height: 1.3,
