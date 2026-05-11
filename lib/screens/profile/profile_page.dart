@@ -448,24 +448,20 @@ class _ProfilePageState extends State<ProfilePage>
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      child: Row(
+      child: Column(
         children: [
           if (hasPhone)
-            Expanded(
-              child: _infoCard(
-                icon: Icons.phone_rounded,
-                label: 'Phone',
-                value: profile.phone!,
-              ),
+            _infoCard(
+              icon: Icons.phone_rounded,
+              label: 'Phone',
+              value: profile.phone!,
             ),
-          if (hasPhone && hasEmail) const SizedBox(width: 12),
+          if (hasPhone && hasEmail) const SizedBox(height: 12),
           if (hasEmail)
-            Expanded(
-              child: _infoCard(
-                icon: Icons.email_rounded,
-                label: 'Email',
-                value: profile.email!,
-              ),
+            _infoCard(
+              icon: Icons.email_rounded,
+              label: 'Email',
+              value: profile.email!,
             ),
         ],
       ),
@@ -507,8 +503,6 @@ class _ProfilePageState extends State<ProfilePage>
                         fontWeight: FontWeight.w500)),
                 const SizedBox(height: 2),
                 Text(value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         fontSize: 13,
                         color: AppColors.textPrimary,
@@ -599,3 +593,4 @@ class _ProfilePageState extends State<ProfilePage>
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
   }
 }
+

@@ -103,6 +103,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         'videoId': details.videoId.trim().isEmpty ? '' : details.videoId,
         'videoUrl': details.videoUrl.trim().isEmpty ? '' : details.videoUrl,
         'hasFuturePath': details.hasFuturePath,
+        'growth': details.growth,   // ADD THIS
+        'demand': details.demand,
       };
 
       setState(() {
@@ -374,6 +376,117 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     }
 
     return child;
+  }
+
+  Widget _buildStatsRow(Color color) {
+    final growth = _data['growth']?.toString();
+    final demand = _data['demand']?.toString();
+
+    if ((growth == null || growth.isEmpty) && (demand == null || demand.isEmpty)) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      children: [
+        if (growth != null && growth.isNotEmpty)
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.w(4),
+                vertical: Responsive.h(1.8),
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FAF7),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFADE8CE), width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'GROWTH',
+                    style: GoogleFonts.dmSans(
+                      fontSize: Responsive.sp(10),
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF6B7280),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  SizedBox(height: Responsive.h(0.6)),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.trending_up_rounded,
+                        color: Color(0xFF059669),
+                        size: 18,
+                      ),
+                      SizedBox(width: Responsive.w(1.5)),
+                      Text(
+                        '+$growth%',
+                        style: GoogleFonts.dmSans(
+                          fontSize: Responsive.sp(22),
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (growth != null && growth.isNotEmpty &&
+            demand != null && demand.isNotEmpty)
+          SizedBox(width: Responsive.w(3)),
+        if (demand != null && demand.isNotEmpty)
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.w(4),
+                vertical: Responsive.h(1.8),
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF5F5),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFFFDDDD), width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DEMAND',
+                    style: GoogleFonts.dmSans(
+                      fontSize: Responsive.sp(10),
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF6B7280),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  SizedBox(height: Responsive.h(0.6)),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.people_outline_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 18,
+                      ),
+                      SizedBox(width: Responsive.w(1.5)),
+                      Text(
+                        demand,
+                        style: GoogleFonts.dmSans(
+                          fontSize: Responsive.sp(22),
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   // ── Shared back button ────────────────────────────────────────────────────
@@ -806,6 +919,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         ),
 
         SizedBox(height: Responsive.h(3)),
+        if (_data['growth'] != null || _data['demand'] != null) ...[
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: Responsive.w(6)),
+            child: _buildStatsRow(color),
+          ),
+          SizedBox(height: Responsive.h(3)),
+        ],
 
         // ── Description card ──────────────────────────────────────────────
         Padding(
@@ -983,8 +1103,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
             child: _buildExploreCTA(color),
           ),
 
-        SizedBox(
-            height: MediaQuery.of(context).padding.bottom + Responsive.h(2)),
+        SizedBox(height: MediaQuery.of(context).padding.bottom + Responsive.h(0.5)),
       ],
     );
   }

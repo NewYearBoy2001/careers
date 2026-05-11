@@ -213,7 +213,7 @@ class _NewgenCoursesPageState extends State<NewgenCoursesPage> {
                             crossAxisCount: 2,
                             crossAxisSpacing: Responsive.w(3),
                             mainAxisSpacing: Responsive.h(2),
-                            childAspectRatio: 0.78,
+                            mainAxisExtent: (Responsive.deviceWidth / 2) - Responsive.w(6) + 20,
                           ),
                           delegate: SliverChildBuilderDelegate(
                                 (context, index) {
