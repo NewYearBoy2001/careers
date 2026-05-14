@@ -90,35 +90,41 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final bloc = context.read<CareerRecordVideoBloc>();
       final state = bloc.state;
+
       final hasDisplayableData = state is HomeVideosLoaded ||
           state is VideosLoaded ||
           state is VideosRefreshing;
 
       if (!hasDisplayableData) {
-        // First ever load — show shimmer then data
         bloc.add(FetchHomeVideos());
       } else {
-        // Already has data — silently refresh in background
         bloc.add(RefreshHomeVideos());
       }
 
-      // Always re-fetch banners
       final bannerBloc = context.read<CareerGuidanceBannerBloc>();
       final bannerState = bannerBloc.state;
+
       final hasBannerData = bannerState is CareerGuidanceBannerLoaded;
-      final bannerHadError = bannerState is CareerGuidanceBannerError;
 
       if (!hasBannerData) {
-        bannerBloc.add(FetchCareerGuidanceBanners()); // covers initial + error
+        bannerBloc.add(FetchCareerGuidanceBanners());
       } else {
         bannerBloc.add(RefreshCareerGuidanceBanners());
       }
+
       AppUpdateChecker.check(context);
 
-      final fcmToken = await context.read<AuthLocalStorage>().getFcmToken();
+      // ✅ GET FCM TOKEN
+      final fcmToken =
+      await context.read<AuthLocalStorage>().getFcmToken();
+
+      print("🔥 FCM TOKEN => $fcmToken");
+
       if (fcmToken != null && fcmToken.isNotEmpty) {
         if (context.mounted) {
-          context.read<SaveFcmTokenBloc>().add(SaveFcmTokenRequested(fcmToken));
+          context
+              .read<SaveFcmTokenBloc>()
+              .add(SaveFcmTokenRequested(fcmToken));
         }
       }
     });
