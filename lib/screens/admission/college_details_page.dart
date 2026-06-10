@@ -219,7 +219,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                           _buildFacilitiesSection(college.facilities!),
                         if (college.phone != null)
                           _buildAgentSection(college.phone!),
-                        SizedBox(height: Responsive.h(2.5)),
+                        SizedBox(height: Responsive.h(2.5) + MediaQuery.of(context).padding.bottom),
                       ],
                     ),
                   ),
