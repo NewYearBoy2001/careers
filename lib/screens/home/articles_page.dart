@@ -9,6 +9,7 @@ import 'package:careers/constants/app_text_styles.dart';
 import 'package:careers/data/models/article_model.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 
+
 class ArticlesPage extends StatefulWidget {
   const ArticlesPage({super.key});
 
@@ -267,10 +268,7 @@ class _ArticlesPageState extends State<ArticlesPage>
                       // Main headline
                       Text(
                         'Knowledge\nto grow.',
-                        style: TextStyle(
-                          fontSize: Responsive.sp(28),
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                        style: AppTextStyles.pageTitle(fontSize: Responsive.sp(28)).copyWith(
                           height: 1.15,
                           letterSpacing: -0.8,
                         ),
@@ -322,13 +320,8 @@ class _ArticlesPageState extends State<ArticlesPage>
             SliverList(
               delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                  if (index == 0 && !state.isSearching) {
-                    // Featured card (first article)
-                    return _FeaturedArticleCard(article: state.articles[0]);
-                  }
-                  final article = state.articles[index];
                   return _ArticleListTile(
-                    article: article,
+                    article: state.articles[index],
                     index: index,
                   );
                 },
@@ -466,10 +459,10 @@ class _ArticleListTile extends StatelessWidget {
   // Cycle through a few accent tones for the left border
   Color get _accentColor {
     const colors = [
-      AppColors.teal1,
       AppColors.primary,
-      AppColors.tealBlue,
-      AppColors.tealGreen,
+      AppColors.teal1,
+      AppColors.tealnetwork,
+      AppColors.primaryLight,
       AppColors.teal2,
     ];
     return colors[index % colors.length];
@@ -536,12 +529,8 @@ class _ArticleListTile extends StatelessWidget {
                           children: [
                             Text(
                               article.title,
-                              style: TextStyle(
-                                fontSize: Responsive.sp(13),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                              style: AppTextStyles.cardTitle(fontSize: Responsive.sp(13)).copyWith(
                                 height: 1.4,
-                                letterSpacing: -0.2,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -640,7 +629,7 @@ class _SkeletonTileState extends State<_SkeletonTile>
             Responsive.w(4),
             Responsive.h(1.2),
           ),
-          height: widget.index == 0 ? Responsive.h(16) : Responsive.h(8),
+          height: Responsive.h(8),
           decoration: BoxDecoration(
             color: base,
             borderRadius: BorderRadius.circular(14),
