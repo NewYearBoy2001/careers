@@ -15,13 +15,19 @@ import 'package:careers/widgets/network_aware_widget.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_bloc.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_state.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_event.dart';
-import 'package:new_version_plus/new_version_plus.dart';
 import 'package:careers/widgets/update_dialog.dart';
 import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/constants/app_text_styles.dart';
 import 'package:careers/bloc/save_fcm_token/save_fcm_token_bloc.dart';
 import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:careers/bloc/save_fcm_token/save_fcm_token_event.dart';
+import 'package:careers/bloc/article/article_bloc.dart';
+import 'package:careers/bloc/article/article_state.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:careers/data/models/article_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:careers/bloc/notification/notification_bloc.dart';
+import 'package:careers/bloc/notification/notification_event.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -148,6 +154,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     try {
       context.read<CareerRecordVideoBloc>().add(RefreshHomeVideos());
       context.read<CareerGuidanceBannerBloc>().add(RefreshCareerGuidanceBanners());
+      context.read<NotificationBloc>().add(FetchNotifications());
 
       await Future.any([
         Future.delayed(const Duration(seconds: 5)),
@@ -174,7 +181,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     }
   }
-
 
   void _showComingSoonDialog(String featureName) {
     showDialog(
@@ -457,23 +463,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
 
+          _buildArticlesSection(),
+
           BlocBuilder<CareerGuidanceBannerBloc, CareerGuidanceBannerState>(
             builder: (context, state) {
-              // Hide everything if error
               if (state is CareerGuidanceBannerError) return const SizedBox.shrink();
 
-              // Hide everything while loading — no heading flash
               if (state is CareerGuidanceBannerInitial ||
                   state is CareerGuidanceBannerLoading) {
                 return const SizedBox.shrink();
               }
 
-              // Hide if loaded but empty
               if (state is CareerGuidanceBannerLoaded && state.banners.isEmpty) {
                 return const SizedBox.shrink();
               }
 
-              // Only show heading + carousel when we KNOW there's data
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -491,7 +495,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   SizedBox(height: Responsive.h(1.2)),
                   const LiveCarousel(),
-                  SizedBox(height: Responsive.h(1.8)),
+                  // ← trailing SizedBox removed
                 ],
               );
             },
@@ -733,4 +737,57 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _buildArticlesSection() {
+    return BlocBuilder<ArticleBloc, ArticleState>(
+      builder: (context, state) {
+        // Show shimmer while loading
+        if (state is ArticleInitial || state is ArticleLoading) {
+          return Padding(
+            padding: EdgeInsets.only(
+              top: Responsive.h(1.8),          // ← add this
+              left: Responsive.w(5),
+              right: Responsive.w(5),
+            ),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: double.infinity,
+                  height: Responsive.h(16),
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (state is! ArticleLoaded || state.articles.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(top: Responsive.h(1.8)),
+          child: GestureDetector(
+            onTap: () => context.push('/articles'),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: Responsive.w(5)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/home_banner.png',
+                  width: double.infinity,
+                  height: Responsive.h(16),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 }

@@ -37,6 +37,17 @@ import 'package:careers/screens/careers/newgen_courses_page.dart';
 import 'package:careers/bloc/newgen_courses/newgen_courses_bloc.dart';
 import 'package:careers/data/repositories/newgen_courses_repository.dart';
 import 'package:careers/screens/onboarding/onboarding_screen.dart';
+import 'package:careers/screens/home/articles_page.dart';
+import 'package:careers/bloc/article/article_bloc.dart';
+import 'package:careers/bloc/article/article_event.dart';
+import 'package:careers/data/repositories/article_repository.dart';
+import 'package:careers/bloc/notification/notification_bloc.dart';
+import 'package:careers/data/repositories/notification_repository.dart';
+import 'package:careers/screens/home/notifications_page.dart';
+import 'package:careers/bloc/notification/notification_bloc.dart';
+import 'package:careers/bloc/notification/notification_event.dart';
+import 'package:careers/data/repositories/notification_repository.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
@@ -487,6 +498,51 @@ class AppRouter {
               child: child,
             );
           },
+        ),
+      ),
+
+      GoRoute(
+        path: '/articles',
+        name: 'articles',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: BlocProvider(
+            create: (context) => ArticleBloc(
+              context.read<ArticleRepository>(),
+            )..add(FetchArticles()),
+            child: const ArticlesPage(),
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.1, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+        ),
+      ),
+
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const NotificationsPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.1, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
         ),
       ),
     ],

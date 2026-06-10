@@ -1,8 +1,8 @@
 class ApiConstants {
 
   // static const String baseUrl = "https://rajasree.astradevelops.in/CareerApp/public/api/";
-  static const String baseUrl = "https://careerss.in/api/";
-  // static const String baseUrl = "https://rajasree.astradevelops.in/New_career/public/api/";
+  //  static const String baseUrl = "https://careerss.in/api/";
+  static const String baseUrl = "https://rajasree.astradevelops.in/New_career/public/api/";
 
   // static const String login = "login";
   // static const String signup = "signup";
@@ -33,5 +33,8 @@ class ApiConstants {
   // static const String deleteAccount = 'delete-account';
   static const String collegeViewUser = 'collegeview-user';
   static const String saveFcmToken = 'save-fcm-token';
+  static const String articles = 'articles';
+  static const String searchArticles = 'search-articles';
+  static const String notifications = 'notifications';
 
 }

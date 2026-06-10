@@ -8,6 +8,7 @@ class AuthLocalStorage {
   static const _onboardingKey = 'onboarding_complete';
   static const _storedKey = 'stored_flag';
   static const _fcmTokenKey = 'fcm_token';
+  static const _lastSeenNotificationIdKey = 'last_seen_notification_id';
 
   Future<void> saveUser({
     required String userId,
@@ -92,5 +93,15 @@ class AuthLocalStorage {
   Future<String> getStoredFlag() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_storedKey) ?? '0';
+  }
+
+  Future<void> saveLastSeenNotificationId(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastSeenNotificationIdKey, id);
+  }
+
+  Future<int> getLastSeenNotificationId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_lastSeenNotificationIdKey) ?? 0;
   }
 }

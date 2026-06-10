@@ -3,6 +3,10 @@ import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import '/utils/prefs/auth_local_storage.dart';
 import 'package:careers/constants/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
+import 'package:careers/bloc/notification/notification_bloc.dart';
+import 'package:careers/bloc/notification/notification_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SimpleHeader extends StatefulWidget {
   const SimpleHeader({super.key});
@@ -89,18 +93,45 @@ class _SimpleHeaderState extends State<SimpleHeader> {
               ],
             ),
           ),
-          // Container(
-          //   padding: EdgeInsets.all(Responsive.w(2.5)),
-          //   decoration: BoxDecoration(
-          //     color: AppColors.white.withOpacity(0.2),
-          //     borderRadius: BorderRadius.circular(Responsive.w(3)),
-          //   ),
-          //   child: Icon(
-          //     Icons.notifications_outlined,
-          //     color: AppColors.white,
-          //     size: Responsive.sp(18),
-          //   ),
-          // ),
+          GestureDetector(
+            onTap: () => context.push('/notifications'),
+            child: BlocBuilder<NotificationBloc, NotificationState>(
+              builder: (context, state) {
+                final hasUnread = state is NotificationLoaded && state.hasUnread;
+
+                return Container(
+                  padding: EdgeInsets.all(Responsive.w(2.5)),
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(Responsive.w(3)),
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(
+                        Icons.notifications_outlined,
+                        color: AppColors.white,
+                        size: Responsive.sp(20),
+                      ),
+                      if (hasUnread)
+                        Positioned(
+                          top: Responsive.h(0.2),
+                          right: Responsive.w(0.2),
+                          child: Container(
+                            width: Responsive.w(1.8),
+                            height: Responsive.w(1.8),
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

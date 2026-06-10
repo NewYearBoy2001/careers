@@ -58,6 +58,14 @@ import 'bloc/delete_account/delete_account_bloc.dart';
 import 'data/repositories/save_fcm_token_repository.dart';
 import 'data/api/save_fcm_token_api_service.dart';
 import 'bloc/save_fcm_token/save_fcm_token_bloc.dart';
+import 'data/api/article_api_service.dart';
+import 'data/repositories/article_repository.dart';
+import 'bloc/article/article_bloc.dart';
+import 'bloc/article/article_event.dart';
+import 'data/api/notification_api_service.dart';
+import 'data/repositories/notification_repository.dart';
+import 'bloc/notification/notification_bloc.dart';
+import 'bloc/notification/notification_event.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -180,6 +188,19 @@ class MyApp extends StatelessWidget {
             context.read<AuthLocalStorage>(),
           ),
         ),
+
+        RepositoryProvider<ArticleApiService>(
+          create: (context) => ArticleApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
+
+        RepositoryProvider<NotificationApiService>(
+          create: (context) => NotificationApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
+
         // RepositoryProvider<DeleteAccountApiService>(
         //   create: (context) => DeleteAccountApiService(
         //     context.read<AuthLocalStorage>(),
@@ -300,6 +321,19 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<ArticleRepository>(
+          create: (context) => ArticleRepository(
+            context.read<ArticleApiService>(),
+          ),
+        ),
+
+        RepositoryProvider<NotificationRepository>(
+          create: (context) => NotificationRepository(
+            context.read<NotificationApiService>(),
+          ),
+        ),
+
+
         // RepositoryProvider<DeleteAccountRepository>(
         //   create: (context) => DeleteAccountRepository(
         //     context.read<DeleteAccountApiService>(),
@@ -405,6 +439,19 @@ class MyApp extends StatelessWidget {
             create: (context) => SaveFcmTokenBloc(
               context.read<SaveFcmTokenRepository>(),
             ),
+          ),
+
+          BlocProvider<ArticleBloc>(
+            create: (context) => ArticleBloc(
+              context.read<ArticleRepository>(),
+            )..add(FetchArticles()),
+          ),
+
+          BlocProvider<NotificationBloc>(
+            create: (context) => NotificationBloc(
+              context.read<NotificationRepository>(),
+              context.read<AuthLocalStorage>(),
+            )..add(FetchNotifications()),
           ),
 
           // BlocProvider<DeleteAccountBloc>(
