@@ -15,7 +15,6 @@ import 'package:careers/widgets/network_aware_widget.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_bloc.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_state.dart';
 import 'package:careers/bloc/career_guidance_banner/career_guidance_banner_event.dart';
-import 'package:new_version_plus/new_version_plus.dart';
 import 'package:careers/widgets/update_dialog.dart';
 import 'package:careers/utils/app_notifier.dart';
 import 'package:careers/constants/app_text_styles.dart';
