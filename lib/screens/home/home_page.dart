@@ -24,8 +24,6 @@ import 'package:careers/bloc/save_fcm_token/save_fcm_token_event.dart';
 import 'package:careers/bloc/article/article_bloc.dart';
 import 'package:careers/bloc/article/article_state.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:careers/data/models/article_model.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:careers/bloc/notification/notification_bloc.dart';
 import 'package:careers/bloc/notification/notification_event.dart';
 
