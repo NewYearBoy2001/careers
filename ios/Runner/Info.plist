@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 
+	<!-- Performance -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 
+	<!-- App Info -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 
@@ -36,54 +38,56 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 
-	<!-- Firebase Push Notification -->
+	<!-- Firebase -->
 	<key>FirebaseMessagingAutoInitEnabled</key>
 	<true/>
 
-	<!-- Notification Permission -->
-	<key>NSUserNotificationUsageDescription</key>
-	<string>Careers sends notifications about job updates, applications, alerts, and important account information.</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
 
-	<!-- Background Push Notification -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
+	<!-- Encryption -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 
-	<!-- Internet -->
+	<!-- iPhone -->
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!-- Network -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
 
-	<!-- Camera -->
+	<!-- Camera Permission -->
 	<key>NSCameraUsageDescription</key>
 	<string>Careers uses the camera to capture profile photos and upload documents.</string>
 
-	<!-- Gallery -->
+	<!-- Photo Library Permission -->
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Careers needs access to your photo library so you can upload profile images and documents.</string>
 
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Careers may save generated or edited files to your photo library.</string>
 
-	<!-- Encryption -->
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+	<!-- Notifications -->
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Careers sends notifications about job updates, applications, alerts, and important account information.</string>
 
-	<!-- Fullscreen -->
-	<key>UIRequiresFullScreen</key>
-	<true/>
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-
+	<!-- Scene Configuration -->
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
+
 		<key>UISceneConfigurations</key>
 		<dict>
 			<key>UIWindowSceneSessionRoleApplication</key>
@@ -91,10 +95,13 @@
 				<dict>
 					<key>UISceneClassName</key>
 					<string>UIWindowScene</string>
+
 					<key>UISceneConfigurationName</key>
 					<string>flutter</string>
+
 					<key>UISceneDelegateClassName</key>
 					<string>FlutterSceneDelegate</string>
+
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
 				</dict>
@@ -102,15 +109,22 @@
 		</dict>
 	</dict>
 
+	<!-- Input Events -->
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 
+	<!-- Launch Screen -->
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 
+	<!-- Fullscreen -->
+	<key>UIRequiresFullScreen</key>
+	<true/>
+
+	<!-- Orientation -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
