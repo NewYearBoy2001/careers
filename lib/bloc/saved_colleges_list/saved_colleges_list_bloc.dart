@@ -13,6 +13,15 @@ class SavedCollegesListBloc extends Bloc<SavedCollegesListEvent, SavedCollegesLi
     on<RemoveCollegeFromSavedList>(_onRemoveCollege);
   }
 
+  // Helper — detect the "no profile data" API error
+  bool _isNoProfileError(Object e) {
+    final msg = e.toString().toLowerCase();
+    return msg.contains('phone') ||
+        msg.contains('required') ||
+        msg.contains('unauthenticated') ||
+        msg.contains('unauthori');
+  }
+
   Future<void> _onFetch(
       FetchSavedCollegesList event,
       Emitter<SavedCollegesListState> emit,
@@ -30,7 +39,36 @@ class SavedCollegesListBloc extends Bloc<SavedCollegesListEvent, SavedCollegesLi
         ));
       }
     } catch (e) {
-      emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));
+      // No profile yet — treat as empty, not an error
+      if (_isNoProfileError(e)) {
+        emit(SavedCollegesListEmpty('No saved colleges found'));
+      } else {
+        emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));
+      }
+    }
+  }
+
+  Future<void> _onRefresh(
+      RefreshSavedCollegesList event,
+      Emitter<SavedCollegesListState> emit,
+      ) async {
+    try {
+      final result = await _repository.getSavedColleges(page: 1);
+      if (result.colleges.isEmpty) {
+        emit(SavedCollegesListEmpty('No saved colleges found'));
+      } else {
+        emit(SavedCollegesListLoaded(
+          colleges: result.colleges,
+          currentPage: result.currentPage,
+          lastPage: result.lastPage,
+        ));
+      }
+    } catch (e) {
+      if (_isNoProfileError(e)) {
+        emit(SavedCollegesListEmpty('No saved colleges found'));
+      } else {
+        emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));
+      }
     }
   }
 
@@ -54,26 +92,6 @@ class SavedCollegesListBloc extends Bloc<SavedCollegesListEvent, SavedCollegesLi
     } catch (e) {
       // On next-page error, revert isFetchingMore but keep existing data
       emit(current.copyWith(isFetchingMore: false));
-    }
-  }
-
-  Future<void> _onRefresh(
-      RefreshSavedCollegesList event,
-      Emitter<SavedCollegesListState> emit,
-      ) async {
-    try {
-      final result = await _repository.getSavedColleges(page: 1);
-      if (result.colleges.isEmpty) {
-        emit(SavedCollegesListEmpty('No saved colleges found'));
-      } else {
-        emit(SavedCollegesListLoaded(
-          colleges: result.colleges,
-          currentPage: result.currentPage,
-          lastPage: result.lastPage,
-        ));
-      }
-    } catch (e) {
-      emit(SavedCollegesListError(e.toString().replaceAll('Exception: ', '')));
     }
   }
 

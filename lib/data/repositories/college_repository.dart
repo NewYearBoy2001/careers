@@ -21,7 +21,7 @@ class CollegeRepository {
     );
   }
 
-  Future<ApiResponse<CollegeModel>> getCollegeDetails(String id) async {
-    return await _apiService.getCollegeDetails(id);
+  Future<ApiResponse<CollegeModel>> getCollegeDetails(String id, String? userId) async {
+    return await _apiService.getCollegeDetails(id, userId);
   }
 }

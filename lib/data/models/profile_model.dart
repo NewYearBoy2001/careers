@@ -1,79 +1,31 @@
 class ProfileModel {
   final String userId;
-  final String role;
   final String name;
-  final String email;
+  final String? email;
   final String? phone;
-  final String? currentEducation; // For Student
-  final List<ChildModel>? children; // For Parent
 
   ProfileModel({
     required this.userId,
-    required this.role,
     required this.name,
-    required this.email,
+    this.email,
     this.phone,
-    this.currentEducation,
-    this.children,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
-      userId: json['user_id'] ?? '',
-      role: json['role'] ?? '',
+      userId: json['user_id']?.toString() ?? '',
       name: json['name'] ?? '',
-      email: json['email'] ?? '',
+      email: json['email'],
       phone: json['phone'],
-      currentEducation: json['current_education'],
-      children: json['children'] != null
-          ? (json['children'] as List)
-          .map((child) => ChildModel.fromJson(child))
-          .toList()
-          : null,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'user_id': userId,
-      'role': role,
-      'name': name,
-      'email': email,
-      if (phone != null && phone!.isNotEmpty) 'phone': phone,
-      if (currentEducation != null) 'current_education': currentEducation,
-      if (children != null)
-        'children': children!.map((child) => child.toJson()).toList(),
-    };
-  }
+  bool get isEmpty => name.isEmpty && (email == null || email!.isEmpty) && (phone == null || phone!.isEmpty);
 
-  bool isStudent() => role == 'Student';
-  bool isParent() => role == 'Parent';
-}
-
-class ChildModel {
-  final String id;
-  final String name;
-  final String educationLevel;
-
-  ChildModel({
-    required this.id,
-    required this.name,
-    required this.educationLevel,
-  });
-
-  factory ChildModel.fromJson(Map<String, dynamic> json) {
-    return ChildModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      educationLevel: json['education_level'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'education_level': educationLevel,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'user_id': userId,
+    'name': name,
+    if (email != null) 'email': email,
+    if (phone != null) 'phone': phone,
+  };
 }

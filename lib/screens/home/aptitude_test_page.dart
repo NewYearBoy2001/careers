@@ -3,6 +3,7 @@ import '../../data/aptitude_questions.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:go_router/go_router.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class AptitudeTestPage extends StatefulWidget {
   const AptitudeTestPage({super.key});
@@ -125,12 +126,9 @@ class _AptitudeTestPageState extends State<AptitudeTestPage> with SingleTickerPr
           color: AppColors.textOnPrimary,
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           "Career Aptitude Test",
-          style: TextStyle(
-            color: AppColors.textOnPrimary,
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.pageTitle(fontSize: 16),
         ),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(Responsive.h(0.5)),
@@ -181,12 +179,7 @@ class _AptitudeTestPageState extends State<AptitudeTestPage> with SingleTickerPr
                         // Question text
                         Text(
                           question["question"],
-                          style: TextStyle(
-                            fontSize: Responsive.sp(20),
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                            height: 1.3,
-                          ),
+                          style: AppTextStyles.heroTitle(fontSize: Responsive.sp(20)).copyWith(height: 1.3),
                         ),
 
                         SizedBox(height: Responsive.h(4)),

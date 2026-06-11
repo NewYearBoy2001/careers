@@ -7,6 +7,7 @@ import 'package:careers/bloc/career_record_video/career_record_video_event.dart'
 import 'package:careers/bloc/career_record_video/career_record_video_state.dart';
 import 'package:careers/data/models/career_record_video_model.dart';
 import 'package:careers/screens/home/widgets/youtube_player_page.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareerRecordVideosPage extends StatefulWidget {
   const CareerRecordVideosPage({super.key});
@@ -51,16 +52,13 @@ class _CareerRecordVideosPageState extends State<CareerRecordVideosPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Career Guidance Classes',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+          style: AppTextStyles.pageTitle(fontSize: 18),
         ),
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: const IconThemeData(color: AppColors.white),
       ),
       body: BlocBuilder<CareerRecordVideoBloc, CareerRecordVideoState>(
         builder: (context, state) {
@@ -268,12 +266,7 @@ class _VideoListTile extends StatelessWidget {
                     children: [
                       Text(
                         video.title,
-                        style: TextStyle(
-                          fontSize: Responsive.sp(13),
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                          height: 1.3,
-                        ),
+                        style: AppTextStyles.cardTitle(fontSize: Responsive.sp(13)).copyWith(height: 1.3),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

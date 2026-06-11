@@ -104,7 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         color: AppColors.white,
         border: Border(
           top: BorderSide(
-            color: AppColors.shadow.withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.1),
             width: 1,
           ),
         ),
@@ -127,8 +127,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(int index, IconData iconFilled, String label) {
     final isSelected = _currentIndex == index;
+
+    // Outlined versions for unselected state
+    final Map<int, IconData> outlinedIcons = {
+      0: Icons.home_outlined,
+      1: Icons.explore_outlined,
+      2: Icons.account_balance_outlined,
+      3: Icons.person_outline_rounded,
+    };
+
+    final icon = isSelected ? iconFilled : outlinedIcons[index]!;
 
     return GestureDetector(
       onTap: () => _onNavTap(index),

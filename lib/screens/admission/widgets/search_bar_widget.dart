@@ -10,6 +10,7 @@ class SearchBarWidget extends StatefulWidget {
   final FocusNode? focusNode;
   final VoidCallback? onTap;
   final bool readOnly;
+  final bool interceptTap; // ADD
 
   const SearchBarWidget({
     super.key,
@@ -20,6 +21,7 @@ class SearchBarWidget extends StatefulWidget {
     this.focusNode,
     this.onTap,
     this.readOnly = false,
+    this.interceptTap = false, // ADD
   });
 
   @override
@@ -34,19 +36,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-    // ✅ CHANGE: Use provided focusNode or create new one
     _focusNode = widget.focusNode ?? FocusNode();
   }
 
   @override
   void dispose() {
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
-    // ✅ CHANGE: Only dispose if we created the focus node
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
+    if (widget.controller == null) _controller.dispose();
+    if (widget.focusNode == null) _focusNode.dispose();
     super.dispose();
   }
 
@@ -54,7 +50,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   Widget build(BuildContext context) {
     Responsive.init(context);
 
-    return Container(
+    // ADD: wrap with GestureDetector when interceptTap is true
+    Widget field = Container(
       height: Responsive.h(6),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -84,8 +81,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         child: TextField(
           focusNode: _focusNode,
           controller: _controller,
-          readOnly: widget.readOnly,
-          onTap: widget.onTap,
+          readOnly: widget.readOnly || widget.interceptTap, // ADD: treat as readOnly if intercepting
+          onTap: widget.interceptTap ? null : widget.onTap,
           style: TextStyle(
             fontSize: Responsive.sp(14),
             color: AppColors.textPrimary,
@@ -130,5 +127,18 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         ),
       ),
     );
+
+    // ADD: intercept tap at GestureDetector level, before TextField can request focus
+    if (widget.interceptTap && widget.onTap != null) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AbsorbPointer(
+          child: field,
+        ),
+      );
+    }
+
+    return field;
   }
 }

@@ -43,6 +43,8 @@ class CareerNodeDetails {
   final String? thumbnail;
   final bool isNewgenCourse;
   final bool hasFuturePath;
+  final String? growth;   // ADD THIS
+  final String? demand;
 
 
   CareerNodeDetails({
@@ -56,6 +58,8 @@ class CareerNodeDetails {
     this.thumbnail,
     required this.isNewgenCourse,
     required this.hasFuturePath,
+    this.growth,   // ADD THIS
+    this.demand,
   });
 
   factory CareerNodeDetails.fromJson(Map<String, dynamic> json) {
@@ -78,6 +82,8 @@ class CareerNodeDetails {
       hasFuturePath: json['has_future_path'] == 1 ||
           json['has_future_path'] == '1' ||
           json['has_future_path'] == true,
+      growth: json['growth']?.toString(),   // ADD THIS
+      demand: json['demand']?.toString(),
     );
   }
 

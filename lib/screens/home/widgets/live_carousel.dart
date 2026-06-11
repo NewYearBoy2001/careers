@@ -15,6 +15,7 @@ import 'package:careers/utils/app_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class LiveCarousel extends StatefulWidget {
   const LiveCarousel({super.key});
@@ -286,12 +287,7 @@ class _LiveCarouselState extends State<LiveCarousel> {
                     // Class name
                     Text(
                       data.name,
-                      style: TextStyle(
-                        fontSize: Responsive.sp(13),
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        height: 1.3,
-                      ),
+                      style: AppTextStyles.cardTitle(fontSize: Responsive.sp(13)).copyWith(height: 1.3),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -449,12 +445,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
                     // ── Class name ──────────────────────────────────
                     Text(
                       banner.name,
-                      style: TextStyle(
-                        fontSize: Responsive.sp(17),
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        height: 1.3,
-                      ),
+                      style: AppTextStyles.cardTitle(fontSize: Responsive.sp(17)).copyWith(height: 1.3),
                     ),
                     SizedBox(height: Responsive.h(0.6)),
 
@@ -538,6 +529,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
                       validator: (v) =>
                           FormValidators.required(v, field: 'Name'),
                       enabled: !isLoading,
+                      textCapitalization: TextCapitalization.words,
                     ),
                     SizedBox(height: Responsive.h(1.8)),
 
@@ -649,6 +641,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
     String? Function(String?)? validator,
     bool enabled = true,
     List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return TextFormField(
       controller: controller,
@@ -656,6 +649,7 @@ class _RegisterSheetState extends State<_RegisterSheet> {
       enabled: enabled,
       validator: validator,
       inputFormatters: inputFormatters,
+      textCapitalization: textCapitalization,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

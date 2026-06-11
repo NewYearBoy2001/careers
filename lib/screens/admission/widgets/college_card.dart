@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:careers/data/models/college_model.dart';
 import 'package:go_router/go_router.dart';
+import 'package:careers/utils/prefs/auth_local_storage.dart';
+import 'user_info_dialog.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CollegeCard extends StatelessWidget {
   final CollegeModel college;
@@ -19,7 +23,7 @@ class CollegeCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(Responsive.w(2.5)),
-        border: Border.all(          // ← ADD THIS
+        border: Border.all(
           color: AppColors.border,
           width: 1,
         ),
@@ -34,25 +38,80 @@ class CollegeCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            context.push('/college-details', extra: college.id);
+          onTap: () async {
+            final storage = AuthLocalStorage();
+
+            /// ✅ PLATFORM CHECK
+            if (Platform.isIOS) {
+              final storedFlag = await storage.getStoredFlag();
+
+              /// 🚨 iOS RULE
+              if (storedFlag == '1') {
+                /// ✅ SKIP dialog completely
+                final profile = await storage.getCachedProfile();
+                final userId = profile['user_id'] ?? '';
+
+                if (!context.mounted) return;
+
+                context.push('/college-details', extra: {
+                  'id': college.id,
+                  'user_id': userId,
+                });
+                return;
+              }
+            }
+
+            /// ✅ NORMAL FLOW (Android + iOS when flag != 1)
+            final phone = await storage.getPhone();
+            final name = await storage.getUserName();
+
+            final hasData = phone != null &&
+                phone.isNotEmpty &&
+                name != null &&
+                name.isNotEmpty;
+
+            if (!context.mounted) return;
+
+            /// 🚨 SHOW DIALOG ONLY IF NEEDED
+            if (!hasData) {
+              final result = await showDialog<bool>(
+                context: context,
+                barrierDismissible: true,
+                barrierColor: Colors.black.withOpacity(0.45),
+                useSafeArea: false,
+                builder: (_) => const UserInfoDialog(),
+              );
+
+              if (result != true || !context.mounted) return;
+            }
+
+            /// ✅ NAVIGATION
+            final profile = await storage.getCachedProfile();
+            final userId = profile['user_id'] ?? '';
+
+            if (!context.mounted) return;
+
+            context.push('/college-details', extra: {
+              'id': college.id,
+              'user_id': userId,
+            });
           },
+
           borderRadius: BorderRadius.circular(Responsive.w(3.5)),
+
           child: Padding(
             padding: EdgeInsets.all(Responsive.w(2.5)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// TITLE + RATING
                 Row(
                   children: [
                     Expanded(
                       child: Text(
                         college.name,
-                        style: TextStyle(
+                        style: AppTextStyles.cardTitle(
                           fontSize: Responsive.sp(15),
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.3,
                         ),
                       ),
                     ),
@@ -63,16 +122,15 @@ class CollegeCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(Responsive.w(1.8)),
+                        borderRadius:
+                        BorderRadius.circular(Responsive.w(1.8)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.star_rounded,
-                            color: AppColors.primary,
-                            size: Responsive.sp(14),
-                          ),
+                          Icon(Icons.star_rounded,
+                              color: AppColors.primary,
+                              size: Responsive.sp(14)),
                           SizedBox(width: Responsive.w(1)),
                           Text(
                             college.rating,
@@ -87,14 +145,15 @@ class CollegeCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 SizedBox(height: Responsive.h(0.6)),
+
+                /// LOCATION
                 Row(
                   children: [
-                    Icon(
-                      Icons.location_on_rounded,
-                      size: Responsive.sp(14),
-                      color: AppColors.textSecondary,
-                    ),
+                    Icon(Icons.location_on_rounded,
+                        size: Responsive.sp(14),
+                        color: AppColors.textSecondary),
                     SizedBox(width: Responsive.w(1)),
                     Expanded(
                       child: Text(
@@ -109,18 +168,23 @@ class CollegeCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 SizedBox(height: Responsive.h(0.7)),
+
+                /// COURSES
                 Text(
                   college.courseList.map((c) => c.courseName).join(', '),
                   style: TextStyle(
                     fontSize: Responsive.sp(12),
                     color: AppColors.textSecondary,
-                    height: 1.3,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+
                 SizedBox(height: Responsive.h(0.7)),
+
+                /// CTA
                 Row(
                   children: [
                     const Spacer(),
@@ -133,11 +197,9 @@ class CollegeCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: Responsive.w(1)),
-                    Icon(
-                      Icons.arrow_forward,
-                      size: Responsive.sp(14),
-                      color: AppColors.primary,
-                    ),
+                    Icon(Icons.arrow_forward,
+                        size: Responsive.sp(14),
+                        color: AppColors.primary),
                   ],
                 ),
               ],

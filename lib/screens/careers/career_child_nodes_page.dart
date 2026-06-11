@@ -10,6 +10,7 @@ import '../../bloc/career_child_nodes/career_child_nodes_state.dart';
 import 'widgets/career_search_result_card.dart';
 import '/shimmer/career_search_grid_shimmer.dart';
 import 'package:lottie/lottie.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareerChildNodesPage extends StatefulWidget {
   final String parentId;
@@ -106,11 +107,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
           children: [
             Text(
               widget.parentTitle,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: Responsive.sp(18),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.pageTitle(fontSize: Responsive.sp(18)),
             ),
             Text(
               'Career Paths',
@@ -133,7 +130,9 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
         ],
       ),
 
-      body: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
+        body: SafeArea(
+          top: false,
+          child: BlocBuilder<CareerChildNodesBloc, CareerChildNodesState>(
         builder: (context, state) {
           if (state is CareerChildNodesLoading) {
             return CustomScrollView(
@@ -157,11 +156,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                     SizedBox(height: Responsive.h(2)),
                     Text(
                       'Failed to load career paths',
-                      style: TextStyle(
-                        fontSize: Responsive.sp(18),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: Responsive.h(1)),
@@ -248,11 +243,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                         state.activeKeyword != null
                             ? 'Results for "${state.activeKeyword}"'
                             : 'Choose your path',
-                        style: TextStyle(
-                          fontSize: Responsive.sp(16),
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
+                        style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(16)),
                       ),
                     ),
                   ),
@@ -272,7 +263,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
                             crossAxisCount: 2,
                             crossAxisSpacing: Responsive.w(3),
                             mainAxisSpacing: Responsive.h(2),
-                            childAspectRatio: 0.9,
+                            mainAxisExtent: (Responsive.deviceWidth / 2) - Responsive.w(6) + 20,
                           ),
                           delegate: SliverChildBuilderDelegate((
                               context,
@@ -330,7 +321,7 @@ class _CareerChildNodesPageState extends State<CareerChildNodesPage> {
 
           return const SizedBox.shrink();
         },
-      ),
+      ),),
     );
   }
 }

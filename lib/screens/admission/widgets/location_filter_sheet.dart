@@ -6,6 +6,7 @@ import 'package:careers/bloc/location/location_bloc.dart';
 import 'package:careers/bloc/location/location_event.dart';
 import 'package:careers/bloc/location/location_state.dart';
 import 'package:careers/data/models/location_model.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class LocationFilterSheet extends StatefulWidget {
   final int? selectedStateId;
@@ -82,11 +83,7 @@ class _LocationFilterSheetState extends State<LocationFilterSheet> {
                 children: [
                   Text(
                     'Filter by Location',
-                    style: TextStyle(
-                      fontSize: Responsive.sp(18),
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
                   ),
                   const Spacer(),
                   if (_selectedState != null || _selectedDistrict != null)

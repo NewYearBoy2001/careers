@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:careers/utils/network/network_service.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class NetworkAwareWidget extends StatefulWidget {
   final Widget child;
@@ -74,24 +75,19 @@ class _NoInternetScreen extends StatelessWidget {
                   repeat: true,
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'No Internet Connection',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A3C34),
-                    letterSpacing: -0.5,
+                  style: AppTextStyles.heroTitle(fontSize: 22).copyWith(
+                    color: const Color(0xFF1A3C34),
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
+                Text(
                   "Oops! Looks like you're floating\nin space without a signal.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6B8F84),
+                  style: AppTextStyles.subSectionTitle(fontSize: 14).copyWith(
+                    color: const Color(0xFF6B8F84),
                     height: 1.6,
                   ),
                 ),

@@ -19,19 +19,25 @@ class SavedCollegesPageResult {
 
 class SavedCollegesListApiService {
   final BaseDioClient _dioClient;
+  final AuthLocalStorage _authStorage; // ADD
   static const int _perPage = 10;
 
   SavedCollegesListApiService(AuthLocalStorage authStorage)
-      : _dioClient = BaseDioClient(authStorage: authStorage);
+      : _dioClient = BaseDioClient(),  // CHANGE: no authStorage needed
+        _authStorage = authStorage;    // ADD
 
   Future<SavedCollegesPageResult> getSavedColleges({int page = 1}) async {
     try {
-      final response = await _dioClient.dio.get(
+      final cached = await _authStorage.getCachedProfile();
+      final userId = cached['user_id'] ?? '';
+
+      final response = await _dioClient.dio.post(
         ApiConstants.savedColleges,
         queryParameters: {
           'page': page,
           'per_page': _perPage,
         },
+        data: {'user_id': userId},
       );
 
       if (response.statusCode == 200 && response.data['status'] == "1") {

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'router/app_router.dart';
-import 'data/api/auth_api_service.dart';
-import 'data/repositories/auth_repository.dart';
 import 'utils/prefs/auth_local_storage.dart';
 import 'data/repositories/admission_banner_repository.dart';
 import 'data/api/admission_banner_api.dart';
@@ -20,9 +18,9 @@ import 'bloc/profile/profile_bloc.dart';
 import 'data/api/saved_colleges_list_api_service.dart';
 import 'data/repositories/saved_colleges_list_repository.dart';
 import 'bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
-import 'data/api/change_password_api_service.dart';
-import 'data/repositories/change_password_repository.dart';
-import 'bloc/change_password/change_password_bloc.dart';
+// import 'data/api/change_password_api_service.dart';
+// import 'data/repositories/change_password_repository.dart';
+// import 'bloc/change_password/change_password_bloc.dart';
 import 'data/api/career_banner_api_service.dart';
 import 'data/repositories/career_banner_repository.dart';
 import 'bloc/career_banner/career_banner_bloc.dart';
@@ -57,6 +55,17 @@ import 'bloc/newgen_courses/newgen_courses_bloc.dart';
 import 'data/api/delete_account_api_service.dart';
 import 'data/repositories/delete_account_repository.dart';
 import 'bloc/delete_account/delete_account_bloc.dart';
+import 'data/repositories/save_fcm_token_repository.dart';
+import 'data/api/save_fcm_token_api_service.dart';
+import 'bloc/save_fcm_token/save_fcm_token_bloc.dart';
+import 'data/api/article_api_service.dart';
+import 'data/repositories/article_repository.dart';
+import 'bloc/article/article_bloc.dart';
+import 'bloc/article/article_event.dart';
+import 'data/api/notification_api_service.dart';
+import 'data/repositories/notification_repository.dart';
+import 'bloc/notification/notification_bloc.dart';
+import 'bloc/notification/notification_event.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -76,9 +85,9 @@ class MyApp extends StatelessWidget {
         // ========================================
         // API SERVICES (Network Layer)
         // ========================================
-        RepositoryProvider<AuthApiService>(
-          create: (_) => AuthApiService(),
-        ),
+        // RepositoryProvider<AuthApiService>(
+        //   create: (_) => AuthApiService(),
+        // ),
 
         RepositoryProvider<AdmissionApiService>(
           create: (context) => AdmissionApiService(
@@ -110,11 +119,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<ChangePasswordApiService>(
-          create: (context) => ChangePasswordApiService(
-            context.read<AuthLocalStorage>(),
-          ),
-        ),
+        // RepositoryProvider<ChangePasswordApiService>(
+        //   create: (context) => ChangePasswordApiService(
+        //     context.read<AuthLocalStorage>(),
+        //   ),
+        // ),
 
         RepositoryProvider<CareerBannerApiService>(
           create: (context) => CareerBannerApiService(
@@ -174,21 +183,39 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<DeleteAccountApiService>(
-          create: (context) => DeleteAccountApiService(
+        RepositoryProvider<SaveFcmTokenApiService>(
+          create: (context) => SaveFcmTokenApiService(
             context.read<AuthLocalStorage>(),
           ),
         ),
 
-        // ========================================
-        // REPOSITORIES (Business Logic Layer)
-        // ========================================
-        RepositoryProvider<AuthRepository>(
-          create: (context) => AuthRepository(
-            context.read<AuthApiService>(),
+        RepositoryProvider<ArticleApiService>(
+          create: (context) => ArticleApiService(
             context.read<AuthLocalStorage>(),
           ),
         ),
+
+        RepositoryProvider<NotificationApiService>(
+          create: (context) => NotificationApiService(
+            context.read<AuthLocalStorage>(),
+          ),
+        ),
+
+        // RepositoryProvider<DeleteAccountApiService>(
+        //   create: (context) => DeleteAccountApiService(
+        //     context.read<AuthLocalStorage>(),
+        //   ),
+        // ),
+
+        // ========================================
+        // REPOSITORIES (Business Logic Layer)
+        // ========================================
+        // RepositoryProvider<AuthRepository>(
+        //   create: (context) => AuthRepository(
+        //     context.read<AuthApiService>(),
+        //     context.read<AuthLocalStorage>(),
+        //   ),
+        // ),
 
         RepositoryProvider<AdmissionRepository>(
           create: (context) => AdmissionRepository(
@@ -221,11 +248,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<ChangePasswordRepository>(
-          create: (context) => ChangePasswordRepository(
-            context.read<ChangePasswordApiService>(),
-          ),
-        ),
+        // RepositoryProvider<ChangePasswordRepository>(
+        //   create: (context) => ChangePasswordRepository(
+        //     context.read<ChangePasswordApiService>(),
+        //   ),
+        // ),
 
         RepositoryProvider<CareerBannerRepository>(
           create: (context) => CareerBannerRepository(
@@ -254,6 +281,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<CareerRecordVideoRepository>(
           create: (context) => CareerRecordVideoRepository(
             context.read<CareerRecordVideoApiService>(),
+            context.read<AuthLocalStorage>(), // ADD
           ),
         ),
 
@@ -287,11 +315,30 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        RepositoryProvider<DeleteAccountRepository>(
-          create: (context) => DeleteAccountRepository(
-            context.read<DeleteAccountApiService>(),
+        RepositoryProvider<SaveFcmTokenRepository>(
+          create: (context) => SaveFcmTokenRepository(
+            context.read<SaveFcmTokenApiService>(),
           ),
         ),
+
+        RepositoryProvider<ArticleRepository>(
+          create: (context) => ArticleRepository(
+            context.read<ArticleApiService>(),
+          ),
+        ),
+
+        RepositoryProvider<NotificationRepository>(
+          create: (context) => NotificationRepository(
+            context.read<NotificationApiService>(),
+          ),
+        ),
+
+
+        // RepositoryProvider<DeleteAccountRepository>(
+        //   create: (context) => DeleteAccountRepository(
+        //     context.read<DeleteAccountApiService>(),
+        //   ),
+        // ),
 
 
       ],
@@ -327,11 +374,11 @@ class MyApp extends StatelessWidget {
             ),
           ),
 
-          BlocProvider<ChangePasswordBloc>(
-            create: (context) => ChangePasswordBloc(
-              context.read<ChangePasswordRepository>(),
-            ),
-          ),
+          // BlocProvider<ChangePasswordBloc>(
+          //   create: (context) => ChangePasswordBloc(
+          //     context.read<ChangePasswordRepository>(),
+          //   ),
+          // ),
 
           BlocProvider<CareerBannerBloc>(
             create: (context) => CareerBannerBloc(
@@ -388,11 +435,30 @@ class MyApp extends StatelessWidget {
             ),
           ),
 
-          BlocProvider<DeleteAccountBloc>(
-            create: (context) => DeleteAccountBloc(
-              context.read<DeleteAccountRepository>(),
+          BlocProvider<SaveFcmTokenBloc>(
+            create: (context) => SaveFcmTokenBloc(
+              context.read<SaveFcmTokenRepository>(),
             ),
           ),
+
+          BlocProvider<ArticleBloc>(
+            create: (context) => ArticleBloc(
+              context.read<ArticleRepository>(),
+            )..add(FetchArticles()),
+          ),
+
+          BlocProvider<NotificationBloc>(
+            create: (context) => NotificationBloc(
+              context.read<NotificationRepository>(),
+              context.read<AuthLocalStorage>(),
+            )..add(FetchNotifications()),
+          ),
+
+          // BlocProvider<DeleteAccountBloc>(
+          //   create: (context) => DeleteAccountBloc(
+          //     context.read<DeleteAccountRepository>(),
+          //   ),
+          // ),
         ],
         child: MaterialApp.router(
           title: 'Careers',

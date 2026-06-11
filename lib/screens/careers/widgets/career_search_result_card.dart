@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareerSearchResultCard extends StatefulWidget {
   final String title;
@@ -108,6 +108,7 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Image with NEWGEN badge overlay
                   AspectRatio(
@@ -191,45 +192,40 @@ class _CareerSearchResultCardState extends State<CareerSearchResultCard>
 
                   // Title + badge row
                   Padding(
-                    padding: EdgeInsets.all(Responsive.w(3)),
+                    padding: EdgeInsets.fromLTRB(
+                      Responsive.w(3),
+                      Responsive.h(0.8),
+                      Responsive.w(3),
+                      Responsive.h(0.8),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           widget.title,
-                          style: TextStyle(
-                            fontSize: Responsive.sp(14),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                            letterSpacing: -0.3,
-                          ),
+                          style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(13)),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: Responsive.h(0.75)),
-                        Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: Responsive.w(2),
-                                vertical: Responsive.h(0.4),
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.teal2.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(
-                                    Responsive.w(1.5)),
-                              ),
-                              child: Text(
-                                'Explore',
-                                style: TextStyle(
-                                  fontSize: Responsive.sp(12),
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primary,
-                                ),
-                              ),
+                        SizedBox(height: Responsive.h(0.6)),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Responsive.w(2),
+                            vertical: Responsive.h(0.35),
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.teal2.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(Responsive.w(1.5)),
+                          ),
+                          child: Text(
+                            'Explore',
+                            style: TextStyle(
+                              fontSize: Responsive.sp(11),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

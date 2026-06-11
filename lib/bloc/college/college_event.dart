@@ -26,11 +26,12 @@ class SearchColleges extends CollegeEvent {
 
 class FetchCollegeDetails extends CollegeEvent {
   final String collegeId;
+  final String? userId; // nullable
 
-  const FetchCollegeDetails(this.collegeId);
+  const FetchCollegeDetails(this.collegeId, [this.userId]); // optional positional
 
   @override
-  List<Object?> get props => [collegeId];
+  List<Object?> get props => [collegeId, userId];
 }
 
 class ClearCollegeDetails extends CollegeEvent {

@@ -1,30 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
-import 'package:careers/utils/prefs/auth_local_storage.dart';
-import 'package:careers/utils/app_notifier.dart';
-import 'package:careers/screens/profile/widgets/delete_account_dialog.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class ProfileOption extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool isLogout;
   final String? route;
   final dynamic profileData;
   final VoidCallback? onReturn;
-  final bool isDeleteAccount;
 
   const ProfileOption({
     super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.isLogout = false,
     this.route,
     this.profileData,
     this.onReturn,
-    this.isDeleteAccount = false,
   });
 
   @override
@@ -55,132 +49,6 @@ class _ProfileOptionState extends State<ProfileOption>
   }
 
   void _handleTap() async {
-    if (widget.isLogout) {
-      final confirm = await showDialog<bool>(
-        context: context,
-        barrierColor: Colors.black.withOpacity(0.45),
-        builder: (ctx) => Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: Container(
-            width: 320,
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.black.withOpacity(0.06),
-                width: 1,
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Icon container
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.logout_rounded,
-                    size: 28,
-                    color: AppColors.error,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Title
-                const Text(
-                  'Sign out?',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Subtitle
-                Text(
-                  'You will need to sign in again\nto access your account.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                // Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(ctx, false),
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.profileIconBg,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(ctx, true),
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Sign out',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      if (confirm == true && context.mounted) {
-        await AuthLocalStorage().clearUser();
-        if (context.mounted) {
-          AppNotifier.show(context, 'Logged out successfully');
-          await Future.delayed(const Duration(milliseconds: 800));
-        }
-        if (context.mounted) context.go('/login');
-      }
-      return;
-    }
-    if (widget.isDeleteAccount) {
-      showDeleteAccountDialog(context);
-      return;
-    }
-
     if (widget.route != null) {
       final result = await (widget.route == '/edit-profile' &&
           widget.profileData != null
@@ -211,73 +79,36 @@ class _ProfileOptionState extends State<ProfileOption>
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           decoration: BoxDecoration(
-            color: widget.isLogout
-                ? AppColors.error.withOpacity(0.05)
-                : AppColors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: widget.isLogout
-                  ? AppColors.error.withOpacity(0.12)
-                  : Colors.black.withOpacity(0.05),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.black.withOpacity(0.05), width: 1),
           ),
           child: Row(
             children: [
-              // Icon box
               Container(
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: widget.isLogout
-                      ? AppColors.error.withOpacity(0.1)
-                      : AppColors.profileIconBg,
+                  color: AppColors.profileIconBg,
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: Icon(
-                  widget.icon,
-                  size: 20,
-                  color: widget.isLogout ? AppColors.error : AppColors.primary,
-                ),
+                child: Icon(widget.icon, size: 20, color: AppColors.primary),
               ),
-
               const SizedBox(width: 14),
-
-              // Text
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: widget.isLogout
-                            ? AppColors.error
-                            : AppColors.textPrimary,
-                      ),
-                    ),
+                      Text(widget.title,
+                          style: AppTextStyles.cardTitle(fontSize: 15)),
                     const SizedBox(height: 2),
-                    Text(
-                      widget.subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                    Text(widget.subtitle,
+                        style: AppTextStyles.subSectionTitle(fontSize: 12)),
                   ],
                 ),
               ),
-
-              // Chevron
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: widget.isLogout
-                    ? AppColors.error.withOpacity(0.6)
-                    : AppColors.iconSecondary,
-              ),
+              Icon(Icons.chevron_right_rounded,
+                  size: 20, color: AppColors.iconSecondary),
             ],
           ),
         ),

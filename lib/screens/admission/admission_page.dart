@@ -16,6 +16,7 @@ import 'package:careers/shimmer/college_card_shimmer.dart';
 import 'package:careers/widgets/network_aware_widget.dart';
 import 'widgets/location_filter_sheet.dart';
 import 'package:lottie/lottie.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class AdmissionPage extends StatefulWidget {
   const AdmissionPage({super.key});
@@ -42,8 +43,6 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     super.initState();
     _loadInitialData();
     _scrollController.addListener(_onScroll);
-
-    _searchFocusNode.addListener(_onSearchFocusChange);
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -124,12 +123,12 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     }
   }
 
-  void _onSearchFocusChange() {
-    if (_searchFocusNode.hasFocus) {
-      _searchFocusNode.unfocus();
-      _navigateToSearchResults(focusField: 'keyword'); // ✅ Pass which field
-    }
-  }
+  // void _onSearchFocusChange() {
+  //   if (_searchFocusNode.hasFocus) {
+  //     _searchFocusNode.unfocus();
+  //     _navigateToSearchResults(focusField: 'keyword'); // ✅ Pass which field
+  //   }
+  // }
 
   // ✅ MODIFY: Accept which field to focus
   void _navigateToSearchResults({String? focusField}) async {
@@ -178,12 +177,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
                         padding: EdgeInsets.symmetric(horizontal: Responsive.w(4)),
                         child: Text(
                           'Featured Colleges',
-                          style: TextStyle(
-                            fontSize: Responsive.sp(18),
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -0.3,
-                          ),
+                          style: AppTextStyles.cardTitle(fontSize: Responsive.sp(18)),
                         ),
                       ),
                       SizedBox(height: Responsive.h(1.5)),
@@ -241,21 +235,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
         children: [
           Text(
             'Find Colleges',
-            style: TextStyle(
-              fontSize: Responsive.sp(22),
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: -0.5,
-              height: 1.1,
-              fontFamily: 'SF Pro Display',
-              shadows: [
-                Shadow(
-                  color: const Color(0x40000000),
-                  offset: Offset(0, Responsive.h(0.2)),
-                  blurRadius: Responsive.w(0.75),
-                ),
-              ],
-            ),
+            style: AppTextStyles.pageTitle(fontSize: Responsive.sp(22)),
           ),
           SizedBox(height: Responsive.h(1.25)),
           // Keyword search — still navigates to search results page
@@ -264,6 +244,8 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
             icon: Icons.search_rounded,
             controller: _searchController,
             focusNode: _searchFocusNode,
+            interceptTap: true,
+            onTap: () => _navigateToSearchResults(focusField: 'keyword'),
           ),
           SizedBox(height: Responsive.h(0.75)),
           _buildLocationFilterButton(),
@@ -467,12 +449,7 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
     if (_selectedStateName == null) {
       return Text(
         'All Colleges',
-        style: TextStyle(
-          fontSize: Responsive.sp(18),
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-          letterSpacing: -0.3,
-        ),
+        style: AppTextStyles.cardTitle(fontSize: Responsive.sp(18)),
       );
     }
 
@@ -485,21 +462,11 @@ class _AdmissionPageState extends State<AdmissionPage> with WidgetsBindingObserv
         children: [
           TextSpan(
             text: 'Colleges in ',
-            style: TextStyle(
-              fontSize: Responsive.sp(18),
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-              letterSpacing: -0.3,
-            ),
+            style: AppTextStyles.sectionTitle(fontSize: Responsive.sp(18)),
           ),
           TextSpan(
             text: locationLabel,
-            style: TextStyle(
-              fontSize: Responsive.sp(18),
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-              letterSpacing: -0.3,
-            ),
+            style: AppTextStyles.sectionTitleAccent(fontSize: Responsive.sp(18)),
           ),
         ],
       ),

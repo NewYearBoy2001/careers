@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:careers/utils/prefs/auth_local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:careers/constants/app_colors.dart';
@@ -19,13 +22,16 @@ import 'package:careers/data/repositories/course_fee_repository.dart';
 import 'package:careers/data/models/college_model.dart'; // for CourseItem
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_bloc.dart';
 import 'package:careers/bloc/saved_colleges_list/saved_colleges_list_event.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CollegeDetailsPage extends StatefulWidget {
   final String collegeId;
+  final String userId;
 
   const CollegeDetailsPage({
     super.key,
     required this.collegeId,
+    required this.userId,
   });
 
   @override
@@ -37,20 +43,38 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
   final PageController _pageController = PageController();
   bool _isSaved = false;
   bool _hasUserInteracted = false;
+  bool _hideSaveForIos = false;
 
   @override
   void initState() {
     super.initState();
-    // Reset the saved state on init
-    _isSaved = false;
-    _hasUserInteracted = false; // ✅ ADD: Reset user interaction flag
-    context.read<CollegeBloc>().add(FetchCollegeDetails(widget.collegeId));
-  }
 
+    _isSaved = false;
+    _hasUserInteracted = false;
+
+    _checkIosStoredFlag(); // 👈 ADD THIS
+
+    context.read<CollegeBloc>().add(
+      FetchCollegeDetails(widget.collegeId, widget.userId),
+    );
+  }
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkIosStoredFlag() async {
+    if (!Platform.isIOS) return; // ✅ Only for iOS
+
+    final storage = AuthLocalStorage();
+    final flag = await storage.getStoredFlag();
+
+    if (mounted && flag == '1') {
+      setState(() {
+        _hideSaveForIos = true;
+      });
+    }
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -84,9 +108,13 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
 
   void _toggleSaveCollege() {
     if (_isSaved) {
-      context.read<SavedCollegeBloc>().add(RemoveSavedCollege(widget.collegeId));
+      context.read<SavedCollegeBloc>().add(
+        RemoveSavedCollege(widget.collegeId, widget.userId), // ADD phone
+      );
     } else {
-      context.read<SavedCollegeBloc>().add(SaveCollege(widget.collegeId));
+      context.read<SavedCollegeBloc>().add(
+        SaveCollege(widget.collegeId, widget.userId), // ADD phone
+      );
     }
   }
 
@@ -191,7 +219,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
                           _buildFacilitiesSection(college.facilities!),
                         if (college.phone != null)
                           _buildAgentSection(college.phone!),
-                        SizedBox(height: Responsive.h(2.5)),
+                        SizedBox(height: Responsive.h(2.5) + MediaQuery.of(context).padding.bottom),
                       ],
                     ),
                   ),
@@ -373,50 +401,46 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
               Expanded(
                 child: Text(
                   college.name,
-                  style: TextStyle(
-                    fontSize: Responsive.sp(20),
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    height: 1.3,
-                  ),
+                  style: AppTextStyles.cardTitle(fontSize: Responsive.sp(20)).copyWith(height: 1.3),
                 ),
               ),
               SizedBox(width: Responsive.w(3)),
               // Save Button
-              BlocBuilder<SavedCollegeBloc, SavedCollegeState>(
-                builder: (context, state) {
-                  final bool isLoading = state is SavedCollegeActionLoading;
+// Save Button
+              if (!_hideSaveForIos) // ✅ HIDE ONLY IN IOS WHEN FLAG = 1
+                BlocBuilder<SavedCollegeBloc, SavedCollegeState>(
+                  builder: (context, state) {
+                    final bool isLoading = state is SavedCollegeActionLoading;
 
-                  return InkWell(
-                    onTap: isLoading ? null : _toggleSaveCollege,
-                    borderRadius: BorderRadius.circular(Responsive.w(2)),
-                    child: Container(
-                      padding: EdgeInsets.all(Responsive.w(2)),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(Responsive.w(2)),
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                        width: Responsive.w(5),
-                        height: Responsive.w(5),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.primary,
-                          ),
+                    return InkWell(
+                      onTap: isLoading ? null : _toggleSaveCollege,
+                      borderRadius: BorderRadius.circular(Responsive.w(2)),
+                      child: Container(
+                        padding: EdgeInsets.all(Responsive.w(2)),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(Responsive.w(2)),
                         ),
-                      )
-                          : Icon(
-                        _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: AppColors.primary,
-                        size: Responsive.w(6),
+                        child: isLoading
+                            ? SizedBox(
+                          width: Responsive.w(5),
+                          height: Responsive.w(5),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
+                        )
+                            : Icon(
+                          _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                          color: AppColors.primary,
+                          size: Responsive.w(6),
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    );
+                  },
+                ),            ],
           ),
           SizedBox(height: Responsive.h(1.5)),
           // Location and Rating Row
@@ -498,11 +522,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
             children: [
               Text(
                 'Courses Offered',
-                style: TextStyle(
-                  fontSize: Responsive.sp(16),
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
               ),
               if (college.courseList.any((c) => c.hasFeeStructure)) ...[ // ADD CONDITION
                 SizedBox(width: Responsive.w(2)),
@@ -535,11 +555,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
             SizedBox(height: Responsive.h(2.5)),
             Text(
               'About',
-              style: TextStyle(
-                fontSize: Responsive.sp(16),
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+              style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
             ),
             SizedBox(height: Responsive.h(1)),
             Text(
@@ -664,11 +680,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
         children: [
           Text(
             'Contact Information',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
           ),
           SizedBox(height: Responsive.h(2)),
           if (college.email != null)
@@ -771,11 +783,7 @@ class _CollegeDetailsPageState extends State<CollegeDetailsPage> {
         children: [
           Text(
             'Facilities',
-            style: TextStyle(
-              fontSize: Responsive.sp(16),
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.subSectionTitle(fontSize: Responsive.sp(16)),
           ),
           SizedBox(height: Responsive.h(1.5)),
           ...facilities.map((facility) => Padding(

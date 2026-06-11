@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:careers/constants/app_colors.dart';
 import 'package:careers/utils/responsive/responsive.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class CareerCard extends StatefulWidget {
   final String title;
@@ -141,12 +142,7 @@ class _CareerCardState extends State<CareerCard> with SingleTickerProviderStateM
                           children: [
                             Text(
                               widget.title,
-                              style: TextStyle(
-                                fontSize: Responsive.sp(16),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                                letterSpacing: -0.3,
-                              ),
+                              style: AppTextStyles.cardTitle(fontSize: Responsive.sp(16)),
                             ),
                             SizedBox(height: Responsive.h(0.5)),
                             Text(

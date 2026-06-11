@@ -7,9 +7,10 @@ import '../../data/models/college_model.dart';
 class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
   final CollegeRepository _repository;
   List<CollegeModel> _lastSearchResults = [];
-  List<CollegeModel> _accumulatedColleges = []; // for pagination append
+  List<CollegeModel> _accumulatedColleges = [];
   String? _lastKeyword;
   String? _lastLocation;
+  int _searchGeneration = 0; // ← ADD THIS
 
   CollegeBloc(this._repository) : super(CollegeInitial()) {
     on<SearchColleges>(_onSearchColleges);
@@ -20,14 +21,15 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
       SearchColleges event,
       Emitter<CollegeState> emit,
       ) async {
-    // If page 1, it's a fresh search — reset accumulated list
     if (event.page == 1) {
       _accumulatedColleges = [];
       _lastKeyword = event.keyword;
       _lastLocation = event.location;
+      _searchGeneration++; // ← INCREMENT on every new search
       emit(CollegeSearchLoading());
     }
-    // else it's a "load more" — don't show full loading, keep existing list
+
+    final int myGeneration = _searchGeneration; // ← CAPTURE current generation
 
     try {
       final response = await _repository.searchColleges(
@@ -36,6 +38,9 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
         page: event.page,
         perPage: event.perPage,
       );
+
+      // ← DISCARD result if a newer search has started
+      if (myGeneration != _searchGeneration) return;
 
       if (response.success && response.data != null) {
         _accumulatedColleges = [..._accumulatedColleges, ...response.data!];
@@ -50,6 +55,7 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
         emit(CollegeError(response.message ?? 'Failed to fetch colleges'));
       }
     } catch (e) {
+      if (myGeneration != _searchGeneration) return; // ← also guard here
       emit(CollegeError('An error occurred: ${e.toString()}'));
     }
   }
@@ -58,23 +64,22 @@ class CollegeBloc extends Bloc<CollegeEvent, CollegeState> {
       FetchCollegeDetails event,
       Emitter<CollegeState> emit,
       ) async {
-    emit(CollegeDetailsLoading(_lastSearchResults)); // ✅ CHANGE: Pass preserved results
-
+    emit(CollegeDetailsLoading(_lastSearchResults));
     try {
-      final response = await _repository.getCollegeDetails(event.collegeId);
+      final response = await _repository.getCollegeDetails(event.collegeId, event.userId);
 
       if (response.success && response.data != null) {
-        emit(CollegeDetailsLoaded(response.data!, _lastSearchResults)); // ✅ CHANGE: Pass preserved results
+        emit(CollegeDetailsLoaded(response.data!, _lastSearchResults));
       } else {
         emit(CollegeError(
           response.message ?? 'Failed to fetch college details',
-          colleges: _lastSearchResults, // ✅ CHANGE: Pass preserved results on error
+          colleges: _lastSearchResults,
         ));
       }
     } catch (e) {
       emit(CollegeError(
         'An error occurred: ${e.toString()}',
-        colleges: _lastSearchResults, // ✅ CHANGE: Pass preserved results on error
+        colleges: _lastSearchResults,
       ));
     }
   }

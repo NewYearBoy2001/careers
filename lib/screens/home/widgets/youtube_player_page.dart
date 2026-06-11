@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:careers/constants/app_colors.dart';
+import 'package:careers/constants/app_text_styles.dart';
 
 class YoutubePlayerPage extends StatefulWidget {
   final String videoId;
@@ -35,10 +36,10 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ));
+    SystemChrome.setEnabledSystemUIMode(        // ADD this
+      SystemUiMode.manual,                       // ADD this
+      overlays: SystemUiOverlay.values,          // ADD this
+    );                                           // ADD this
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: const YoutubePlayerFlags(
@@ -139,12 +140,11 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
         SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
         ]);
-        SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: SystemUiOverlay.values,
-        );
         Future.delayed(const Duration(milliseconds: 300), () {
-          SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+          SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.manual,
+            overlays: SystemUiOverlay.values,
+          );
         });
       },
       player: YoutubePlayer(
@@ -228,13 +228,7 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                       children: [
                         Text(
                           widget.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
-                            height: 1.35,
-                            letterSpacing: -0.3,
-                          ),
+                          style: AppTextStyles.heroTitle(fontSize: 18).copyWith(height: 1.35),
                         ),
                         const SizedBox(height: 14),
                         Row(
@@ -273,14 +267,9 @@ class _YoutubePlayerPageState extends State<YoutubePlayerPage> {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              const Text(
+                              Text(
                                 'About this class',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                  letterSpacing: -0.2,
-                                ),
+                                style: AppTextStyles.subSectionTitle(fontSize: 15),
                               ),
                             ],
                           ),
