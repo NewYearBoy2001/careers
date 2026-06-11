@@ -756,7 +756,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
                   width: double.infinity,
-                  height: Responsive.h(22),
+                  height: Responsive.h(18),
                   color: Colors.white,
                 ),
               ),
@@ -782,7 +782,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Image.asset(
                       'assets/images/home_banner2.png',
                       width: double.infinity,
-                      height: Responsive.h(22),
+                      height: Responsive.h(18),
                       fit: BoxFit.cover,
                     ),
                     // Overlay content
