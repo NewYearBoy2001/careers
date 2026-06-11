@@ -756,7 +756,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
                   width: double.infinity,
-                  height: Responsive.h(16),
+                  height: Responsive.h(22),
                   color: Colors.white,
                 ),
               ),
@@ -776,11 +776,91 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               padding: EdgeInsets.symmetric(horizontal: Responsive.w(5)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  'assets/images/home_banner.png',
-                  width: double.infinity,
-                  height: Responsive.h(16),
-                  fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    // Background image
+                    Image.asset(
+                      'assets/images/home_banner2.png',
+                      width: double.infinity,
+                      height: Responsive.h(22),
+                      fit: BoxFit.cover,
+                    ),
+                    // Overlay content
+                    Positioned.fill(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Responsive.w(5),
+                          vertical: Responsive.h(1.5),  // was h(2)
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,   // ← add this
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Responsive.w(2.5),
+                                vertical: Responsive.h(0.25),  // was h(0.35)
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'GUIDE',
+                                style: TextStyle(
+                                  fontSize: Responsive.sp(10),
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.teal1,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: Responsive.h(0.6)),  // was h(0.8)
+                            Text(
+                              'Career Insights\nand Guides',
+                              style: AppTextStyles.heroTitle(
+                                fontSize: Responsive.sp(17),
+                              ).copyWith(
+                                color: AppColors.primary,   // dark color
+                                fontWeight: FontWeight.w700,    // bolder
+                              ),
+                            ),
+                            SizedBox(height: Responsive.h(1.2)),  // was h(1.2)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Responsive.w(5),
+                                vertical: Responsive.h(0.8),  // was h(1)
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.teal1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Read Blog',
+                                    style: TextStyle(
+                                      fontSize: Responsive.sp(13),
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(width: Responsive.w(2)),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Colors.white,
+                                    size: Responsive.w(4),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
