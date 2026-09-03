@@ -66,6 +66,10 @@ import 'data/api/notification_api_service.dart';
 import 'data/repositories/notification_repository.dart';
 import 'bloc/notification/notification_bloc.dart';
 import 'bloc/notification/notification_event.dart';
+import 'data/api/bottom_ads_api_service.dart';
+import 'data/repositories/bottom_ads_repository.dart';
+import 'bloc/bottom_ads/bottom_ads_bloc.dart';
+import 'bloc/bottom_ads/bottom_ads_event.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -201,6 +205,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<BottomAdsApiService>(
+          create: (_) => BottomAdsApiService(),
+        ),
+
         // RepositoryProvider<DeleteAccountApiService>(
         //   create: (context) => DeleteAccountApiService(
         //     context.read<AuthLocalStorage>(),
@@ -333,6 +341,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
+        RepositoryProvider<BottomAdsRepository>(
+          create: (context) => BottomAdsRepository(
+            context.read<BottomAdsApiService>(),
+          ),
+        ),
+
 
         // RepositoryProvider<DeleteAccountRepository>(
         //   create: (context) => DeleteAccountRepository(
@@ -452,6 +466,12 @@ class MyApp extends StatelessWidget {
               context.read<NotificationRepository>(),
               context.read<AuthLocalStorage>(),
             )..add(FetchNotifications()),
+          ),
+
+          BlocProvider<BottomAdsBloc>(
+            create: (context) => BottomAdsBloc(
+              context.read<BottomAdsRepository>(),
+            )..add(FetchBottomAds()),
           ),
 
           // BlocProvider<DeleteAccountBloc>(

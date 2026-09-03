@@ -6,6 +6,7 @@ import 'admission/admission_page.dart';
 import 'profile/profile_page.dart';
 import 'package:careers/utils/responsive/responsive.dart';
 import 'package:flutter/services.dart';
+import 'package:careers/screens/home/widgets/bottom_ad_banner.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int initialTab;
@@ -91,9 +92,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ProfilePage(key: _pageKeys[3]),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          child: _buildBottomNav(),
+      bottomNavigationBar: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const BottomAdBanner(),
+            _buildBottomNav(),
+          ],
         ),
+      ),
       ),),
     );
   }

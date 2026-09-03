@@ -36,5 +36,6 @@ class ApiConstants {
   static const String articles = 'articles';
   static const String searchArticles = 'search-articles';
   static const String notifications = 'notifications';
+  static const String bottomAds = 'bottom-ads';
 
 }
