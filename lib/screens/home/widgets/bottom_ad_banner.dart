@@ -241,96 +241,98 @@ class _AdPosterDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final maxWidth = size.width * 0.92;
-    final maxHeight = size.height * 0.6; // leaves room for the button card below
+    final maxWidth = size.width * 0.88;
+    final maxImageHeight = size.height * 0.32;
+    final hasLink = ad.link != null && ad.link!.isNotEmpty;
 
     return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              color: Colors.white,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _ResponsiveNetworkImage(
+      backgroundColor: Colors.white,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: _ResponsiveNetworkImage(
                     url: ad.poster,
                     maxWidth: maxWidth,
-                    maxHeight: maxHeight,
+                    maxHeight: maxImageHeight,
                   ),
-                  if (ad.link != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), // tighter than before
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: Material(
-                          borderRadius: BorderRadius.circular(24),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(24),
-                            onTap: () => _openLink(context),
-                            child: Ink(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.primary,
-                                    AppColors.primary.withOpacity(0.75),
-                                  ],
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                ),
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 11), // was 15
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.open_in_new_rounded, color: Colors.white, size: 16), // was 18
-                                    SizedBox(width: 8), // was 10
-                                    Text(
-                                      'Open Link',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13, // was 15
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    SizedBox(width: 8), // was 10
-                                    Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16), // was 18
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Material(
+                    color: Colors.black54,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.pop(context),
+                      child: const Padding(
+                        padding: EdgeInsets.all(5),
+                        child: Icon(Icons.close_rounded, color: Colors.white, size: 16),
                       ),
                     ),
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Positioned(
-            top: -12,
-            right: -12,
-            child: Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 4,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: () => Navigator.pop(context),
-                child: const Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Icon(Icons.close_rounded, color: Colors.black87, size: 20),
+            if (hasLink) ...[
+              const SizedBox(height: 18),
+              const Text(
+                'Open this link?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
                 ),
               ),
-            ),
-          ),
-        ],
+              const SizedBox(height: 6),
+              Text(
+                'You will be redirected to an external website.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: Material(
+                  color: const Color(0xFF2196F3),
+                  borderRadius: BorderRadius.circular(28),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(28),
+                    onTap: () => _openLink(context),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 13),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Open link',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Icon(Icons.open_in_new_rounded, color: Colors.white, size: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ] else
+              const SizedBox(height: 4),
+          ],
+        ),
       ),
     );
   }
@@ -402,7 +404,7 @@ class _ResponsiveNetworkImageState extends State<_ResponsiveNetworkImage> {
         highlightColor: Colors.grey.shade100,
         child: Container(
           width: widget.maxWidth,
-          height: widget.maxWidth * 1.1,
+          height: 120,
           color: Colors.white,
         ),
       );
